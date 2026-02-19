@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppStore } from '../store';
 import { useIPC } from '../hooks/useIPC';
@@ -44,6 +44,7 @@ export function Sidebar() {
   const [loadingSession, setLoadingSession] = useState<string | null>(null);
   const [showSettings, setShowSettings] = useState(false);
   const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false);
+  const [focusedSessionIndex, setFocusedSessionIndex] = useState(-1);
 
   // Handle session click - load messages if needed
   const handleSessionClick = useCallback(async (sessionId: string) => {
@@ -107,6 +108,40 @@ export function Sidebar() {
     deleteSession(sessionId);
   };
 
+  const handleSessionKeyDown = useCallback((e: React.KeyboardEvent, sessionId: string, index: number) => {
+    switch (e.key) {
+      case 'Enter':
+      case ' ':
+        e.preventDefault();
+        handleSessionClick(sessionId);
+        break;
+      case 'ArrowDown':
+        e.preventDefault();
+        if (index < sessions.length - 1) {
+          setFocusedSessionIndex(index + 1);
+        }
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        if (index > 0) {
+          setFocusedSessionIndex(index - 1);
+        }
+        break;
+      case 'Delete':
+        e.preventDefault();
+        deleteSession(sessionId);
+        break;
+    }
+  }, [handleSessionClick, sessions.length, deleteSession]);
+
+  // Focus the session element when focusedSessionIndex changes
+  useEffect(() => {
+    if (focusedSessionIndex >= 0) {
+      const el = document.querySelector(`[data-session-index="${focusedSessionIndex}"]`) as HTMLElement;
+      el?.focus();
+    }
+  }, [focusedSessionIndex]);
+
   const handleDeleteAllSessions = () => {
     if (sessions.length === 0) return;
     setShowDeleteAllConfirm(true);
@@ -138,8 +173,9 @@ export function Sidebar() {
           <>
             <button
               onClick={toggleSidebar}
-              className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-surface-hover transition-colors text-text-secondary"
+              className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-surface-hover transition-colors text-text-secondary focus:outline-none focus:ring-2 focus:ring-accent focus:ring-opacity-30"
               title="Expand sidebar"
+              aria-label="Expand sidebar"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
@@ -177,8 +213,9 @@ export function Sidebar() {
         </button>
               <button
                 onClick={toggleSidebar}
-                className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-surface-hover transition-colors text-text-secondary"
+                className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-surface-hover transition-colors text-text-secondary focus:outline-none focus:ring-2 focus:ring-accent focus:ring-opacity-30"
                 title="Collapse sidebar"
+                aria-label="Collapse sidebar"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
@@ -257,15 +294,16 @@ export function Sidebar() {
             </span>
             <button
               onClick={handleDeleteAllSessions}
-              className="w-6 h-6 rounded flex items-center justify-center hover:bg-surface-hover text-text-muted hover:text-error transition-colors"
+              className="w-6 h-6 rounded flex items-center justify-center hover:bg-surface-hover text-text-muted hover:text-error transition-colors focus:outline-none focus:ring-2 focus:ring-accent focus:ring-opacity-30"
               title={t('sidebar.deleteAll')}
+              aria-label={t('sidebar.deleteAll')}
             >
               <Trash className="w-3.5 h-3.5" />
             </button>
           </div>
         )}
 
-        <div className="space-y-1">
+        <div className="space-y-1" role="listbox" aria-label={t('sidebar.recents')}>
           {sidebarCollapsed ? (
             <div className="text-center py-6 text-text-muted text-xs">
               <p>{t('sidebar.expandToView')}</p>
@@ -275,13 +313,18 @@ export function Sidebar() {
               <p>{t('sidebar.noTasks')}</p>
             </div>
           ) : (
-            sessions.map((session) => (
+            sessions.map((session, index) => (
               <div
                 key={session.id}
+                role="option"
+                aria-selected={activeSessionId === session.id}
+                tabIndex={0}
+                data-session-index={index}
                 onClick={() => handleSessionClick(session.id)}
+                onKeyDown={(e) => handleSessionKeyDown(e, session.id, index)}
                 onMouseEnter={() => setHoveredSession(session.id)}
                 onMouseLeave={() => setHoveredSession(null)}
-                className={`group relative px-3 py-2.5 rounded-xl cursor-pointer transition-all ${
+                className={`group relative px-3 py-2.5 rounded-xl cursor-pointer transition-all focus:outline-none focus:ring-2 focus:ring-accent focus:ring-opacity-30 ${
                   activeSessionId === session.id
                     ? 'bg-surface-active'
                     : 'hover:bg-surface-hover'
@@ -298,12 +341,13 @@ export function Sidebar() {
                     {session.title}
                   </span>
                 </div>
-                
+
                 {/* Delete button */}
                 {hoveredSession === session.id && (
                   <button
                     onClick={(e) => handleDeleteSession(e, session.id)}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded-lg flex items-center justify-center hover:bg-surface-active text-text-muted hover:text-error transition-colors"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded-lg flex items-center justify-center hover:bg-surface-active text-text-muted hover:text-error transition-colors focus:outline-none focus:ring-2 focus:ring-accent focus:ring-opacity-30"
+                    aria-label={t('sidebar.deleteSession', { title: session.title })}
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
@@ -326,8 +370,9 @@ export function Sidebar() {
         {sidebarCollapsed ? (
           <button
             onClick={() => setShowSettings(true)}
-            className="w-full flex items-center justify-center px-3 py-2 rounded-xl hover:bg-surface-hover transition-colors"
+            className="w-full flex items-center justify-center px-3 py-2 rounded-xl hover:bg-surface-hover transition-colors focus:outline-none focus:ring-2 focus:ring-accent focus:ring-opacity-30"
             title="Settings"
+            aria-label="Settings"
           >
             <Settings className="w-4 h-4 text-text-muted" />
           </button>

@@ -123,6 +123,7 @@
     @apply inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface border border-border;
     @apply text-sm font-medium text-text-primary;
     @apply hover:bg-surface-hover hover:shadow-soft cursor-pointer transition-all duration-150;
+    @apply focus:outline-none focus:ring-2 focus:ring-accent focus:ring-opacity-30;
   }
 
   .tag-active {

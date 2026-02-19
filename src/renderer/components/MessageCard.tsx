@@ -1,5 +1,48 @@
-import { useState, isValidElement, cloneElement } from 'react';
+import { useState, useMemo, isValidElement, cloneElement } from 'react';
 import { useTranslation } from 'react-i18next';
+import hljs from 'highlight.js/lib/core';
+import javascript from 'highlight.js/lib/languages/javascript';
+import typescript from 'highlight.js/lib/languages/typescript';
+import python from 'highlight.js/lib/languages/python';
+import bash from 'highlight.js/lib/languages/bash';
+import json from 'highlight.js/lib/languages/json';
+import css from 'highlight.js/lib/languages/css';
+import xml from 'highlight.js/lib/languages/xml';
+import markdown from 'highlight.js/lib/languages/markdown';
+import sql from 'highlight.js/lib/languages/sql';
+import yaml from 'highlight.js/lib/languages/yaml';
+import go from 'highlight.js/lib/languages/go';
+import rust from 'highlight.js/lib/languages/rust';
+import java from 'highlight.js/lib/languages/java';
+import cpp from 'highlight.js/lib/languages/cpp';
+import 'highlight.js/styles/github-dark.css';
+
+hljs.registerLanguage('javascript', javascript);
+hljs.registerLanguage('js', javascript);
+hljs.registerLanguage('jsx', javascript);
+hljs.registerLanguage('typescript', typescript);
+hljs.registerLanguage('ts', typescript);
+hljs.registerLanguage('tsx', typescript);
+hljs.registerLanguage('python', python);
+hljs.registerLanguage('py', python);
+hljs.registerLanguage('bash', bash);
+hljs.registerLanguage('sh', bash);
+hljs.registerLanguage('shell', bash);
+hljs.registerLanguage('json', json);
+hljs.registerLanguage('css', css);
+hljs.registerLanguage('html', xml);
+hljs.registerLanguage('xml', xml);
+hljs.registerLanguage('markdown', markdown);
+hljs.registerLanguage('md', markdown);
+hljs.registerLanguage('sql', sql);
+hljs.registerLanguage('yaml', yaml);
+hljs.registerLanguage('yml', yaml);
+hljs.registerLanguage('go', go);
+hljs.registerLanguage('rust', rust);
+hljs.registerLanguage('rs', rust);
+hljs.registerLanguage('java', java);
+hljs.registerLanguage('cpp', cpp);
+hljs.registerLanguage('c', cpp);
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import remarkGfm from 'remark-gfm';
@@ -797,8 +840,6 @@ function ToolResultBlock({ block, allBlocks, message }: { block: ToolResultConte
   // MCP tools start with mcp__ (double underscore)
   const isMCPTool = toolName?.startsWith('mcp__') || false;
 
-  console.log('[ToolResultBlock] toolUseId:', block.toolUseId, 'toolName:', toolName, 'isMCPTool:', isMCPTool, 'expanded:', expanded);
-
   // Generate summary for tool results
   const generateSummary = (content: string, isError: boolean): string => {
     if (isError) {
@@ -903,16 +944,6 @@ function ToolResultBlock({ block, allBlocks, message }: { block: ToolResultConte
   const summary = generateSummary(block.content, block.isError || false);
   const hasImages = block.images && block.images.length > 0;
 
-  // Debug: Log the entire block to see what we're receiving
-  console.log('[ToolResultBlock] Full block:', {
-    toolUseId: block.toolUseId,
-    hasImages: hasImages,
-    imagesCount: block.images?.length || 0,
-    contentLength: block.content?.length || 0,
-    imagesMimeTypes: block.images?.map(img => img.mimeType),
-    imagesDataLengths: block.images?.map(img => img.data?.length || 0)
-  });
-
   return (
     <div className="rounded-xl border border-border overflow-hidden bg-surface">
       <button
@@ -970,6 +1001,17 @@ function ToolResultBlock({ block, allBlocks, message }: { block: ToolResultConte
 function CodeBlock({ language, children }: { language: string; children: string }) {
   const [copied, setCopied] = useState(false);
 
+  const highlightedHtml = useMemo(() => {
+    try {
+      if (hljs.getLanguage(language)) {
+        return hljs.highlight(children, { language }).value;
+      }
+      return hljs.highlightAuto(children).value;
+    } catch {
+      return null;
+    }
+  }, [children, language]);
+
   const handleCopy = async () => {
     await navigator.clipboard.writeText(children);
     setCopied(true);
@@ -978,7 +1020,7 @@ function CodeBlock({ language, children }: { language: string; children: string 
 
   return (
     <div className="relative group my-3">
-      <div className="absolute top-2 right-2 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+      <div className="absolute top-2 right-2 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
         <span className="text-xs text-text-muted px-2 py-1 rounded bg-surface">
           {language}
         </span>
@@ -994,7 +1036,11 @@ function CodeBlock({ language, children }: { language: string; children: string 
         </button>
       </div>
       <pre className="code-block">
-        <code>{children}</code>
+        {highlightedHtml ? (
+          <code className={`hljs language-${language}`} dangerouslySetInnerHTML={{ __html: highlightedHtml }} />
+        ) : (
+          <code>{children}</code>
+        )}
       </pre>
     </div>
   );

@@ -271,7 +271,8 @@
     "apiConfigured": "API 已配置",
     "apiNotConfigured": "API 未配置",
     "user": "用户",
-    "newTask": "新任务"
+    "newTask": "新任务",
+    "deleteSession": "删除 {{title}}"
   },
   "chat": {
     "sendMessage": "发送消息",
@@ -281,7 +282,8 @@
     "loadingConversation": "加载对话中...",
     "startConversation": "开始对话",
     "connectorCount": "{{count}} 个连接器",
-    "aiDisclaimer": "Open Cowork 由 AI 驱动，可能会出错。请仔细核对回复。"
+    "aiDisclaimer": "Open Cowork 由 AI 驱动，可能会出错。请仔细核对回复。",
+    "send": "发送消息"
   },
   "context": {
     "progress": "进度",

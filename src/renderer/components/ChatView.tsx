@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useAppStore } from '../store';
 import { useIPC } from '../hooks/useIPC';
 import { useFileAttachments } from '../hooks/useFileAttachments';
+import { ErrorBoundary } from './ErrorBoundary';
 import { MessageCard } from './MessageCard';
 import type { Message, ContentBlock } from '../types';
 import {
@@ -201,6 +202,22 @@ export function ChatView() {
     textareaRef.current?.focus();
   }, [activeSessionId]);
 
+  // Auto-adjust textarea height based on content
+  const adjustTextareaHeight = () => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = 'auto';
+      const maxHeight = 200;
+      const newHeight = Math.min(textarea.scrollHeight, maxHeight);
+      textarea.style.height = `${newHeight}px`;
+      textarea.style.overflowY = textarea.scrollHeight > maxHeight ? 'auto' : 'hidden';
+    }
+  };
+
+  useEffect(() => {
+    adjustTextareaHeight();
+  }, [prompt]);
+
   // Load active MCP connectors
   useEffect(() => {
     if (isElectron && typeof window !== 'undefined' && window.electronAPI) {
@@ -372,7 +389,9 @@ export function ChatView() {
               const isStreaming = typeof message.id === 'string' && message.id.startsWith('partial-');
               return (
               <div key={message.id}>
+                <ErrorBoundary>
                   <MessageCard message={message} isStreaming={isStreaming} />
+                </ErrorBoundary>
               </div>
               );
             })
@@ -404,7 +423,7 @@ export function ChatView() {
           >
             {/* Image previews */}
             {pastedImages.length > 0 && (
-              <div className="grid grid-cols-5 gap-2 mb-3">
+              <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mb-3">
                 {pastedImages.map((img, index) => (
                   <div key={index} className="relative group">
                     <img
@@ -456,8 +475,9 @@ export function ChatView() {
               <button
                 type="button"
                 onClick={handleFileSelect}
-                className="w-8 h-8 rounded-lg flex items-center justify-center text-text-muted hover:text-text-primary hover:bg-surface-hover transition-colors"
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-text-muted hover:text-text-primary hover:bg-surface-hover transition-colors focus:outline-none focus:ring-2 focus:ring-accent focus:ring-opacity-30"
                 title={t('welcome.attachFiles')}
+                aria-label={t('welcome.attachFiles')}
               >
                 <Plus className="w-5 h-5" />
               </button>
@@ -465,7 +485,10 @@ export function ChatView() {
               <textarea
                 ref={textareaRef}
                 value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
+                onChange={(e) => {
+                  setPrompt(e.target.value);
+                  adjustTextareaHeight();
+                }}
                 onCompositionStart={() => {
                   isComposingRef.current = true;
                 }}
@@ -486,7 +509,8 @@ export function ChatView() {
                 placeholder={t('chat.typeMessage')}
                 disabled={isSubmitting}
                 rows={1}
-                className="flex-1 resize-none bg-transparent border-none outline-none text-text-primary placeholder:text-text-muted text-sm py-1.5"
+                style={{ minHeight: '40px', maxHeight: '200px' }}
+                className="flex-1 resize-none bg-transparent border-none outline-none text-text-primary placeholder:text-text-muted text-sm py-1.5 overflow-hidden"
               />
 
               <div className="flex items-center gap-2">
@@ -499,7 +523,8 @@ export function ChatView() {
                   <button
                     type="button"
                     onClick={handleStop}
-                    className="w-8 h-8 rounded-lg flex items-center justify-center bg-error/10 text-error hover:bg-error/20 transition-colors"
+                    className="w-8 h-8 rounded-lg flex items-center justify-center bg-error/10 text-error hover:bg-error/20 transition-colors focus:outline-none focus:ring-2 focus:ring-accent focus:ring-opacity-30"
+                    aria-label={t('chat.stop')}
                   >
                     <Square className="w-4 h-4" />
                   </button>
@@ -507,7 +532,8 @@ export function ChatView() {
                   <button
                     type="submit"
                   disabled={(!prompt.trim() && !textareaRef.current?.value.trim() && pastedImages.length === 0 && attachedFiles.length === 0) || isSubmitting}
-                    className="w-8 h-8 rounded-lg flex items-center justify-center bg-accent text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-accent-hover transition-colors"
+                    className="w-8 h-8 rounded-lg flex items-center justify-center bg-accent text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-accent-hover transition-colors focus:outline-none focus:ring-2 focus:ring-accent focus:ring-opacity-30"
+                    aria-label={t('chat.send')}
                   >
                     <Send className="w-4 h-4" />
                   </button>

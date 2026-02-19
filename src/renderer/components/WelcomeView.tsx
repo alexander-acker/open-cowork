@@ -280,7 +280,7 @@ export function WelcomeView() {
         >
           {/* Image previews */}
           {pastedImages.length > 0 && (
-            <div className="grid grid-cols-5 gap-2 pb-2 border-b border-border w-full">
+            <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 pb-2 border-b border-border w-full">
               {pastedImages.map((img, index) => (
                 <div key={index} className="relative group">
                   <img
