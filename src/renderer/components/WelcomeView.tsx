@@ -20,6 +20,7 @@ import {
   GraduationCap,
   MessageSquare,
 } from 'lucide-react';
+import CoeadaptLogo from '../assets/logo-full-1.png';
 
 export function WelcomeView() {
   const { t } = useTranslation();
@@ -202,11 +203,23 @@ export function WelcomeView() {
   ];
 
   return (
-    <div className="flex-1 flex items-center justify-center p-8">
-      <div className="max-w-2xl w-full space-y-6 animate-fade-in">
+    <div className="flex-1 flex items-center justify-center p-8 bg-grid">
+      <div className="max-w-2xl w-full space-y-8 animate-fade-in relative z-10">
+        
+        {/* Brand Banner */}
+        <div className="flex flex-col items-center justify-center text-center space-y-4 mb-4">
+          <img 
+            src={CoeadaptLogo} 
+            alt="Coeadapt" 
+            className="h-14 w-auto object-contain drop-shadow-lg transition-transform hover:scale-105 duration-300 dark:brightness-0 dark:invert"
+          />
+          <p className="text-text-muted text-sm max-w-md">
+            {t('career.careerDev')}
+          </p>
+        </div>
+
         {/* Career Category Pills */}
         <div className="flex items-center justify-center gap-2">
-          <span className="text-xs text-text-muted">{t('career.careerDev')}</span>
           {careerCategories.map((cat) => (
             <button
               key={cat.id}

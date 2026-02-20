@@ -173,7 +173,7 @@ export function Sidebar() {
       >
         {sidebarCollapsed ? (
           <>
-            <img src={CoeadaptIcon} alt="Coeadapt Icon" className="w-8 h-8 object-contain mb-2" />
+            <img src={CoeadaptIcon} alt="Coeadapt Icon" className="w-8 h-8 object-contain mb-2 drop-shadow-md" />
             <button
               onClick={toggleSidebar}
               className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-surface-hover transition-colors text-text-secondary focus:outline-none focus:ring-2 focus:ring-accent focus:ring-opacity-30"
@@ -197,7 +197,11 @@ export function Sidebar() {
         ) : (
           <>
             <div className="flex items-center gap-2">
-              <img src={CoeadaptLogo} alt="Coeadapt Logo" className="h-8 w-auto object-contain" />
+              <img 
+                src={CoeadaptLogo} 
+                alt="Coeadapt Logo" 
+                className="h-8 w-auto object-contain transition-all duration-300 drop-shadow-sm dark:brightness-0 dark:invert" 
+              />
             </div>
             <div className="flex items-center gap-2">
         <button

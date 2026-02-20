@@ -7,45 +7,46 @@
 @layer base {
   /* Define CSS variables for theming */
   :root {
-    /* Dark theme (default) — OpenAI/Claude inspired */
-    --color-background: #0f172a; /* Slate 900 base */
-    --color-background-secondary: #020617; /* Slate 950 */
-    --color-surface: #1e293b; /* Slate 800 */
-    --color-surface-hover: #334155; /* Slate 700 */
-    --color-surface-active: #475569; /* Slate 600 */
-    --color-surface-muted: #1e293b;
-    --color-border: #334155;
-    --color-border-muted: #1e293b;
-    --color-accent: #2563eb; /* Blue 600 */
-    --color-accent-hover: #1d4ed8; /* Blue 700 */
-    --color-accent-muted: rgba(37, 99, 235, 0.15);
+    /* Dark theme (Premium) */
+    --color-background: #09090b; /* Zinc 950 base */
+    --color-background-secondary: #0c0c0e; /* Even darker zinc */
+    --color-surface: rgba(24, 24, 27, 0.6); /* Zinc 900 translucent */
+    --color-surface-hover: rgba(39, 39, 42, 0.8); /* Zinc 800 */
+    --color-surface-active: rgba(63, 63, 70, 0.8); /* Zinc 700 */
+    --color-surface-muted: rgba(24, 24, 27, 0.4);
+    --color-border: rgba(63, 63, 70, 0.5);
+    --color-border-muted: rgba(39, 39, 42, 0.5);
+    --color-accent: #3b82f6; /* Bright vibrant Blue */
+    --color-accent-hover: #2563eb; /* Vivid Blue hover */
+    --color-accent-muted: rgba(59, 130, 246, 0.15); /* Light blue tint */
     --color-text-primary: #f8fafc;
-    --color-text-secondary: #94a3b8;
-    --color-text-muted: #64748b;
-    --color-card-border: rgba(255, 255, 255, 0.1);
-    --color-card-border-hover: rgba(255, 255, 255, 0.2);
-    --color-card-border-subtle: rgba(255, 255, 255, 0.05);
+    --color-text-secondary: #cbd5e1;
+    --color-text-muted: #94a3b8;
+    --color-card-border: rgba(255, 255, 255, 0.08); /* Sophisticated glass border */
+    --color-card-border-hover: rgba(255, 255, 255, 0.15);
+    --color-card-border-subtle: rgba(255, 255, 255, 0.03);
   }
 
   /* Light theme override — clean white/slate */
   .light {
-    --color-background: #ffffff;
-    --color-background-secondary: #f8fafc;
-    --color-surface: #ffffff;
-    --color-surface-hover: #f1f5f9;
-    --color-surface-active: #e2e8f0;
-    --color-surface-muted: #f8fafc;
-    --color-border: #e2e8f0;
-    --color-border-muted: #f1f5f9;
-    --color-accent: #10a37f; /* OpenAI Green */
-    --color-accent-hover: #1a7f64; /* OpenAI Green Dark */
-    --color-accent-muted: rgba(16, 163, 127, 0.1);
-    --color-text-primary: #0f172a;
-    --color-text-secondary: #475569;
-    --color-text-muted: #94a3b8;
-    --color-card-border: rgba(0, 0, 0, 0.1);
-    --color-card-border-hover: rgba(0, 0, 0, 0.15);
-    --color-card-border-subtle: rgba(0, 0, 0, 0.05);
+    /* Light theme (Premium) */
+    --color-background: #fafafa;
+    --color-background-secondary: #f4f4f5;
+    --color-surface: rgba(255, 255, 255, 0.8);
+    --color-surface-hover: rgba(244, 244, 245, 0.8);
+    --color-surface-active: rgba(228, 228, 231, 0.8);
+    --color-surface-muted: rgba(255, 255, 255, 0.6);
+    --color-border: rgba(228, 228, 231, 0.8);
+    --color-border-muted: rgba(244, 244, 245, 0.8);
+    --color-accent: #2563eb; /* Bright vibrant Blue */
+    --color-accent-hover: #1d4ed8;
+    --color-accent-muted: rgba(37, 99, 235, 0.1);
+    --color-text-primary: #09090b;
+    --color-text-secondary: #3f3f46;
+    --color-text-muted: #71717a;
+    --color-card-border: rgba(0, 0, 0, 0.06);
+    --color-card-border-hover: rgba(0, 0, 0, 0.12);
+    --color-card-border-subtle: rgba(0, 0, 0, 0.04);
   }
 
   * {
@@ -56,6 +57,7 @@
     background-color: var(--color-background);
     color: var(--color-text-primary);
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    letter-spacing: -0.015em;
   }
 
   /* Custom scrollbar - subtle */
@@ -80,8 +82,9 @@
 @layer components {
   /* Button styles */
   .btn {
-    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-150;
-    @apply focus:outline-none focus:ring-2 focus:ring-accent focus:ring-opacity-30;
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl font-medium transition-all duration-300 ease-out;
+    @apply focus:outline-none focus:ring-2 focus:ring-accent focus:ring-opacity-40;
+    @apply active:scale-95; /* Micro-interaction scale down on click */
   }
 
   .btn-primary {
@@ -107,12 +110,12 @@
 
   /* Card styles */
   .card {
-    @apply bg-surface rounded-xl shadow-card;
+    @apply bg-surface/70 backdrop-blur-md rounded-2xl shadow-card;
     border: 1px solid var(--color-card-border);
   }
 
   .card-hover {
-    @apply hover:shadow-elevated cursor-pointer transition-all duration-150;
+    @apply hover:shadow-elevated hover:-translate-y-0.5 hover:bg-surface/90 cursor-pointer transition-all duration-300 ease-out;
     &:hover {
       border-color: var(--color-card-border-hover);
     }
@@ -120,10 +123,10 @@
 
   /* Tag/Chip styles */
   .tag {
-    @apply inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-surface border border-border;
+    @apply inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-surface/50 backdrop-blur-sm border border-border;
     @apply text-sm font-medium text-text-primary;
-    @apply hover:bg-surface-hover hover:shadow-sm cursor-pointer transition-all duration-150;
-    @apply focus:outline-none focus:ring-2 focus:ring-accent focus:ring-opacity-30;
+    @apply hover:bg-surface-hover hover:shadow-md hover:-translate-y-[1px] cursor-pointer transition-all duration-300 ease-out;
+    @apply focus:outline-none focus:ring-2 focus:ring-accent focus:ring-opacity-40;
   }
 
   .tag-active {
@@ -198,7 +201,7 @@
 
   /* Message bubbles */
   .message-user {
-    @apply bg-surface rounded-xl;
+    @apply bg-surface/80 backdrop-blur-sm rounded-2xl;
     border: 1px solid var(--color-card-border);
     width: fit-content;
     margin-left: auto;
