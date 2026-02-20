@@ -100,7 +100,7 @@ export function SettingsPanel({ isOpen, onClose, initialTab = 'api' }: SettingsP
     { id: 'credentials' as TabId, label: t('settings.credentials'), icon: Key, description: t('settings.credentialsDesc') },
     { id: 'connectors' as TabId, label: t('settings.connectors'), icon: Plug, description: t('settings.connectorsDesc') },
     { id: 'skills' as TabId, label: t('settings.skills'), icon: Package, description: t('settings.skillsDesc') },
-    { id: 'remote' as TabId, label: t('settings.remote', '远程控制'), icon: Wifi, description: t('settings.remoteDesc', '通过飞书等平台远程使用') },
+    { id: 'remote' as TabId, label: t('settings.remote', ''), icon: Wifi, description: t('settings.remoteDesc', '') },
     { id: 'logs' as TabId, label: t('settings.logs'), icon: AlertCircle, description: t('settings.logsDesc') },
     { id: 'language' as TabId, label: t('settings.language'), icon: Languages, description: t('settings.languageDesc') },
   ];
@@ -971,7 +971,7 @@ function SandboxTab() {
             <div className="flex-1 min-w-0">
               <h3 className="text-base font-semibold text-text-primary">{t('sandbox.enableSandbox')}</h3>
               <p className="text-sm text-amber-500 mt-0.5">
-                🚧 功能调试中，暂时不支持
+                🚧 
               </p>
             </div>
           </div>
@@ -979,7 +979,7 @@ function SandboxTab() {
           <button
             disabled={true}
             aria-label="Sandbox temporarily unavailable"
-            title="功能调试中，暂时不支持"
+            title=""
             className="relative inline-flex h-8 w-14 items-center rounded-full transition-all duration-200 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0 bg-gray-300 dark:bg-gray-600"
           >
             <span
@@ -2293,7 +2293,7 @@ function ServerForm({
                       type="password"
                       value={newEnvValue}
                       onChange={(e) => setNewEnvValue(e.target.value)}
-                      placeholder="输入值"
+                      placeholder=""
                       className="w-full px-3 py-1.5 rounded bg-surface border border-border text-text-primary text-sm font-mono focus:outline-none focus:ring-2 focus:ring-accent/30"
                     />
                     <div className="flex gap-2">
@@ -2897,7 +2897,7 @@ function LanguageTab() {
 
   const languages = [
     { code: 'en', nativeName: 'English' },
-    { code: 'zh', nativeName: '中文' },
+    { code: 'zh', nativeName: '' },
   ];
 
   const handleLanguageChange = (langCode: string) => {

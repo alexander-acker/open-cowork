@@ -7,7 +7,7 @@ const panelContent = readFileSync(panelPath, 'utf8');
 
 describe('RemoteControlPanel links', () => {
   it('does not show one-click permission link', () => {
-    expect(panelContent).not.toContain('一键配置权限');
+    expect(panelContent).not.toContain('');
   });
 
   it('does not include the feishu auth url', () => {

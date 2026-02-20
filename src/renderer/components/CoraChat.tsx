@@ -70,7 +70,7 @@ export function CoraChat({ isOpen, onClose }: CoraChatProps) {
       <div className="flex items-center justify-between px-4 py-3 border-b border-border">
         <div className="flex items-center gap-2">
           <MessageSquare className="w-4 h-4 text-accent" />
-          <span className="text-sm font-medium text-text-primary">Cora</span>
+          <span className="text-sm font-medium text-text-primary">Navi</span>
         </div>
         <div className="flex items-center gap-1">
           {messages.length > 0 && (
@@ -95,7 +95,7 @@ export function CoraChat({ isOpen, onClose }: CoraChatProps) {
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-3 py-3 space-y-3">
         {messages.length === 0 && !isStreaming && (
           <div className="text-center text-text-muted text-xs py-8">
-            Ask Cora anything about your career journey.
+            Ask Navi anything about your career journey.
           </div>
         )}
 
@@ -117,7 +117,7 @@ export function CoraChat({ isOpen, onClose }: CoraChatProps) {
         {isStreaming && !partial && (
           <div className="flex items-center gap-2 text-text-muted text-xs">
             <Loader2 className="w-3 h-3 animate-spin" />
-            <span>Cora is thinking...</span>
+            <span>Navi is thinking...</span>
           </div>
         )}
 
@@ -138,7 +138,7 @@ export function CoraChat({ isOpen, onClose }: CoraChatProps) {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Message Cora..."
+            placeholder="Message Navi..."
             className="flex-1 resize-none bg-transparent text-sm text-text-primary outline-none max-h-24 min-h-[1.5rem]"
             rows={1}
             disabled={isStreaming}

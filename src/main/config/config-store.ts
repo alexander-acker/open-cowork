@@ -71,7 +71,7 @@ export const PROVIDER_PRESETS = {
       { id: 'z-ai/glm-4.7', name: 'GLM-4.7' },
     ],
     keyPlaceholder: 'sk-or-v1-...',
-    keyHint: '从 openrouter.ai/keys 获取',
+    keyHint: ' openrouter.ai/keys ',
   },
   anthropic: {
     name: 'Anthropic',
@@ -82,7 +82,7 @@ export const PROVIDER_PRESETS = {
       { id: 'claude-haiku-4-5', name: 'claude-haiku-4-5' },
     ],
     keyPlaceholder: 'sk-ant-...',
-    keyHint: '从 console.anthropic.com 获取',
+    keyHint: ' console.anthropic.com ',
   },
   openai: {
     name: 'OpenAI',
@@ -93,10 +93,10 @@ export const PROVIDER_PRESETS = {
       { id: 'gpt-5.2-mini', name: 'gpt-5.2-mini' },
     ],
     keyPlaceholder: 'sk-...',
-    keyHint: '从 platform.openai.com 获取',
+    keyHint: ' platform.openai.com ',
   },
   custom: {
-    name: '更多模型',
+    name: '',
     baseUrl: 'https://open.bigmodel.cn/api/anthropic',
     models: [
       { id: 'glm-4.7', name: 'GLM-4.7' },
@@ -104,7 +104,7 @@ export const PROVIDER_PRESETS = {
       { id: 'glm-4-air', name: 'GLM-4-Air' },
     ],
     keyPlaceholder: 'sk-xxx',
-    keyHint: '输入你的 API Key',
+    keyHint: ' API Key',
   },
 };
 
@@ -183,9 +183,9 @@ class ConfigStore {
    * Apply config to environment variables
    * This should be called before creating sessions
    * 
-   * 环境变量映射：
-   * - OpenAI 直连: OPENAI_API_KEY = apiKey, OPENAI_BASE_URL 可选
-   * - Anthropic 直连: ANTHROPIC_API_KEY = apiKey
+   * 
+   * - OpenAI : OPENAI_API_KEY = apiKey, OPENAI_BASE_URL 
+   * - Anthropic : ANTHROPIC_API_KEY = apiKey
    * - Custom Anthropic: ANTHROPIC_API_KEY = apiKey
    * - OpenRouter: ANTHROPIC_AUTH_TOKEN = apiKey, ANTHROPIC_API_KEY = '' (proxy mode)
    */

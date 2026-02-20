@@ -23,7 +23,45 @@ function isStandaloneKey(key: string | undefined | null): boolean {
   return false;
 }
 
-// ─── Inner component that initializes the API client with Clerk token ───────
+// ─── Inner components that initialize the API client ─────────────────────────
+
+function StandaloneApiInitializer({ children }: { children: ReactNode }) {
+  const { setCoeadaptConnected } = useAppStore();
+  const initialized = useRef(false);
+
+  useEffect(() => {
+    if (initialized.current) return;
+    initialized.current = true;
+
+    (async () => {
+      try {
+        let apiUrl = 'http://localhost:3000'; // Default standalone backend
+        if (isElectron) {
+          const config = await window.electronAPI.coeadapt.getConfig();
+          apiUrl = config.coeadaptApiUrl || apiUrl;
+        }
+
+        initCoeadaptApi(
+          async () => {
+            // Standalone mode: try for device token first
+            if (isElectron) {
+               return window.electronAPI.coeadapt.deviceToken.getRaw();
+            }
+            return null; // Not authenticated
+          },
+          apiUrl,
+        );
+
+        setCoeadaptConnected(true);
+      } catch (err) {
+        console.error('[CoeadaptAuth] Failed to initialize standalone API:', err);
+      }
+    })();
+  }, [setCoeadaptConnected]);
+
+  return <>{children}</>;
+}
+
 
 function ClerkApiInitializer({ children }: { children: ReactNode }) {
   const { getToken, isSignedIn } = useAuth();
@@ -101,8 +139,8 @@ interface CoeadaptAuthProps {
 
 export function CoeadaptAuth({ clerkPublishableKey, children }: CoeadaptAuthProps) {
   if (isStandaloneKey(clerkPublishableKey)) {
-    // Standalone mode – no auth required
-    return <>{children}</>;
+    // Standalone mode – no auth required but we must initialize API
+    return <StandaloneApiInitializer>{children}</StandaloneApiInitializer>;
   }
 
   return (

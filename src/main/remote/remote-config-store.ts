@@ -1,6 +1,6 @@
 /**
  * Remote Config Store
- * 远程控制配置存储
+ * 
  */
 
 import Store from 'electron-store';
@@ -8,7 +8,6 @@ import { log } from '../utils/logger';
 import type {
   RemoteConfig,
   GatewayConfig,
-  FeishuChannelConfig,
   WechatChannelConfig,
   TelegramChannelConfig,
   DingtalkChannelConfig,
@@ -75,21 +74,7 @@ class RemoteConfigStore {
     log('[RemoteConfig] Gateway config updated');
   }
   
-  /**
-   * Get feishu channel config
-   */
-  getFeishuConfig(): FeishuChannelConfig | undefined {
-    return this.store.get('channels.feishu');
-  }
-  
-  /**
-   * Set feishu channel config
-   */
-  setFeishuConfig(config: FeishuChannelConfig): void {
-    this.store.set('channels.feishu', config);
-    log('[RemoteConfig] Feishu config updated');
-  }
-  
+
   /**
    * Get wechat channel config
    */

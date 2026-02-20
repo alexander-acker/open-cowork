@@ -7,7 +7,7 @@
 </p>
 
 <p align="center">
-  <a href="./README_zh.md">中文文档</a> •
+  <a href="./README_zh.md"></a> •
   <a href="#features">Features</a> •
   <a href="#demo">Demo</a> •
   <a href="#installation">Downloads</a> •

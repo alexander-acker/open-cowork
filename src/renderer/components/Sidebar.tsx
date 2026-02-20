@@ -16,6 +16,8 @@ import {
   MessageSquare,
   AlertTriangle,
 } from 'lucide-react';
+import CoeadaptIcon from '../assets/icon-color.png';
+import CoeadaptLogo from '../assets/logo-full-1.png';
 
 export function Sidebar() {
   const { t } = useTranslation();
@@ -171,6 +173,7 @@ export function Sidebar() {
       >
         {sidebarCollapsed ? (
           <>
+            <img src={CoeadaptIcon} alt="Coeadapt Icon" className="w-8 h-8 object-contain mb-2" />
             <button
               onClick={toggleSidebar}
               className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-surface-hover transition-colors text-text-secondary focus:outline-none focus:ring-2 focus:ring-accent focus:ring-opacity-30"
@@ -194,10 +197,7 @@ export function Sidebar() {
         ) : (
           <>
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-accent-muted flex items-center justify-center">
-                <Sparkles className="w-4 h-4 text-accent" />
-              </div>
-              <h1 className="text-lg font-semibold text-text-primary whitespace-nowrap">Coeadapt</h1>
+              <img src={CoeadaptLogo} alt="Coeadapt Logo" className="h-8 w-auto object-contain" />
             </div>
             <div className="flex items-center gap-2">
         <button

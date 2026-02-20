@@ -1049,7 +1049,7 @@ export class MCPManager {
       throw new Error(`MCP server not connected: ${tool.serverId}`);
     }
 
-    // 提取实际工具名（格式：mcp__<ServerName>__<toolName>）
+    // mcp__<ServerName>__<toolName>
     let actualToolName = toolName;
     if (toolName.startsWith('mcp__')) {
       const remainder = toolName.slice('mcp__'.length);

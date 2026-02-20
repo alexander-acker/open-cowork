@@ -110,7 +110,7 @@ function App() {
         {/* Context Panel - only show when in chat session */}
         {activeView === 'chat' && activeSessionId && <ContextPanel />}
 
-        {/* Cora Chat Panel */}
+        {/* Navi Chat Panel */}
         <CoraChat isOpen={coraChatOpen} onClose={() => setCoraChatOpen(false)} />
       </div>
       

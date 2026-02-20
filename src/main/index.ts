@@ -20,7 +20,7 @@ import type { MCPServerConfig } from './mcp/mcp-manager';
 import type { ClientEvent, ServerEvent, ApiTestInput, ApiTestResult } from '../renderer/types';
 import { remoteManager, type AgentExecutor } from './remote/remote-manager';
 import { remoteConfigStore } from './remote/remote-config-store';
-import type { GatewayConfig, FeishuChannelConfig, ChannelType } from './remote/types';
+import type { GatewayConfig, ChannelType } from './remote/types';
 import {
   log,
   logWarn,
@@ -65,11 +65,11 @@ let skillsManager: SkillsManager | null = null;
 let pluginRuntimeService: PluginRuntimeService | null = null;
 
 function createWindow() {
-  // Theme colors (warm cream theme)
+  // Theme colors (modern dark theme)
   const THEME = {
-    background: '#f5f3ee',
-    titleBar: '#f5f3ee',
-    titleBarSymbol: '#1a1a1a',
+    background: '#000000',
+    titleBar: '#000000',
+    titleBarSymbol: '#f0f0f0',
   };
 
   // Platform-specific window configuration
@@ -111,7 +111,7 @@ function createWindow() {
     try {
       allowedOrigins.add(new URL(process.env.VITE_DEV_SERVER_URL).origin);
     } catch {
-      // 忽略无效的开发服务地址
+      // 
     }
   }
   const allowedProtocols = new Set<string>(['file:', 'devtools:']);
@@ -283,27 +283,27 @@ async function startSandboxBootstrap(): Promise<void> {
   }
 }
 
-// 发送事件到渲染进程（含远程会话拦截）
+// 
 function sendToRenderer(event: ServerEvent) {
   const payload = event.payload as { sessionId?: string; [key: string]: any };
   const sessionId = payload?.sessionId;
   
-  // 判断是否远程会话
+  // 
   if (sessionId && remoteManager.isRemoteSession(sessionId)) {
-    // 处理远程会话事件
+    // 
     
-    // 拦截 stream.message，用于回传到远程通道
+    //  stream.message
     if (event.type === 'stream.message') {
       const message = payload.message as { role?: string; content?: Array<{ type: string; text?: string }> };
       if (message?.role === 'assistant' && message?.content) {
-        // 提取助手文本内容
+        // 
         const textContent = message.content
           .filter((c: any) => c.type === 'text' && c.text)
           .map((c: any) => c.text)
           .join('\n');
         
         if (textContent) {
-          // 发送到远程通道（带缓冲）
+          // 
           remoteManager.sendResponseToChannel(sessionId, textContent).catch((err: Error) => {
             logError('[Remote] Failed to send response to channel:', err);
           });
@@ -311,7 +311,7 @@ function sendToRenderer(event: ServerEvent) {
       }
     }
     
-    // 拦截 trace.step 作为工具进度
+    //  trace.step 
     if (event.type === 'trace.step') {
       const step = payload.step as { type?: string; toolName?: string; status?: string; title?: string };
       if (step?.type === 'tool_call' && step?.toolName) {
@@ -325,20 +325,20 @@ function sendToRenderer(event: ServerEvent) {
       }
     }
     
-    // trace.update 预留；当前主要用 trace.step
+    // trace.update  trace.step
     
-    // 拦截 session.status 用于清理
+    //  session.status 
     if (event.type === 'session.status') {
       const status = payload.status as string;
       if (status === 'idle' || status === 'error') {
-        // 会话结束，清空缓冲
+        // 
         remoteManager.clearSessionBuffer(sessionId).catch((err: Error) => {
           logError('[Remote] Failed to clear session buffer:', err);
         });
       }
     }
     
-    // 拦截 question.request
+    //  question.request
     if (event.type === 'question.request' && payload.questionId && payload.questions) {
       log('[Remote] Intercepting question for remote session:', sessionId);
       remoteManager.handleQuestionRequest(
@@ -352,10 +352,10 @@ function sendToRenderer(event: ServerEvent) {
       }).catch((err) => {
         logError('[Remote] Failed to handle question request:', err);
       });
-      return; // 不发送到本地 UI
+      return; //  UI
     }
     
-    // 拦截 permission.request
+    //  permission.request
     if (event.type === 'permission.request' && payload.toolUseId && payload.toolName) {
       log('[Remote] Intercepting permission for remote session:', sessionId);
       remoteManager.handlePermissionRequest(
@@ -376,11 +376,11 @@ function sendToRenderer(event: ServerEvent) {
       }).catch((err) => {
         logError('[Remote] Failed to handle permission request:', err);
       });
-      return; // 不发送到本地 UI
+      return; //  UI
     }
   }
   
-  // 发送到本地 UI
+  //  UI
   if (mainWindow && !mainWindow.isDestroyed()) {
     mainWindow.webContents.send('server-event', event);
   }
@@ -415,7 +415,7 @@ app.whenReady().then(async () => {
   // Initialize default working directory
   initializeDefaultWorkingDir();
   log('Working directory:', currentWorkingDir);
-  // 远程会话默认使用全局工作目录
+  // 
   remoteManager.setDefaultWorkingDirectory(currentWorkingDir || undefined);
   
   // Initialize database
@@ -428,7 +428,7 @@ app.whenReady().then(async () => {
   // Initialize session manager
   sessionManager = new SessionManager(db, sendToRenderer, pluginRuntimeService);
 
-  // 初始化远程管理器
+  // 
   remoteManager.setRendererCallback(sendToRenderer);
   const agentExecutor: AgentExecutor = {
     startSession: async (title, prompt, cwd) => {
@@ -446,7 +446,7 @@ app.whenReady().then(async () => {
   };
   remoteManager.setAgentExecutor(agentExecutor);
 
-  // 远程控制启用时启动
+  // 
   if (remoteConfigStore.isEnabled()) {
     remoteManager.start().catch(error => {
       logError('[App] Failed to start remote control:', error);
@@ -476,7 +476,7 @@ async function cleanupSandboxResources(): Promise<void> {
   }
   isCleaningUp = true;
 
-  // 停止远程控制
+  // 
   try {
     log('[App] Stopping remote control...');
     await remoteManager.stop();
@@ -1291,7 +1291,7 @@ ipcMain.handle('logs.isEnabled', () => {
 });
 
 // ============================================================================
-// 远程控制 IPC 处理
+//  IPC 
 // ============================================================================
 
 ipcMain.handle('remote.getConfig', () => {
@@ -1339,15 +1339,6 @@ ipcMain.handle('remote.updateGatewayConfig', async (_event, config: Partial<Gate
   }
 });
 
-ipcMain.handle('remote.updateFeishuConfig', async (_event, config: FeishuChannelConfig) => {
-  try {
-    await remoteManager.updateFeishuConfig(config);
-    return { success: true };
-  } catch (error) {
-    logError('[Remote] Error updating Feishu config:', error);
-    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
-  }
-});
 
 ipcMain.handle('remote.getPairedUsers', () => {
   try {
@@ -1415,14 +1406,6 @@ ipcMain.handle('remote.getTunnelStatus', () => {
   }
 });
 
-ipcMain.handle('remote.getWebhookUrl', () => {
-  try {
-    return remoteManager.getFeishuWebhookUrl();
-  } catch (error) {
-    logError('[Remote] Error getting webhook URL:', error);
-    return null;
-  }
-});
 
 ipcMain.handle('remote.restart', async () => {
   try {
@@ -1707,7 +1690,7 @@ async function handleClientEvent(event: ClientEvent): Promise<unknown> {
   if (event.type === 'session.start' && !configStore.isConfigured()) {
     sendToRenderer({
       type: 'error',
-      payload: { message: '请先配置 API Key' },
+      payload: { message: ' API Key' },
     });
     sendToRenderer({
       type: 'config.status',
