@@ -113,6 +113,33 @@ export interface SkillReadinessData {
   topPriority?: string;
 }
 
+// ─── VM Cowork Desktop Card Types ───────────────────────────────────────────
+
+export interface VMStatusCardData {
+  vmId: string;
+  vmName: string;
+  state: string;
+  os?: string;
+  cpuCount?: number;
+  memoryMb?: number;
+  ipAddress?: string;
+  computerUseEnabled?: boolean;
+}
+
+export interface VMProvisionCardData {
+  suggestedOs?: string;
+  reason?: string;
+  suggestedResources?: { cpuCount: number; memoryMb: number; diskSizeGb: number };
+}
+
+export interface VMSuggestionCardData {
+  reason: string;
+  taskDescription: string;
+  suggestedOs?: string;
+  existingVmId?: string;
+  existingVmName?: string;
+}
+
 export type CareerCardType =
   | 'goal-progress'
   | 'skill-gap'
@@ -125,4 +152,7 @@ export type CareerCardType =
   | 'skill-tree'
   | 'skill-unlock'
   | 'skill-progress'
-  | 'skill-readiness';
+  | 'skill-readiness'
+  | 'vm-status'
+  | 'vm-provision'
+  | 'vm-suggestion';

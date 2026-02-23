@@ -128,6 +128,10 @@ export function useIPC() {
           store.setCareerboxPullProgress(event.payload);
           break;
 
+        case 'vm.downloadProgress':
+          store.setVmImageDownloadProgress(event.payload);
+          break;
+
         case 'workdir.changed':
           console.log('[useIPC] workdir.changed received:', event.payload.path);
           store.setWorkingDir(event.payload.path || null);

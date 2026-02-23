@@ -38,8 +38,8 @@ async function main(): Promise<void> {
     platformToken: TOKEN || undefined,
     workspacePath: WORKSPACE,
     enabledSkills: [
-      'openclaw-career-dev',
-      'openclaw-platform-connect',
+      'navi-career-dev',
+      'navi-platform-connect',
       'navi-skillception',
     ],
   };

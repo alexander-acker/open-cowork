@@ -1,24 +1,24 @@
 ---
-name: openclaw-platform-connect
-description: "OpenClaw platform connection skill — bridges the agent to the Coeadapt career platform for syncing plans, tasks, goals, habits, jobs, skills, portfolio, and market intelligence. Enables OpenClaw to operate as a connected career agent."
+name: navi-platform-connect
+description: "Navi platform connection skill — bridges the agent to the Coeadapt career platform for syncing plans, tasks, goals, habits, jobs, skills, portfolio, and market intelligence. Enables Navi to operate as a connected career agent."
 ---
 
-# OpenClaw: Platform Connect
+# Navi: Platform Connect
 
 ## Purpose
 
-This skill connects OpenClaw to the Coeadapt career platform, turning the agent into a fully connected career co-worker. It syncs the user's career data bidirectionally — pulling context from the platform to inform conversations and pushing agent-generated artifacts back.
+This skill connects Navi to the Coeadapt career platform, turning the agent into a fully connected career co-worker. It syncs the user's career data bidirectionally — pulling context from the platform to inform conversations and pushing agent-generated artifacts back.
 
 ## Connection Model
 
-OpenClaw connects to the platform via the Coeadapt API:
+Navi connects to the platform via the Coeadapt API:
 - **Authentication**: Device token (Clerk-based auth flow)
 - **Sync**: Real-time for active sessions, periodic background sync
 - **Offline**: Graceful degradation — works with cached data when disconnected
 
 ## Platform Capabilities
 
-When connected, OpenClaw gains access to:
+When connected, Navi gains access to:
 
 ### Plans & Tasks
 - Read the user's career plans and associated tasks
@@ -45,6 +45,7 @@ When connected, OpenClaw gains access to:
 - Access verified skills inventory
 - Sync portfolio items
 - Map skills to market requirements
+- Push Skillception skill-tree data to the platform
 
 ### Market Intelligence
 - Pull market fit analysis

@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { Session, Message, TraceStep, PermissionRequest, UserQuestionRequest, Settings, AppConfig, SandboxSetupProgress, SandboxSyncStatus, ContainerInfo, PullProgress } from '../types';
+import type { Session, Message, TraceStep, PermissionRequest, UserQuestionRequest, Settings, AppConfig, SandboxSetupProgress, SandboxSyncStatus, ContainerInfo, PullProgress, VMStatus, ImageDownloadProgress, BackendStatus } from '../types';
 import { applySessionUpdate } from '../utils/session-update';
 
 interface AppState {
@@ -46,11 +46,22 @@ interface AppState {
   sandboxSyncStatus: SandboxSyncStatus | null;
 
   // CareerBox state
-  activeView: 'chat' | 'careerbox';
+  activeView: 'chat' | 'careerbox' | 'vm' | 'cowork-desktop';
   careerboxStatus: ContainerInfo | null;
   careerboxDockerAvailable: boolean;
   careerboxPullProgress: PullProgress | null;
   careerboxHealthy: boolean;
+
+  // VM state
+  vmBackendStatus: BackendStatus | null;
+  vmList: VMStatus[];
+  vmImageDownloadProgress: ImageDownloadProgress | null;
+  vmCreateWizardOpen: boolean;
+
+  // Cowork Desktop state
+  activeCoworkVM: { id: string; name: string; state: string } | null;
+  coworkVNCUrl: string | null;
+  coworkComputerUseEnabled: boolean;
 
   // Coeadapt / Cora state
   coraChatOpen: boolean;
@@ -103,11 +114,22 @@ interface AppState {
   setSandboxSyncStatus: (status: SandboxSyncStatus | null) => void;
 
   // CareerBox actions
-  setActiveView: (view: 'chat' | 'careerbox') => void;
+  setActiveView: (view: 'chat' | 'careerbox' | 'vm' | 'cowork-desktop') => void;
   setCareerboxStatus: (status: ContainerInfo | null) => void;
   setCareerboxDockerAvailable: (available: boolean) => void;
   setCareerboxPullProgress: (progress: PullProgress | null) => void;
   setCareerboxHealthy: (healthy: boolean) => void;
+
+  // VM actions
+  setVmBackendStatus: (status: BackendStatus | null) => void;
+  setVmList: (vms: VMStatus[]) => void;
+  setVmImageDownloadProgress: (progress: ImageDownloadProgress | null) => void;
+  setVmCreateWizardOpen: (open: boolean) => void;
+
+  // Cowork Desktop actions
+  setActiveCoworkVM: (vm: { id: string; name: string; state: string } | null) => void;
+  setCoworkVNCUrl: (url: string | null) => void;
+  setCoworkComputerUseEnabled: (enabled: boolean) => void;
 
   // Coeadapt / Cora actions
   setCoraChatOpen: (open: boolean) => void;
@@ -169,6 +191,13 @@ export const useAppStore = create<AppState>((set) => ({
   careerboxDockerAvailable: false,
   careerboxPullProgress: null,
   careerboxHealthy: false,
+  vmBackendStatus: null,
+  vmList: [],
+  vmImageDownloadProgress: null,
+  vmCreateWizardOpen: false,
+  activeCoworkVM: null,
+  coworkVNCUrl: null,
+  coworkComputerUseEnabled: false,
   coraChatOpen: false,
   coeadaptConnected: false,
 
@@ -459,6 +488,17 @@ export const useAppStore = create<AppState>((set) => ({
   setCareerboxDockerAvailable: (available) => set({ careerboxDockerAvailable: available }),
   setCareerboxPullProgress: (progress) => set({ careerboxPullProgress: progress }),
   setCareerboxHealthy: (healthy) => set({ careerboxHealthy: healthy }),
+
+  // VM actions
+  setVmBackendStatus: (status) => set({ vmBackendStatus: status }),
+  setVmList: (vms) => set({ vmList: vms }),
+  setVmImageDownloadProgress: (progress) => set({ vmImageDownloadProgress: progress }),
+  setVmCreateWizardOpen: (open) => set({ vmCreateWizardOpen: open }),
+
+  // Cowork Desktop actions
+  setActiveCoworkVM: (vm) => set({ activeCoworkVM: vm }),
+  setCoworkVNCUrl: (url) => set({ coworkVNCUrl: url }),
+  setCoworkComputerUseEnabled: (enabled) => set({ coworkComputerUseEnabled: enabled }),
 
   // Coeadapt / Cora actions
   setCoraChatOpen: (open) => set({ coraChatOpen: open }),

@@ -277,6 +277,61 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.invoke('careerbox.saveConfig', config),
   },
 
+  // Virtual Machine methods
+  vm: {
+    checkBackend: (): Promise<{ type: string; available: boolean; version?: string; error?: string }> =>
+      ipcRenderer.invoke('vm.checkBackend'),
+    listVMs: (): Promise<any[]> =>
+      ipcRenderer.invoke('vm.listVMs'),
+    getVMStatus: (vmId: string): Promise<any> =>
+      ipcRenderer.invoke('vm.getVMStatus', vmId),
+    getVMConfig: (vmId: string): Promise<any> =>
+      ipcRenderer.invoke('vm.getVMConfig', vmId),
+    createVM: (params: { name: string; osImageId: string; resources: any }): Promise<{ success: boolean; vmId?: string; error?: string }> =>
+      ipcRenderer.invoke('vm.createVM', params),
+    startVM: (vmId: string): Promise<{ success: boolean; error?: string }> =>
+      ipcRenderer.invoke('vm.startVM', vmId),
+    stopVM: (vmId: string): Promise<{ success: boolean; error?: string }> =>
+      ipcRenderer.invoke('vm.stopVM', vmId),
+    forceStopVM: (vmId: string): Promise<{ success: boolean; error?: string }> =>
+      ipcRenderer.invoke('vm.forceStopVM', vmId),
+    pauseVM: (vmId: string): Promise<{ success: boolean; error?: string }> =>
+      ipcRenderer.invoke('vm.pauseVM', vmId),
+    resumeVM: (vmId: string): Promise<{ success: boolean; error?: string }> =>
+      ipcRenderer.invoke('vm.resumeVM', vmId),
+    deleteVM: (vmId: string): Promise<{ success: boolean; error?: string }> =>
+      ipcRenderer.invoke('vm.deleteVM', vmId),
+    openDisplay: (vmId: string): Promise<{ success: boolean; error?: string }> =>
+      ipcRenderer.invoke('vm.openDisplay', vmId),
+    modifyVM: (vmId: string, resources: any): Promise<{ success: boolean; error?: string }> =>
+      ipcRenderer.invoke('vm.modifyVM', vmId, resources),
+    getAvailableImages: (): Promise<any[]> =>
+      ipcRenderer.invoke('vm.getAvailableImages'),
+    getDownloadedImages: (): Promise<any[]> =>
+      ipcRenderer.invoke('vm.getDownloadedImages'),
+    downloadImage: (imageId: string): Promise<{ success: boolean; path?: string; error?: string }> =>
+      ipcRenderer.invoke('vm.downloadImage', imageId),
+    cancelDownload: (): Promise<{ success: boolean }> =>
+      ipcRenderer.invoke('vm.cancelDownload'),
+    deleteImage: (imageId: string): Promise<{ success: boolean; error?: string }> =>
+      ipcRenderer.invoke('vm.deleteImage', imageId),
+    importISO: (): Promise<any | null> =>
+      ipcRenderer.invoke('vm.importISO'),
+    // Cowork Desktop (VNC + Computer Use)
+    startWithVNC: (vmId: string): Promise<{ success: boolean; wsUrl?: string; error?: string }> =>
+      ipcRenderer.invoke('vm.startWithVNC', vmId),
+    stopWithVNC: (vmId: string): Promise<{ success: boolean; error?: string }> =>
+      ipcRenderer.invoke('vm.stopWithVNC', vmId),
+    getVNCUrl: (vmId: string): Promise<string | null> =>
+      ipcRenderer.invoke('vm.getVNCUrl', vmId),
+    enableComputerUse: (vmId: string, enabled: boolean): Promise<{ success: boolean; error?: string }> =>
+      ipcRenderer.invoke('vm.enableComputerUse', vmId, enabled),
+    isComputerUseEnabled: (vmId: string): Promise<boolean> =>
+      ipcRenderer.invoke('vm.isComputerUseEnabled', vmId),
+    executeComputerUse: (vmId: string, action: unknown): Promise<unknown> =>
+      ipcRenderer.invoke('vm.executeComputerUse', vmId, action),
+  },
+
   // Coeadapt API methods
   coeadapt: {
     getConfig: (): Promise<{ clerkPublishableKey: string; coeadaptApiUrl: string; isConnected: boolean }> =>
@@ -481,6 +536,34 @@ declare global {
         checkHealth: () => Promise<{ healthy: boolean }>;
         getConfig: () => Promise<CareerBoxConfig>;
         saveConfig: (config: Partial<CareerBoxConfig>) => Promise<{ success: boolean }>;
+      };
+      vm: {
+        checkBackend: () => Promise<{ type: string; available: boolean; version?: string; error?: string }>;
+        listVMs: () => Promise<any[]>;
+        getVMStatus: (vmId: string) => Promise<any>;
+        getVMConfig: (vmId: string) => Promise<any>;
+        createVM: (params: { name: string; osImageId: string; resources: any }) => Promise<{ success: boolean; vmId?: string; error?: string }>;
+        startVM: (vmId: string) => Promise<{ success: boolean; error?: string }>;
+        stopVM: (vmId: string) => Promise<{ success: boolean; error?: string }>;
+        forceStopVM: (vmId: string) => Promise<{ success: boolean; error?: string }>;
+        pauseVM: (vmId: string) => Promise<{ success: boolean; error?: string }>;
+        resumeVM: (vmId: string) => Promise<{ success: boolean; error?: string }>;
+        deleteVM: (vmId: string) => Promise<{ success: boolean; error?: string }>;
+        openDisplay: (vmId: string) => Promise<{ success: boolean; error?: string }>;
+        modifyVM: (vmId: string, resources: any) => Promise<{ success: boolean; error?: string }>;
+        getAvailableImages: () => Promise<any[]>;
+        getDownloadedImages: () => Promise<any[]>;
+        downloadImage: (imageId: string) => Promise<{ success: boolean; path?: string; error?: string }>;
+        cancelDownload: () => Promise<{ success: boolean }>;
+        deleteImage: (imageId: string) => Promise<{ success: boolean; error?: string }>;
+        importISO: () => Promise<any | null>;
+        // Cowork Desktop (VNC + Computer Use)
+        startWithVNC: (vmId: string) => Promise<{ success: boolean; wsUrl?: string; error?: string }>;
+        stopWithVNC: (vmId: string) => Promise<{ success: boolean; error?: string }>;
+        getVNCUrl: (vmId: string) => Promise<string | null>;
+        enableComputerUse: (vmId: string, enabled: boolean) => Promise<{ success: boolean; error?: string }>;
+        isComputerUseEnabled: (vmId: string) => Promise<boolean>;
+        executeComputerUse: (vmId: string, action: unknown) => Promise<unknown>;
       };
       coeadapt: {
         getConfig: () => Promise<{ clerkPublishableKey: string; coeadaptApiUrl: string; isConnected: boolean }>;

@@ -68,6 +68,19 @@ export const MCP_SERVER_PRESETS: Record<string, Omit<MCPServerConfig, 'id' | 'en
       COEADAPT_DEVICE_TOKEN: 'Device token for API authentication (auto-managed)',
     },
   },
+  skillception: {
+    name: 'Skillception',
+    type: 'stdio',
+    command: 'node',
+    args: ['{SKILLCEPTION_SERVER_PATH}'], // Path will be resolved at runtime
+    env: {
+      NAVI_SKILL_TREE_PATH: '', // Injected at runtime (userData/navi/skill-tree.json)
+    },
+    requiresEnv: [],
+    envDescription: {
+      NAVI_SKILL_TREE_PATH: 'Path to the skill tree JSON file (auto-managed)',
+    },
+  },
 };
 
 /**
@@ -229,6 +242,13 @@ class MCPConfigStore {
   }
 
   /**
+   * Get the path to the Skillception MCP server file
+   */
+  private getSkillceptionServerPath(): string {
+    return this.getMcpServerPath('skillception-server.ts');
+  }
+
+  /**
    * Create a server config from a preset
    */
   createFromPreset(presetKey: string, enabled: boolean = false): MCPServerConfig | null {
@@ -255,6 +275,10 @@ class MCPConfigStore {
           // Career Tools server path
           if (arg === '{CAREER_TOOLS_SERVER_PATH}') {
             return this.getCareerToolsServerPath();
+          }
+          // Skillception server path
+          if (arg === '{SKILLCEPTION_SERVER_PATH}') {
+            return this.getSkillceptionServerPath();
           }
           return arg;
         }),

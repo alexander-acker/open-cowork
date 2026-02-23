@@ -1,5 +1,5 @@
 /**
- * OpenClaw Career Development Skill
+ * Navi Career Development Skill
  *
  * Handles career planning, skill development, resume/portfolio work,
  * interview prep, habit building, and market intelligence.
@@ -24,7 +24,7 @@ const CAREER_DEV_INTENTS = [
 ];
 
 export class CareerDevSkill implements AgentCapability {
-  skillId = 'openclaw-career-dev';
+  skillId = 'navi-career-dev';
   name = 'Career Development';
   intents = CAREER_DEV_INTENTS;
 

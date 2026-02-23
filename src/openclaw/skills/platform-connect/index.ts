@@ -1,7 +1,7 @@
 /**
- * OpenClaw Platform Connect Skill
+ * Navi Platform Connect Skill
  *
- * Bridges OpenClaw to the Coeadapt career platform API.
+ * Bridges Navi to the Coeadapt career platform API.
  * Handles authentication, data sync, and bidirectional updates
  * so the agent always has fresh career context.
  */
@@ -30,7 +30,7 @@ const PLATFORM_INTENTS = [
 ];
 
 export class PlatformConnectSkill implements AgentCapability {
-  skillId = 'openclaw-platform-connect';
+  skillId = 'navi-platform-connect';
   name = 'Platform Connect';
   intents = PLATFORM_INTENTS;
 

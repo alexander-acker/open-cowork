@@ -308,6 +308,35 @@ ${sections.join('\n\n')}
     return '';
   }
 
+  /**
+   * Get the Navi (OpenClaw) agent skills directory
+   * These are the career agent's built-in skills (career-dev, platform-connect, skillception)
+   */
+  private getNaviSkillsPath(): string {
+    const appPath = app.getAppPath();
+    const unpackedPath = appPath.replace(/\.asar$/, '.asar.unpacked');
+
+    const possiblePaths = [
+      // Development: relative to this file (dist-electron/main -> src/openclaw/skills)
+      path.join(__dirname, '..', '..', '..', 'src', 'openclaw', 'skills'),
+      // Production: bundled in app
+      path.join(unpackedPath, 'src', 'openclaw', 'skills'),
+      path.join(appPath, 'src', 'openclaw', 'skills'),
+      // Alternative: dist-level path
+      path.join(unpackedPath, 'openclaw', 'skills'),
+      path.join(appPath, 'openclaw', 'skills'),
+    ];
+
+    for (const p of possiblePaths) {
+      if (fs.existsSync(p)) {
+        log('[ClaudeAgentRunner] Found Navi skills at:', p);
+        return p;
+      }
+    }
+
+    return '';
+  }
+
   private getAppClaudeDir(): string {
     return path.join(app.getPath('userData'), 'claude');
   }
@@ -409,6 +438,39 @@ ${sections.join('\n\n')}
       }
     }
     
+    // 1b. Check Navi agent skills (career-dev, platform-connect, skillception)
+    const naviSkillsPath = this.getNaviSkillsPath();
+    if (naviSkillsPath && fs.existsSync(naviSkillsPath)) {
+      try {
+        const dirs = fs.readdirSync(naviSkillsPath, { withFileTypes: true });
+        for (const dir of dirs) {
+          if (dir.isDirectory()) {
+            const skillMdPath = path.join(naviSkillsPath, dir.name, 'SKILL.md');
+            if (fs.existsSync(skillMdPath)) {
+              let description = `Navi agent skill: ${dir.name}`;
+              try {
+                const content = fs.readFileSync(skillMdPath, 'utf-8');
+                const descMatch = content.match(/description:\s*["']?([^"'\n]+)["']?/);
+                if (descMatch) {
+                  description = descMatch[1];
+                }
+              } catch (e) { /* ignore */ }
+
+              const existingIdx = skills.findIndex(s => s.name === dir.name);
+              const skill = { name: dir.name, description, skillMdPath };
+              if (existingIdx >= 0) {
+                skills[existingIdx] = skill;
+              } else {
+                skills.push(skill);
+              }
+            }
+          }
+        }
+      } catch (e) {
+        logError('[ClaudeAgentRunner] Error scanning Navi skills:', e);
+      }
+    }
+
     // 2. Check global skills (app-specific directory)
     const globalSkillsPath = path.join(this.getAppClaudeDir(), 'skills');
     if (fs.existsSync(globalSkillsPath)) {
@@ -1363,11 +1425,13 @@ Then follow the workflow described in that file.
               const { mcpConfigStore } = await import('../mcp/mcp-config-store');
             
             // Check if any args contain placeholders that need resolving
-            const hasPlaceholders = resolvedArgs.some(arg => 
-              arg.includes('{SOFTWARE_DEV_SERVER_PATH}') || 
-              arg.includes('{GUI_OPERATE_SERVER_PATH}')
+            const hasPlaceholders = resolvedArgs.some(arg =>
+              arg.includes('{SOFTWARE_DEV_SERVER_PATH}') ||
+              arg.includes('{GUI_OPERATE_SERVER_PATH}') ||
+              arg.includes('{SKILLCEPTION_SERVER_PATH}') ||
+              arg.includes('{CAREER_TOOLS_SERVER_PATH}')
             );
-            
+
             if (hasPlaceholders) {
               // Get the appropriate preset based on config name
               let presetKey: string | null = null;
@@ -1375,6 +1439,10 @@ Then follow the workflow described in that file.
                 presetKey = 'software-development';
               } else if (config.name === 'GUI_Operate' || config.name === 'GUI Operate') {
                 presetKey = 'gui-operate';
+              } else if (config.name === 'Skillception') {
+                presetKey = 'skillception';
+              } else if (config.name === 'Career_Tools' || config.name === 'Career Tools') {
+                presetKey = 'career-tools';
               }
               
               if (presetKey) {
@@ -1405,6 +1473,56 @@ Then follow the workflow described in that file.
         }
         
         log('[ClaudeAgentRunner] Final mcpServers config:', JSON.stringify(mcpServers, null, 2));
+      }
+
+      // ── Auto-inject Skillception MCP server (always available) ──────────
+      if (!mcpServers['Skillception']) {
+        try {
+          const { mcpConfigStore: skillMcpStore } = await import('../mcp/mcp-config-store');
+          const skillPreset = skillMcpStore.createFromPreset('skillception', true);
+          if (skillPreset && skillPreset.args && skillPreset.args.length > 0) {
+            const skillServerPath = skillPreset.args[0];
+            if (fs.existsSync(skillServerPath)) {
+              // Resolve bundled node path for the Skillception server process
+              const skillNodePaths = (() => {
+                const platform = process.platform;
+                const arch = process.arch;
+                let resPath: string;
+                if (process.env.NODE_ENV === 'development') {
+                  resPath = path.join(__dirname, '..', '..', 'resources', 'node', `${platform}-${arch}`);
+                } else {
+                  resPath = path.join(process.resourcesPath, 'node');
+                }
+                const binDir = platform === 'win32' ? resPath : path.join(resPath, 'bin');
+                const nodeExe = platform === 'win32' ? 'node.exe' : 'node';
+                const nodePath = path.join(binDir, nodeExe);
+                return fs.existsSync(nodePath) ? { node: nodePath, binDir } : null;
+              })();
+
+              const skillCommand = skillNodePaths ? skillNodePaths.node : 'node';
+              const skillTreeDir = path.join(app.getPath('userData'), 'navi');
+              const skillTreePath = path.join(skillTreeDir, 'skill-tree.json');
+              const skillEnv: Record<string, string> = {
+                NAVI_SKILL_TREE_PATH: skillTreePath,
+              };
+              if (skillNodePaths) {
+                skillEnv.PATH = `${skillNodePaths.binDir}${path.delimiter}${process.env.PATH || ''}`;
+              }
+              mcpServers['Skillception'] = {
+                type: 'stdio',
+                command: skillCommand,
+                args: [skillServerPath],
+                env: skillEnv,
+              };
+              log('[ClaudeAgentRunner] Auto-injected Skillception MCP server');
+              log(`[ClaudeAgentRunner]   Skill tree: ${skillTreePath}`);
+            } else {
+              logWarn(`[ClaudeAgentRunner] Skillception server not found at: ${skillServerPath}`);
+            }
+          }
+        } catch (e) {
+          logWarn('[ClaudeAgentRunner] Failed to auto-inject Skillception MCP server:', e);
+        }
       }
       logTiming('after building MCP servers config');
       

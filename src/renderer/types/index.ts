@@ -23,6 +23,122 @@ export interface CareerBoxConfig {
   password: string;
 }
 
+// VM types
+export type VMState =
+  | 'not_created'
+  | 'powered_off'
+  | 'starting'
+  | 'running'
+  | 'paused'
+  | 'saving'
+  | 'saved'
+  | 'stopping'
+  | 'error';
+
+export interface VMStatus {
+  id: string;
+  name: string;
+  state: VMState;
+  cpuUsagePercent?: number;
+  memoryUsedMb?: number;
+  uptimeSeconds?: number;
+  guestOs?: string;
+  ipAddress?: string;
+}
+
+export interface VMConfig {
+  id: string;
+  name: string;
+  osImageId: string;
+  resources: VMResourceConfig;
+  createdAt: string;
+  updatedAt: string;
+  backendType: string;
+}
+
+export interface VMResourceConfig {
+  cpuCount: number;
+  memoryMb: number;
+  diskSizeGb: number;
+  displayMode: 'separate_window' | 'embedded';
+  vramMb?: number;
+  enableEFI?: boolean;
+}
+
+export interface OSImage {
+  id: string;
+  name: string;
+  distro: string;
+  version: string;
+  arch: 'x64' | 'arm64';
+  downloadUrl: string;
+  fileSize: number;
+  sha256?: string;
+  category: 'linux' | 'windows' | 'other';
+  requiresLicense?: boolean;
+  minDiskGb: number;
+  minMemoryMb: number;
+  vboxOsType?: string;
+}
+
+export interface ImageDownloadProgress {
+  imageId: string;
+  status: 'downloading' | 'verifying' | 'complete' | 'error';
+  bytesDownloaded: number;
+  totalBytes: number;
+  percent: number;
+  error?: string;
+}
+
+export interface BackendStatus {
+  type: string;
+  available: boolean;
+  version?: string;
+  error?: string;
+}
+
+// VM Bootstrap types
+export type VMBootstrapPhase =
+  | 'checking_backend'
+  | 'checking_existing'
+  | 'prompting_setup'
+  | 'starting_vm'
+  | 'ready'
+  | 'skipped'
+  | 'error';
+
+export interface VMBootstrapProgress {
+  phase: VMBootstrapPhase;
+  message: string;
+  detail?: string;
+  progress?: number;
+  error?: string;
+}
+
+// VM Health types
+export interface VMHealthEvent {
+  vmId: string;
+  vmName: string;
+  type: 'state_changed' | 'crash_detected' | 'auto_restart' | 'health_check';
+  previousState?: VMState;
+  currentState: VMState;
+  timestamp: number;
+  message: string;
+  autoRestartAttempt?: number;
+}
+
+export interface VMHealthSummary {
+  vmId: string;
+  vmName: string;
+  state: VMState;
+  healthy: boolean;
+  lastChecked: number;
+  upSince?: number;
+  crashCount: number;
+  lastCrash?: number;
+  autoRestartEnabled: boolean;
+}
+
 // Session types
 export interface Session {
   id: string;
@@ -341,6 +457,9 @@ export type ServerEvent =
   | { type: 'plugins.runtimeApplied'; payload: { sessionId: string; plugins: Array<{ name: string; path: string }> } }
   | { type: 'workdir.changed'; payload: { path: string } }
   | { type: 'careerbox.pullProgress'; payload: PullProgress }
+  | { type: 'vm.downloadProgress'; payload: ImageDownloadProgress }
+  | { type: 'vm.bootstrapProgress'; payload: VMBootstrapProgress }
+  | { type: 'vm.healthEvent'; payload: VMHealthEvent }
   | { type: 'error'; payload: { message: string } };
 
 // Settings types

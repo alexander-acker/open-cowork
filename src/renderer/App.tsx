@@ -5,6 +5,7 @@ import { Sidebar } from './components/Sidebar';
 import { ChatView } from './components/ChatView';
 import { WelcomeView } from './components/WelcomeView';
 import { CareerBoxView } from './components/CareerBoxView';
+import { VMView } from './components/VMView';
 import { PermissionDialog } from './components/PermissionDialog';
 import { ContextPanel } from './components/ContextPanel';
 import { ConfigModal } from './components/ConfigModal';
@@ -98,7 +99,9 @@ function App() {
         
         {/* Main Content Area */}
         <main className="flex-1 flex flex-col overflow-hidden bg-background">
-          {activeView === 'careerbox' ? (
+          {activeView === 'vm' ? (
+            <VMView />
+          ) : activeView === 'careerbox' ? (
             <CareerBoxView />
           ) : activeSessionId ? (
             <ChatView />

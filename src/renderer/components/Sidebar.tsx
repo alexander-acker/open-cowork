@@ -15,6 +15,7 @@ import {
   Monitor,
   MessageSquare,
   AlertTriangle,
+  Cpu,
 } from 'lucide-react';
 import CoeadaptIcon from '../assets/icon-color.png';
 import CoeadaptLogo from '../assets/logo-full-1.png';
@@ -253,6 +254,27 @@ export function Sidebar() {
           </div>
           {!sidebarCollapsed && (
             <span className={`font-medium ${activeView === 'careerbox' ? 'text-accent' : 'text-text-primary'}`}>CareerBox</span>
+          )}
+        </button>
+
+        <button
+          onClick={() => setActiveView('vm')}
+          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors ${
+            sidebarCollapsed ? 'justify-center' : ''
+          } ${
+            activeView === 'vm'
+              ? 'bg-accent-muted text-accent'
+              : 'hover:bg-surface-hover text-text-secondary'
+          }`}
+          title="Virtual Machines"
+        >
+          <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+            activeView === 'vm' ? 'bg-accent/20' : 'bg-surface-hover'
+          }`}>
+            <Cpu className={`w-4 h-4 ${activeView === 'vm' ? 'text-accent' : 'text-text-secondary'}`} />
+          </div>
+          {!sidebarCollapsed && (
+            <span className={`font-medium ${activeView === 'vm' ? 'text-accent' : 'text-text-primary'}`}>Virtual Machines</span>
           )}
         </button>
 
