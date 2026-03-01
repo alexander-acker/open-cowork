@@ -272,7 +272,8 @@
     "apiNotConfigured": "API 未配置",
     "user": "用户",
     "newTask": "新任务",
-    "deleteSession": "删除 {{title}}"
+    "deleteSession": "删除 {{title}}",
+    "careerBox": "Navi 实验室"
   },
   "chat": {
     "sendMessage": "发送消息",
@@ -305,6 +306,27 @@
     "callNumber": "调用 #{{number}}",
     "input": "输入：",
     "output": "输出："
+  },
+  "career": {
+    "title": "职业盒子",
+    "subtitle": "Navi 实验室 — 高需求技术岗位的交互式技能训练",
+    "labsCompleted": "已完成实验",
+    "totalXP": "总经验值",
+    "focus": "方向",
+    "techJobs": "高需求技术",
+    "allTracks": "全部方向",
+    "highDemand": "高需求",
+    "startLab": "开始实验",
+    "continueLab": "继续",
+    "completed": "已完成",
+    "locked": "需要完成前置任务",
+    "noLabs": "该方向暂无实验",
+    "openCareerBox": "职业盒子",
+    "difficulty": {
+      "beginner": "入门",
+      "intermediate": "中级",
+      "advanced": "高级"
+    }
   },
   "messageCard": {
     "request": "请求",

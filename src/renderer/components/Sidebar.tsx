@@ -16,6 +16,7 @@ import {
   MessageSquare,
   AlertTriangle,
   Cpu,
+  GraduationCap,
 } from 'lucide-react';
 import CoeadaptIcon from '../assets/icon-color.png';
 import CoeadaptLogo from '../assets/logo-full-1.png';
@@ -42,6 +43,8 @@ export function Sidebar() {
     coraChatOpen,
     setCoraChatOpen,
     activeCoworkVM,
+    showCareerBox,
+    setShowCareerBox,
   } = useAppStore();
   const { deleteSession, getSessionMessages, getSessionTraceSteps, isElectron } = useIPC();
   const [hoveredSession, setHoveredSession] = useState<string | null>(null);
@@ -238,23 +241,45 @@ export function Sidebar() {
           </p>
         )}
         <button
-          onClick={() => setActiveView('careerbox')}
+          onClick={() => { setActiveView('careerbox'); setShowCareerBox(false); }}
           className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors ${
             sidebarCollapsed ? 'justify-center' : ''
           } ${
-            activeView === 'careerbox'
+            activeView === 'careerbox' && !showCareerBox
               ? 'bg-accent-muted text-accent'
               : 'hover:bg-surface-hover text-text-secondary'
           }`}
           title="CareerBox"
         >
           <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-            activeView === 'careerbox' ? 'bg-accent/20' : 'bg-surface-hover'
+            activeView === 'careerbox' && !showCareerBox ? 'bg-accent/20' : 'bg-surface-hover'
           }`}>
-            <Monitor className={`w-4 h-4 ${activeView === 'careerbox' ? 'text-accent' : 'text-text-secondary'}`} />
+            <Monitor className={`w-4 h-4 ${activeView === 'careerbox' && !showCareerBox ? 'text-accent' : 'text-text-secondary'}`} />
           </div>
           {!sidebarCollapsed && (
-            <span className={`font-medium ${activeView === 'careerbox' ? 'text-accent' : 'text-text-primary'}`}>CareerBox</span>
+            <span className={`font-medium ${activeView === 'careerbox' && !showCareerBox ? 'text-accent' : 'text-text-primary'}`}>CareerBox</span>
+          )}
+        </button>
+
+        {/* Navi Labs Button */}
+        <button
+          onClick={() => { setActiveView('careerbox'); setShowCareerBox(true); setActiveSession(null); }}
+          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors ${
+            sidebarCollapsed ? 'justify-center' : ''
+          } ${
+            showCareerBox
+              ? 'bg-violet-500/10 text-violet-400'
+              : 'hover:bg-surface-hover text-text-secondary'
+          }`}
+          title={t('sidebar.careerBox')}
+        >
+          <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+            showCareerBox ? 'bg-violet-500/20' : 'bg-surface-hover'
+          }`}>
+            <GraduationCap className={`w-4 h-4 ${showCareerBox ? 'text-violet-400' : 'text-text-muted'}`} />
+          </div>
+          {!sidebarCollapsed && (
+            <span className={`font-medium ${showCareerBox ? 'text-violet-400' : 'text-text-primary'}`}>{t('sidebar.careerBox')}</span>
           )}
         </button>
 
@@ -344,6 +369,7 @@ export function Sidebar() {
             </span>
           )}
         </button>
+
       </div>
       
       {/* Sessions List */}

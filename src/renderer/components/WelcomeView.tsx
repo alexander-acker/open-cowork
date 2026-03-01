@@ -37,6 +37,7 @@ export function WelcomeView() {
     handleFileSelect, removeImage, removeFile, clearAll,
   } = useFileAttachments(isElectron);
   const workingDir = useAppStore((state) => state.workingDir);
+  const setShowCareerBox = useAppStore((state) => state.setShowCareerBox);
 
   const handleSelectFolder = async () => {
     await changeWorkingDir();
@@ -100,7 +101,11 @@ export function WelcomeView() {
     }
   };
 
-  const handleTagClick = (tag: string, tagPrompt: string) => {
+  const handleTagClick = (tag: string, tagPrompt: string, isCareerBox?: boolean) => {
+    if (isCareerBox) {
+      setShowCareerBox(true);
+      return;
+    }
     setSelectedTag(tag === selectedTag ? null : tag);
     if (tag !== selectedTag) {
       setPrompt(tagPrompt);
@@ -176,6 +181,7 @@ export function WelcomeView() {
   ];
 
   const quickTags = [
+    { id: 'career-box', label: t('career.openCareerBox'), icon: GraduationCap, prompt: '', isCareerBox: true },
     { id: 'create', label: t('welcome.createFile'), icon: FileText, prompt: 'Create a new file for me' },
     { id: 'crunch', label: t('welcome.crunchData'), icon: BarChart3, prompt: 'Help me analyze and process data' },
     { id: 'organize', label: t('welcome.organizeFiles'), icon: FolderOpen, prompt: 'Help me organize my files and folders' },

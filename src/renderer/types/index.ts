@@ -575,6 +575,50 @@ export interface ApiTestResult {
   details?: string;
 }
 
+// Career Box types
+export type CareerTrack =
+  | 'fullstack'
+  | 'cloud-devops'
+  | 'ai-ml'
+  | 'data-engineering'
+  | 'cybersecurity'
+  | 'genai';
+
+export type LabDifficulty = 'beginner' | 'intermediate' | 'advanced';
+export type LabStatus = 'locked' | 'available' | 'in_progress' | 'completed';
+
+export interface CareerProfile {
+  targetRole: string;
+  currentLevel: LabDifficulty;
+  selectedTracks: CareerTrack[];
+  completedLabs: string[];
+  totalXP: number;
+}
+
+export interface NaviLab {
+  id: string;
+  title: string;
+  description: string;
+  track: CareerTrack;
+  difficulty: LabDifficulty;
+  status: LabStatus;
+  estimatedMinutes: number;
+  xpReward: number;
+  skills: string[];
+  demandScore: number; // 1-100 market demand
+  naviPrompt: string; // prompt Navi sends to start the lab
+  prerequisites: string[];
+}
+
+export interface TrackInfo {
+  id: CareerTrack;
+  name: string;
+  description: string;
+  icon: string;
+  color: string;
+  demandTrend: 'rising' | 'stable' | 'hot';
+}
+
 // MCP types
 export interface MCPServerInfo {
   id: string;

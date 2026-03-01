@@ -5,6 +5,7 @@ import { Sidebar } from './components/Sidebar';
 import { ChatView } from './components/ChatView';
 import { WelcomeView } from './components/WelcomeView';
 import { CareerBoxView } from './components/CareerBoxView';
+import { CareerBox } from './components/CareerBox';
 import { VMView } from './components/VMView';
 import { CoworkDesktopView } from './components/CoworkDesktopView';
 import { PermissionDialog } from './components/PermissionDialog';
@@ -34,6 +35,7 @@ function App() {
     activeView,
     coraChatOpen,
     showOnboardingModal,
+    showCareerBox,
     setCoraChatOpen,
     setShowConfigModal,
     setShowOnboardingModal,
@@ -122,7 +124,7 @@ function App() {
           ) : activeView === 'cowork-desktop' ? (
             <CoworkDesktopView />
           ) : activeView === 'careerbox' ? (
-            <CareerBoxView />
+            showCareerBox ? <CareerBox /> : <CareerBoxView />
           ) : activeSessionId ? (
             <ChatView />
           ) : (

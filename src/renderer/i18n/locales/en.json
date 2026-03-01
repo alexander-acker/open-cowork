@@ -272,7 +272,8 @@
     "apiNotConfigured": "API Not Configured",
     "user": "User",
     "newTask": "New task",
-    "deleteSession": "Delete {{title}}"
+    "deleteSession": "Delete {{title}}",
+    "careerBox": "Navi Labs"
   },
   "chat": {
     "sendMessage": "Send message",
@@ -306,6 +307,27 @@
     "callNumber": "Call #{{number}}",
     "input": "Input:",
     "output": "Output:"
+  },
+  "career": {
+    "title": "Career Box",
+    "subtitle": "Navi Labs — interactive skill-building for high-demand tech roles",
+    "labsCompleted": "Labs Completed",
+    "totalXP": "Total XP",
+    "focus": "Focus",
+    "techJobs": "High-Demand Tech",
+    "allTracks": "All Tracks",
+    "highDemand": "High Demand",
+    "startLab": "Start Lab",
+    "continueLab": "Continue",
+    "completed": "Completed",
+    "locked": "Prerequisites required",
+    "noLabs": "No labs available for this track",
+    "openCareerBox": "Career Box",
+    "difficulty": {
+      "beginner": "Beginner",
+      "intermediate": "Intermediate",
+      "advanced": "Advanced"
+    }
   },
   "messageCard": {
     "request": "Request",
