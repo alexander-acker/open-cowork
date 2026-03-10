@@ -136,27 +136,32 @@ export class VirtualBoxBackend implements VMBackend {
     const vmName = config.name;
 
     // Validate VM name to prevent VBoxManage issues with special characters
-    if (!/^[a-zA-Z0-9 _-]+$/.test(vmName) || vmName.length === 0 || vmName.length > 255) {
-      return { success: false, error: 'Invalid VM name. Use only letters, numbers, spaces, dashes, and underscores (max 255 chars).' };
+    if (!/^[a-zA-Z0-9 ._()-]+$/.test(vmName) || vmName.length === 0 || vmName.length > 255) {
+      return { success: false, error: 'Invalid VM name. Use only letters, numbers, spaces, dots, dashes, underscores, and parentheses (max 255 chars).' };
     }
 
     const { cpuCount, memoryMb, diskSizeGb, vramMb = 128, enableEFI = true } = config.resources;
     const osType = config.backendVmId || 'Ubuntu_64'; // overridden by caller
 
+    log('[VBox] createVM starting:', { vmName, osType, isoPath, cpuCount, memoryMb, diskSizeGb, vramMb, enableEFI });
+
     try {
       // 1. Create and register the VM
-      log('[VBox] Creating VM:', vmName);
+      log('[VBox] Step 1/5: createvm --name', vmName, '--ostype', osType);
       const { stdout: createOut } = await this.vbox(
         'createvm', '--name', vmName, '--ostype', osType, '--register',
       );
+      log('[VBox] Step 1/5 done. Output:', createOut.trim());
 
       // Extract settings file path to determine VM folder
       const settingsMatch = createOut.match(/Settings file:\s*'(.+)'/);
       const vmFolder = settingsMatch
         ? path.dirname(settingsMatch[1])
         : undefined;
+      log('[VBox] VM folder:', vmFolder || 'UNKNOWN (no settings path in output)');
 
       // 2. Configure hardware
+      log('[VBox] Step 2/5: modifyvm (hardware config)');
       const modifyArgs = [
         'modifyvm', vmName,
         '--cpus', String(cpuCount),
@@ -172,43 +177,54 @@ export class VirtualBoxBackend implements VMBackend {
         modifyArgs.push('--firmware', 'efi');
       }
       await this.vbox(...modifyArgs);
+      log('[VBox] Step 2/5 done.');
 
       // 3. Create virtual disk
       const diskPath = vmFolder
         ? path.join(vmFolder, `${vmName}.vdi`)
         : `${vmName}.vdi`;
       const diskSizeMb = diskSizeGb * 1024;
+      log('[VBox] Step 3/5: createmedium disk:', diskPath, 'size:', diskSizeMb, 'MB');
       await this.vbox(
         'createmedium', 'disk',
         '--filename', diskPath,
         '--size', String(diskSizeMb),
         '--format', 'VDI',
       );
+      log('[VBox] Step 3/5 done.');
 
       // 4. Add SATA controller and attach disk + ISO
+      log('[VBox] Step 4/5: storagectl + storageattach (disk + ISO)');
       await this.vbox(
         'storagectl', vmName,
         '--name', 'SATA', '--add', 'sata', '--controller', 'IntelAhci',
       );
+      log('[VBox] Step 4a: SATA controller added');
       await this.vbox(
         'storageattach', vmName,
         '--storagectl', 'SATA', '--port', '0', '--device', '0',
         '--type', 'hdd', '--medium', diskPath,
       );
+      log('[VBox] Step 4b: disk attached');
       await this.vbox(
         'storageattach', vmName,
         '--storagectl', 'SATA', '--port', '1', '--device', '0',
         '--type', 'dvddrive', '--medium', isoPath,
       );
+      log('[VBox] Step 4c: ISO attached');
 
       // 5. Set boot order: DVD first (for initial install), then disk
+      log('[VBox] Step 5/5: boot order');
       await this.vbox('modifyvm', vmName, '--boot1', 'dvd', '--boot2', 'disk', '--boot3', 'none');
+      log('[VBox] Step 5/5 done.');
 
       log('[VBox] VM created successfully:', vmName);
       return { success: true };
     } catch (error) {
       const msg = error instanceof Error ? error.message : String(error);
-      logError('[VBox] Failed to create VM:', msg);
+      const stack = error instanceof Error ? error.stack : '';
+      logError('[VBox] Failed to create VM at step:', msg);
+      logError('[VBox] Stack:', stack);
       // Attempt cleanup on failure
       try { await this.vbox('unregistervm', vmName, '--delete'); } catch { /* ignore */ }
       return { success: false, error: msg };

@@ -53,6 +53,7 @@ export function VMCreateWizard({ onClose, onCreated }: VMCreateWizardProps) {
   });
   const [creating, setCreating] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const [importing, setImporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Load available images
@@ -109,6 +110,8 @@ export function VMCreateWizard({ onClose, onCreated }: VMCreateWizardProps) {
   };
 
   const importISO = async () => {
+    setImporting(true);
+    setError(null);
     try {
       const image = await window.electronAPI.vm.importISO();
       if (image) {
@@ -118,6 +121,8 @@ export function VMCreateWizard({ onClose, onCreated }: VMCreateWizardProps) {
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Import failed');
+    } finally {
+      setImporting(false);
     }
   };
 
@@ -276,19 +281,26 @@ export function VMCreateWizard({ onClose, onCreated }: VMCreateWizardProps) {
                 {/* Import custom ISO */}
                 <button
                   onClick={importISO}
+                  disabled={importing}
                   className={`w-full flex items-start gap-4 p-5 rounded-xl border border-dashed transition-all text-left ${
                     selectedImage?.distro === 'custom'
                       ? 'border-accent bg-accent/5 ring-1 ring-accent/30'
                       : 'border-border hover:border-border-hover'
-                  }`}
+                  } disabled:opacity-60`}
                 >
                   <div className="flex-1">
                     <p className="font-semibold text-text-primary">Use Your Own</p>
                     <p className="text-sm text-text-secondary mt-1">
-                      Upload any ISO image — bring your preferred OS or a custom build.
+                      {importing
+                        ? 'Copying ISO into cache, this may take a moment...'
+                        : 'Upload any ISO image — bring your preferred OS or a custom build.'}
                     </p>
                   </div>
-                  <Upload className="w-5 h-5 text-text-secondary mt-1 shrink-0" />
+                  {importing ? (
+                    <Loader2 className="w-5 h-5 text-accent animate-spin mt-1 shrink-0" />
+                  ) : (
+                    <Upload className="w-5 h-5 text-text-secondary mt-1 shrink-0" />
+                  )}
                 </button>
               </div>
             );

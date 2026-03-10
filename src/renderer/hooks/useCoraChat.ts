@@ -44,11 +44,11 @@ export function useCoraChat() {
         text,
         threadId,
         (msg: CoraChatMessage) => {
-          if (msg.type === 'content' && msg.content) {
+          if (msg.type === 'message' && msg.content) {
             accumulated += msg.content;
             setPartial(accumulated);
           } else if (msg.type === 'error') {
-            setError(msg.error || 'Unknown error from Cora');
+            setError(msg.content || msg.error || 'Unknown error from Cora');
             setIsStreaming(false);
           } else if (msg.type === 'done') {
             // Stream finished – commit accumulated text as assistant message

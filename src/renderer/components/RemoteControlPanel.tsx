@@ -8,7 +8,6 @@ import { useTranslation } from 'react-i18next';
 import {
   Power,
   Users,
-  MessageSquare,
   Check,
   Trash2,
   Shield,
@@ -261,7 +260,7 @@ export function RemoteControlPanel() {
   }
 
   // 
-  const isFeishuConfigured = !!(feishuAppId && feishuAppSecret);
+  const isFeishuConfigured = true; // Feishu config removed, always evaluate to true to allow gateway toggle
   const isConnectionConfigured = useLongConnection || (tunnelEnabled && ngrokAuthToken) || tunnelStatus?.connected;
 
   if (isLoading) {
@@ -382,9 +381,8 @@ export function RemoteControlPanel() {
       {/*  */}
       <div className="flex items-center gap-2 p-1 bg-surface rounded-xl">
         {[
-          { id: 'feishu', label: '', icon: MessageSquare, done: isFeishuConfigured },
-          { id: 'connection', label: '', icon: Link2, done: isConnectionConfigured },
-          { id: 'advanced', label: '', icon: Settings2, done: true },
+          { id: 'connection', label: 'Connection', icon: Link2, done: isConnectionConfigured },
+          { id: 'advanced', label: 'Advanced', icon: Settings2, done: true },
         ].map((step) => (
           <button
             key={step.id}

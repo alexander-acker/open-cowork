@@ -26,6 +26,15 @@ import { getVMHealthMonitor } from './vm/vm-health-monitor';
 import { shutdownSandbox } from './sandbox/sandbox-adapter';
 import { registerAllHandlers } from './ipc/registry';
 
+// Catch crashes so they end up in the log file instead of silently killing the app
+process.on('uncaughtException', (error) => {
+  logError('[CRASH] Uncaught exception:', error.message);
+  logError('[CRASH] Stack:', error.stack);
+});
+process.on('unhandledRejection', (reason) => {
+  logError('[CRASH] Unhandled rejection:', reason instanceof Error ? reason.stack : reason);
+});
+
 // Current working directory (persisted between sessions)
 let currentWorkingDir: string | null = null;
 

@@ -100,13 +100,19 @@ export class VMImageRegistry {
   }
 
   /** Register a user-imported ISO */
-  importISO(filePath: string, name: string): OSImage {
+  async importISO(filePath: string, name: string): Promise<OSImage> {
     const id = `custom-${Date.now()}`;
-    const stats = fs.statSync(filePath);
-    const targetPath = path.join(this.imageCacheDir, `${id}.iso`);
+    log('[ImageRegistry] importISO start:', { filePath, name, id });
 
-    // Copy into cache
-    fs.copyFileSync(filePath, targetPath);
+    const stats = await fs.promises.stat(filePath);
+    log('[ImageRegistry] ISO file size:', (stats.size / (1024 * 1024)).toFixed(1), 'MB');
+
+    const targetPath = path.join(this.imageCacheDir, `${id}.iso`);
+    log('[ImageRegistry] Copying ISO to cache:', targetPath);
+
+    // Copy into cache (async to avoid freezing the main process on large ISOs)
+    await fs.promises.copyFile(filePath, targetPath);
+    log('[ImageRegistry] ISO copy complete');
 
     const image: OSImage = {
       id,
@@ -123,6 +129,7 @@ export class VMImageRegistry {
     };
 
     this.customImages.set(id, { image, filePath: targetPath });
+    log('[ImageRegistry] importISO complete, image registered:', id);
 
     return image;
   }

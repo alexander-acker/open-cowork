@@ -168,9 +168,10 @@ export interface DeviceTokenVerification {
 }
 
 export interface CoraChatMessage {
-  type: 'content' | 'error' | 'done';
+  type: 'message' | 'tool_call' | 'tool_result' | 'interrupt' | 'error' | 'done';
   content?: string;
   error?: string;
+  data?: any;
 }
 
 // ─── API Client ─────────────────────────────────────────────────────────────

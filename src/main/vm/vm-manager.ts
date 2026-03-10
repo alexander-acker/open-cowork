@@ -95,19 +95,25 @@ export class VMManager {
     osImageId: string,
     resources: VMResourceConfig,
   ): Promise<VMOperationResult & { vmId?: string }> {
+    log('[VMManager] createVM called:', { name, osImageId, resources });
+
     if (!this.backend || !this.imageRegistry) {
+      logError('[VMManager] No backend or image registry available');
       return { success: false, error: 'VM backend not available' };
     }
 
     // Resolve the ISO path
     const isoPath = this.imageRegistry.getImagePath(osImageId);
+    log('[VMManager] Resolved ISO path:', isoPath);
     if (!isoPath) {
+      logError('[VMManager] ISO not found for imageId:', osImageId);
       return { success: false, error: 'OS image not downloaded yet' };
     }
 
     // Look up vboxOsType from catalog
     const catalog = this.imageRegistry.getAvailableCatalog();
     const osImage = catalog.find(img => img.id === osImageId);
+    log('[VMManager] OS image from catalog:', osImage ? { id: osImage.id, name: osImage.name, vboxOsType: osImage.vboxOsType } : 'NOT FOUND');
 
     const id = uuidv4();
     const now = new Date().toISOString();
@@ -122,13 +128,16 @@ export class VMManager {
       backendVmId: osImage?.vboxOsType || 'Linux_64',
     };
 
+    log('[VMManager] Calling backend.createVM with config:', { id: config.id, name: config.name, backendVmId: config.backendVmId });
     const result = await this.backend.createVM(config, isoPath);
+    log('[VMManager] backend.createVM result:', result);
+
     if (result.success) {
-      // Persist config after successful creation
       vmConfigStore.addVM(config);
       log('[VMManager] Created VM:', name, id);
       return { ...result, vmId: id };
     }
+    logError('[VMManager] createVM failed:', result.error);
     return result;
   }
 
@@ -412,8 +421,8 @@ export class VMManager {
     return this.imageRegistry?.isDownloaded(imageId) || false;
   }
 
-  importISO(filePath: string, name: string): OSImage | null {
-    return this.imageRegistry?.importISO(filePath, name) || null;
+  async importISO(filePath: string, name: string): Promise<OSImage | null> {
+    return (await this.imageRegistry?.importISO(filePath, name)) || null;
   }
 
   // ── Computer Use ────────────────────────────────────────────────

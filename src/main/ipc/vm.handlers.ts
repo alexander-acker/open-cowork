@@ -3,7 +3,7 @@ import { vmManager } from '../vm/vm-manager';
 import { getVMBootstrap } from '../vm/vm-bootstrap';
 import { getVMHealthMonitor } from '../vm/vm-health-monitor';
 import { getVMGuestProvisioner } from '../vm/vm-guest-provisioner';
-import { logError } from '../utils/logger';
+import { log, logError } from '../utils/logger';
 import type { VMResourceConfig } from '../vm/types';
 import type { HandlerDependencies } from './types';
 
@@ -45,10 +45,13 @@ export function registerVMHandlers(deps: HandlerDependencies) {
   });
 
   ipcMain.handle('vm.createVM', async (_event, params: { name: string; osImageId: string; resources: VMResourceConfig }) => {
+    log('[VM IPC] createVM called with:', JSON.stringify({ name: params.name, osImageId: params.osImageId, resources: params.resources }));
     try {
-      return await vmManager.createVM(params.name, params.osImageId, params.resources);
+      const result = await vmManager.createVM(params.name, params.osImageId, params.resources);
+      log('[VM IPC] createVM result:', JSON.stringify(result));
+      return result;
     } catch (error) {
-      logError('[VM] Error creating VM:', error);
+      logError('[VM IPC] createVM threw:', error instanceof Error ? error.stack : error);
       return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
     }
   });
@@ -179,6 +182,7 @@ export function registerVMHandlers(deps: HandlerDependencies) {
   });
 
   ipcMain.handle('vm.importISO', async () => {
+    log('[VM IPC] importISO dialog opening...');
     try {
       const mainWindow = deps.getMainWindow();
       const result = await dialog.showOpenDialog(mainWindow!, {
@@ -189,14 +193,22 @@ export function registerVMHandlers(deps: HandlerDependencies) {
         ],
         properties: ['openFile'],
       });
-      if (result.canceled || result.filePaths.length === 0) return null;
+      if (result.canceled || result.filePaths.length === 0) {
+        log('[VM IPC] importISO dialog cancelled');
+        return null;
+      }
 
       const filePath = result.filePaths[0];
-      const fileName = filePath.split(/[\\/]/).pop() || 'Custom ISO';
-      const image = vmManager.importISO(filePath, fileName);
+      const rawName = filePath.split(/[\\/]/).pop() || 'Custom ISO';
+      // Strip .iso extension, then sanitize to VBoxManage-safe characters
+      const stripped = rawName.replace(/\.iso$/i, '') || 'Custom ISO';
+      const fileName = stripped.replace(/[^a-zA-Z0-9 ._-]/g, '').trim() || 'Custom ISO';
+      log('[VM IPC] importISO selected:', filePath, '→ name:', fileName);
+      const image = await vmManager.importISO(filePath, fileName);
+      log('[VM IPC] importISO result:', JSON.stringify(image));
       return image;
     } catch (error) {
-      logError('[VM] Error importing ISO:', error);
+      logError('[VM IPC] importISO threw:', error instanceof Error ? error.stack : error);
       return null;
     }
   });

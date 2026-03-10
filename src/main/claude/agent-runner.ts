@@ -717,7 +717,8 @@ export class ClaudeAgentRunner {
               arg.includes('{SOFTWARE_DEV_SERVER_PATH}') ||
               arg.includes('{GUI_OPERATE_SERVER_PATH}') ||
               arg.includes('{SKILLCEPTION_SERVER_PATH}') ||
-              arg.includes('{CAREER_TOOLS_SERVER_PATH}')
+              arg.includes('{CAREER_TOOLS_SERVER_PATH}') ||
+              arg.includes('{PINCHTAB_SERVER_PATH}')
             );
 
             if (hasPlaceholders) {
@@ -731,6 +732,8 @@ export class ClaudeAgentRunner {
                 presetKey = 'skillception';
               } else if (config.name === 'Career_Tools' || config.name === 'Career Tools') {
                 presetKey = 'career-tools';
+              } else if (config.name === 'Pinchtab') {
+                presetKey = 'pinchtab';
               }
               
               if (presetKey) {
@@ -763,55 +766,66 @@ export class ClaudeAgentRunner {
         log('[ClaudeAgentRunner] Final mcpServers config:', JSON.stringify(mcpServers, null, 2));
       }
 
-      // ── Auto-inject Skillception MCP server (always available) ──────────
-      if (!mcpServers['Skillception']) {
-        try {
-          const { mcpConfigStore: skillMcpStore } = await import('../mcp/mcp-config-store');
-          const skillPreset = skillMcpStore.createFromPreset('skillception', true);
-          if (skillPreset && skillPreset.args && skillPreset.args.length > 0) {
-            const skillServerPath = skillPreset.args[0];
-            if (fs.existsSync(skillServerPath)) {
-              // Resolve bundled node path for the Skillception server process
-              const skillNodePaths = (() => {
-                const platform = process.platform;
-                const arch = process.arch;
-                let resPath: string;
-                if (process.env.NODE_ENV === 'development') {
-                  resPath = path.join(__dirname, '..', '..', 'resources', 'node', `${platform}-${arch}`);
-                } else {
-                  resPath = path.join(process.resourcesPath, 'node');
-                }
-                const binDir = platform === 'win32' ? resPath : path.join(resPath, 'bin');
-                const nodeExe = platform === 'win32' ? 'node.exe' : 'node';
-                const nodePath = path.join(binDir, nodeExe);
-                return fs.existsSync(nodePath) ? { node: nodePath, binDir } : null;
-              })();
-
-              const skillCommand = skillNodePaths ? skillNodePaths.node : 'node';
-              const skillTreeDir = path.join(app.getPath('userData'), 'navi');
-              const skillTreePath = path.join(skillTreeDir, 'skill-tree.json');
-              const skillEnv: Record<string, string> = {
-                NAVI_SKILL_TREE_PATH: skillTreePath,
-              };
-              if (skillNodePaths) {
-                skillEnv.PATH = `${skillNodePaths.binDir}${path.delimiter}${process.env.PATH || ''}`;
-              }
-              mcpServers['Skillception'] = {
-                type: 'stdio',
-                command: skillCommand,
-                args: [skillServerPath],
-                env: skillEnv,
-              };
-              log('[ClaudeAgentRunner] Auto-injected Skillception MCP server');
-              log(`[ClaudeAgentRunner]   Skill tree: ${skillTreePath}`);
-            } else {
-              logWarn(`[ClaudeAgentRunner] Skillception server not found at: ${skillServerPath}`);
-            }
-          }
-        } catch (e) {
-          logWarn('[ClaudeAgentRunner] Failed to auto-inject Skillception MCP server:', e);
+      // ── Helper: resolve bundled node binary path ─────────────────────
+      const resolveBundledNode = (): { command: string; env: Record<string, string> } => {
+        const platform = process.platform;
+        const arch = process.arch;
+        let resPath: string;
+        if (process.env.NODE_ENV === 'development') {
+          resPath = path.join(__dirname, '..', '..', 'resources', 'node', `${platform}-${arch}`);
+        } else {
+          resPath = path.join(process.resourcesPath, 'node');
         }
-      }
+        const binDir = platform === 'win32' ? resPath : path.join(resPath, 'bin');
+        const nodeExe = platform === 'win32' ? 'node.exe' : 'node';
+        const nodePath = path.join(binDir, nodeExe);
+        if (fs.existsSync(nodePath)) {
+          return {
+            command: nodePath,
+            env: { PATH: `${binDir}${path.delimiter}${process.env.PATH || ''}` },
+          };
+        }
+        return { command: 'node', env: {} };
+      };
+
+      /** Auto-inject an MCP server from a preset if not already present. */
+      const autoInjectMcpServer = async (
+        serverName: string,
+        presetKey: string,
+        extraEnv?: Record<string, string>,
+      ): Promise<void> => {
+        if (mcpServers[serverName]) return;
+        try {
+          const { mcpConfigStore: store } = await import('../mcp/mcp-config-store');
+          const preset = store.createFromPreset(presetKey, true);
+          if (!preset?.args?.length) return;
+          const serverPath = preset.args[0];
+          if (!fs.existsSync(serverPath)) {
+            logWarn(`[ClaudeAgentRunner] ${serverName} server not found at: ${serverPath}`);
+            return;
+          }
+          const node = resolveBundledNode();
+          mcpServers[serverName] = {
+            type: 'stdio',
+            command: node.command,
+            args: [serverPath],
+            env: { ...node.env, ...extraEnv },
+          };
+          log(`[ClaudeAgentRunner] Auto-injected ${serverName} MCP server`);
+        } catch (e) {
+          logWarn(`[ClaudeAgentRunner] Failed to auto-inject ${serverName} MCP server:`, e);
+        }
+      };
+
+      // ── Auto-inject Skillception MCP server (always available) ──────────
+      const skillTreeDir = path.join(app.getPath('userData'), 'navi');
+      const skillTreePath = path.join(skillTreeDir, 'skill-tree.json');
+      await autoInjectMcpServer('Skillception', 'skillception', {
+        NAVI_SKILL_TREE_PATH: skillTreePath,
+      });
+
+      // ── Auto-inject Pinchtab browser MCP server (always available) ────
+      await autoInjectMcpServer('Pinchtab', 'pinchtab');
       logTiming('after building MCP servers config');
       
       // Get enableThinking from config

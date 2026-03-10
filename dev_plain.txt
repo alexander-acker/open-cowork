@@ -1,0 +1,112 @@
+
+> coeadapt@3.1.0 dev
+> npm run download:node && npm run prepare:python && npm run build:wsl-agent && npm run build:lima-agent && npm run build:mcp && vite
+
+
+> coeadapt@3.1.0 download:node
+> node scripts/download-node.js
+
+Downloading Node.js binaries...
+
+Already exists: C:\dev3\open-cowork\resources\node\darwin-arm64
+Already exists: C:\dev3\open-cowork\resources\node\darwin-x64
+Already exists: C:\dev3\open-cowork\resources\node\win32-x64
+Already exists: C:\dev3\open-cowork\resources\node\linux-x64
+
+✓ Node.js binaries ready (4/4)
+
+> coeadapt@3.1.0 prepare:python
+> node scripts/prepare-python.js
+
+[prepare:python] Non-macOS platform, skipping.
+
+> coeadapt@3.1.0 build:wsl-agent
+> tsc -p src/main/sandbox/wsl-agent/tsconfig.json
+
+
+> coeadapt@3.1.0 build:lima-agent
+> tsc -p src/main/sandbox/lima-agent/tsconfig.json
+
+
+> coeadapt@3.1.0 build:mcp
+> node scripts/bundle-mcp.js
+
+🔨 Bundling MCP Servers with esbuild...
+
+📦 Bundling GUI Automation MCP Server...
+   Entry: gui-operate-server.ts
+   Output: dist-mcp/gui-operate-server.js
+
+  dist-mcp\gui-operate-server.js  2.1mb
+
+Done in 163ms
+   ✅ Success! Size: 2099.96 KB
+   📚 Bundled 31 unique packages
+
+📦 Bundling Software Development MCP Server...
+   Entry: software-dev-server-example.ts
+   Output: dist-mcp/software-dev-server-example.js
+
+  dist-mcp\software-dev-server-example.js  2.0mb
+
+Done in 96ms
+   ✅ Success! Size: 2031.32 KB
+   📚 Bundled 31 unique packages
+
+📦 Bundling Career Tools MCP Server (Coeadapt)...
+   Entry: career-tools-server.ts
+   Output: dist-mcp/career-tools-server.js
+
+  dist-mcp\career-tools-server.js  699.6kb
+
+Done in 55ms
+   ✅ Success! Size: 699.56 KB
+   📚 Bundled 11 unique packages
+
+📦 Bundling Skillception Skill-Tree MCP Server (Navi)...
+   Entry: skillception-server.ts
+   Output: dist-mcp/skillception-server.js
+
+  dist-mcp\skillception-server.js  712.7kb
+
+Done in 56ms
+   ✅ Success! Size: 712.73 KB
+   📚 Bundled 11 unique packages
+
+📦 Bundling Pinchtab Browser Automation MCP Server...
+   Entry: pinchtab-server.ts
+   Output: dist-mcp/pinchtab-server.js
+
+  dist-mcp\pinchtab-server.js  707.9kb
+
+Done in 72ms
+   ✅ Success! Size: 707.85 KB
+   📚 Bundled 11 unique packages
+
+✅ All MCP servers bundled successfully!
+
+Port 5173 is in use, trying another one...
+
+  [32m[1mVITE[22m v7.3.1[39m  [2mready in [0m[1m519[22m[2m[0m ms[22m
+
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://localhost:[1m5174[22m/[39m
+[2m  [32m➜[39m  [1mNetwork[22m[2m: use [22m[1m--host[22m[2m to expose[22m
+[36mvite v7.3.1 [32mbuilding client environment for development...[36m[39m
+[36m
+watching for file changes...[39m
+[36mvite v7.3.1 [32mbuilding client environment for development...[36m[39m
+[36m
+watching for file changes...[39m
+[36m
+build started...[39m
+[36m
+build started...[39m
+transforming...
+transforming...
+[32m✓[39m 1 modules transformed.
+rendering chunks...
+computing gzip size...
+[2mdist-electron/preload/[22m[36mindex.js  [39m[1m[2m12.66 kB[22m[1m[22m[2m │ gzip: 2.47 kB[22m
+[36mbuilt in 1630ms.[39m
+
+EXIT CODE: null

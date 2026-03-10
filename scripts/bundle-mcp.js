@@ -35,6 +35,11 @@ const servers = [
     entry: 'skillception-server.ts',
     description: 'Skillception Skill-Tree MCP Server (Navi)',
   },
+  {
+    name: 'pinchtab-server',
+    entry: 'pinchtab-server.ts',
+    description: 'Pinchtab Browser Automation MCP Server',
+  },
 ];
 
 async function bundleMCPServers() {

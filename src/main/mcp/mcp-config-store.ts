@@ -96,6 +96,15 @@ export const MCP_SERVER_PRESETS: Record<string, Omit<MCPServerConfig, 'id' | 'en
       VM_CONFIG_PATH: 'Path to VM configuration store (auto-managed)',
     },
   },
+  pinchtab: {
+    name: 'Pinchtab',
+    type: 'stdio',
+    command: 'node',
+    args: ['{PINCHTAB_SERVER_PATH}'], // Path will be resolved at runtime
+    env: {},
+    requiresEnv: [],
+    envDescription: {},
+  },
 };
 
 /**
@@ -271,6 +280,13 @@ class MCPConfigStore {
   }
 
   /**
+   * Get the path to the Pinchtab MCP server file
+   */
+  private getPinchtabServerPath(): string {
+    return this.getMcpServerPath('pinchtab-server.ts');
+  }
+
+  /**
    * Create a server config from a preset
    */
   createFromPreset(presetKey: string, enabled: boolean = false): MCPServerConfig | null {
@@ -305,6 +321,10 @@ class MCPConfigStore {
           // VM Management server path
           if (arg === '{VM_MANAGEMENT_SERVER_PATH}') {
             return this.getVMManagementServerPath();
+          }
+          // Pinchtab server path
+          if (arg === '{PINCHTAB_SERVER_PATH}') {
+            return this.getPinchtabServerPath();
           }
           return arg;
         }),
