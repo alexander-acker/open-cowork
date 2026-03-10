@@ -89,6 +89,14 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.invoke('config.test', config),
   },
 
+  // Onboarding methods
+  onboarding: {
+    getWorkEnvironment: (): Promise<'real-machine' | 'vm' | null> =>
+      ipcRenderer.invoke('onboarding.getWorkEnvironment'),
+    setWorkEnvironment: (env: 'real-machine' | 'vm'): Promise<{ success: boolean }> =>
+      ipcRenderer.invoke('onboarding.setWorkEnvironment', env),
+  },
+
   // Window control methods
   window: {
     minimize: () => ipcRenderer.send('window.minimize'),
@@ -305,6 +313,10 @@ declare global {
         save: (config: Partial<AppConfig>) => Promise<{ success: boolean; config: AppConfig }>;
         isConfigured: () => Promise<boolean>;
         test: (config: ApiTestInput) => Promise<ApiTestResult>;
+      };
+      onboarding: {
+        getWorkEnvironment: () => Promise<'real-machine' | 'vm' | null>;
+        setWorkEnvironment: (env: 'real-machine' | 'vm') => Promise<{ success: boolean }>;
       };
       window: {
         minimize: () => void;

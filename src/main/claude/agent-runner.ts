@@ -151,6 +151,7 @@ export class ClaudeAgentRunner {
   private activeControllers: Map<string, AbortController> = new Map();
   private sdkSessions: Map<string, string> = new Map(); // sessionId -> sdk session_id
   private pendingQuestions: Map<string, PendingQuestion> = new Map(); // questionId -> resolver
+  private localDesktopAdapter: any = null; // LocalDesktopAdapter instance (lazy-loaded)
 
   /**
    * Clear SDK session cache for a session
@@ -1289,7 +1290,81 @@ Then follow the workflow described in that file.
         contextualPrompt = `${historyItems.join('\n')}\nHuman: ${prompt}\nAssistant:`;
         log('[ClaudeAgentRunner] Including', historyItems.length, 'history messages in context');
       }
-      
+
+      // ── Computer Use delegation ──────────────────────────────────
+      // Check workEnvironment to determine if we should delegate to ComputerUseSession
+      const { configStore: configStoreRef } = await import('../config/config-store');
+      const workEnvironment = configStoreRef.get('workEnvironment');
+      if (workEnvironment === 'real-machine') {
+        try {
+          const { LocalDesktopAdapter } = await import('../vm/local-desktop-adapter');
+          const { ComputerUseSession } = await import('../vm/computer-use-session');
+
+          if (!this.localDesktopAdapter) {
+            this.localDesktopAdapter = new LocalDesktopAdapter();
+          }
+          log('[ClaudeAgentRunner] Delegating to ComputerUseSession for local desktop');
+          logTiming('ComputerUseSession local desktop delegation start');
+
+          const apiKey = process.env.ANTHROPIC_API_KEY || '';
+          const cuModel =
+            process.env.ANTHROPIC_DEFAULT_SONNET_MODEL ||
+            process.env.CLAUDE_MODEL ||
+            'claude-sonnet-4-5-20250929';
+
+          const saveMsgWrapper = (sid: string, role: 'user' | 'assistant' | 'system', content: any[]) => {
+            if (this.saveMessage) {
+              this.saveMessage({
+                id: `cu-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+                sessionId: sid,
+                role,
+                content,
+                timestamp: Date.now(),
+              });
+            }
+          };
+
+          const cuSession = new ComputerUseSession({
+            adapter: this.localDesktopAdapter,
+            apiKey,
+            model: cuModel,
+            maxLoops: 15,
+            sendToRenderer: this.sendToRenderer,
+            saveMessage: saveMsgWrapper,
+            sessionId: session.id,
+          });
+
+          controller.signal.addEventListener('abort', () => cuSession.abort());
+
+          const platform =
+            process.platform === 'win32'
+              ? 'Windows'
+              : process.platform === 'darwin'
+                ? 'macOS'
+                : 'Linux';
+          const cuSystemPrompt = `You are Navi, the user's career navigation agent inside Coeadapt. You have computer tool access on the user's real ${platform} desktop. Use the computer tool to take screenshots, click, type, scroll, and use keyboard shortcuts. Describe what you see and explain your actions. Be careful — this is the user's real machine. Do not type passwords or interact with system settings unless explicitly asked.`;
+
+          try {
+            await cuSession.run(contextualPrompt, cuSystemPrompt);
+          } catch (error) {
+            const msg = error instanceof Error ? error.message : String(error);
+            logError('[ClaudeAgentRunner] ComputerUseSession (local) error:', msg);
+            this.sendToRenderer({
+              type: 'session.status',
+              payload: { sessionId: session.id, status: 'error', error: msg },
+            });
+          }
+
+          logTiming('ComputerUseSession local desktop delegation complete');
+          this.activeControllers.delete(session.id);
+          return;
+        } catch (importErr) {
+          logError('[ClaudeAgentRunner] Failed to load computer use modules:', importErr);
+          // Fall through to normal SDK path
+        }
+      }
+      // ── End Computer Use delegation ──────────────────────────────
+
       logTiming('before building MCP servers config');
       
       // Build MCP servers configuration for SDK

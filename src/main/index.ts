@@ -636,6 +636,18 @@ ipcMain.handle('config.test', async (_event, payload: ApiTestInput): Promise<Api
   }
 });
 
+// Onboarding IPC handlers
+ipcMain.handle('onboarding.getWorkEnvironment', () => {
+  return configStore.get('workEnvironment');
+});
+
+ipcMain.handle('onboarding.setWorkEnvironment', (_event, env: 'real-machine' | 'vm') => {
+  configStore.set('workEnvironment', env);
+  configStore.set('workEnvironmentVersion', 2);
+  log('[Onboarding] Work environment set to:', env);
+  return { success: true };
+});
+
 // MCP Server IPC handlers
 ipcMain.handle('mcp.getServers', () => {
   try {

@@ -10,6 +10,7 @@ import { ConfigModal } from './components/ConfigModal';
 import { Titlebar } from './components/Titlebar';
 import { SandboxSetupDialog } from './components/SandboxSetupDialog';
 import { SandboxSyncToast } from './components/SandboxSyncToast';
+import { OnboardingModal } from './components/OnboardingModal';
 import type { AppConfig } from './types';
 
 // Check if running in Electron
@@ -26,10 +27,13 @@ function App() {
     sandboxSetupProgress,
     isSandboxSetupComplete,
     sandboxSyncStatus,
+    showOnboardingModal,
     setShowConfigModal,
     setIsConfigured,
     setAppConfig,
     setSandboxSetupComplete,
+    setWorkEnvironment,
+    setShowOnboardingModal,
   } = useAppStore();
   const { listSessions, isElectron } = useIPC();
   const initialized = useRef(false);
@@ -52,6 +56,19 @@ function App() {
       document.documentElement.classList.remove('light');
     }
   }, [settings.theme]);
+
+  // Check onboarding state
+  useEffect(() => {
+    if (!isConfigured || !isElectronEnv) return;
+
+    window.electronAPI.onboarding.getWorkEnvironment().then((env) => {
+      if (env === null) {
+        setShowOnboardingModal(true);
+      } else {
+        setWorkEnvironment(env);
+      }
+    });
+  }, [isConfigured, setShowOnboardingModal, setWorkEnvironment]);
 
   // Handle config save
   const handleConfigSave = useCallback(async (newConfig: Partial<AppConfig>) => {
@@ -123,6 +140,11 @@ function App() {
       {/* Sandbox Sync Toast */}
       <SandboxSyncToast status={sandboxSyncStatus} />
       
+      {/* Onboarding Modal */}
+      {showOnboardingModal && (
+        <OnboardingModal onComplete={() => setShowOnboardingModal(false)} />
+      )}
+
       {/* AskUserQuestion is now rendered inline in MessageCard */}
     </div>
   );

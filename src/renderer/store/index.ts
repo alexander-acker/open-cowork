@@ -44,7 +44,11 @@ interface AppState {
   
   // Sandbox sync (per-session)
   sandboxSyncStatus: SandboxSyncStatus | null;
-  
+
+  // Onboarding / work environment
+  workEnvironment: 'real-machine' | 'vm' | null;
+  showOnboardingModal: boolean;
+
   // Actions
   setSessions: (sessions: Session[]) => void;
   addSession: (session: Session) => void;
@@ -87,9 +91,13 @@ interface AppState {
   // Sandbox setup actions
   setSandboxSetupProgress: (progress: SandboxSetupProgress | null) => void;
   setSandboxSetupComplete: (complete: boolean) => void;
-  
+
   // Sandbox sync actions
   setSandboxSyncStatus: (status: SandboxSyncStatus | null) => void;
+
+  // Onboarding actions
+  setWorkEnvironment: (env: 'real-machine' | 'vm' | null) => void;
+  setShowOnboardingModal: (show: boolean) => void;
 }
 
 const defaultSettings: Settings = {
@@ -142,6 +150,8 @@ export const useAppStore = create<AppState>((set) => ({
   sandboxSetupProgress: null,
   isSandboxSetupComplete: false,
   sandboxSyncStatus: null,
+  workEnvironment: null,
+  showOnboardingModal: false,
   
   // Session actions
   setSessions: (sessions) => set({ sessions }),
@@ -423,4 +433,8 @@ export const useAppStore = create<AppState>((set) => ({
   
   // Sandbox sync actions
   setSandboxSyncStatus: (status) => set({ sandboxSyncStatus: status }),
+
+  // Onboarding actions
+  setWorkEnvironment: (env) => set({ workEnvironment: env }),
+  setShowOnboardingModal: (show) => set({ showOnboardingModal: show }),
 }));

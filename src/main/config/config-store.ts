@@ -36,6 +36,10 @@ export interface AppConfig {
   
   // First run flag
   isConfigured: boolean;
+
+  // Work environment preference (onboarding)
+  workEnvironment: 'real-machine' | 'vm' | null;
+  workEnvironmentVersion: number;
 }
 
 const defaultConfig: AppConfig = {
@@ -51,6 +55,8 @@ const defaultConfig: AppConfig = {
   sandboxEnabled: false,
   enableThinking: false,
   isConfigured: false,
+  workEnvironment: null,
+  workEnvironmentVersion: 0,
 };
 
 // Provider presets
@@ -139,6 +145,8 @@ class ConfigStore {
       sandboxEnabled: this.store.get('sandboxEnabled'),
       enableThinking: this.store.get('enableThinking'),
       isConfigured: this.store.get('isConfigured'),
+      workEnvironment: this.store.get('workEnvironment'),
+      workEnvironmentVersion: this.store.get('workEnvironmentVersion'),
     };
   }
 
