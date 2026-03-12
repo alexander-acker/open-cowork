@@ -42,6 +42,15 @@ export class VNCPortManager {
     throw new Error(`No available VNC ports in range ${this.portRangeStart}-${this.portRangeEnd}`);
   }
 
+  /**
+   * Register a known port for a VM without allocating it from the pool.
+   * Used when reconnecting to a VM whose VRDE port was already assigned in a previous session.
+   */
+  registerPort(vmId: string, port: number): void {
+    this.allocatedPorts.set(vmId, port);
+    log('[VNCPortManager] Registered port', port, 'for VM:', vmId);
+  }
+
   /** Release a port allocated to a VM */
   releasePort(vmId: string): void {
     const port = this.allocatedPorts.get(vmId);

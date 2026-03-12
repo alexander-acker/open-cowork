@@ -6,6 +6,9 @@
  * and health monitoring for the Cowork Desktop feature.
  */
 
+import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import { log, logError } from '../utils/logger';
 import { vmConfigStore } from './vm-config-store';
@@ -15,6 +18,7 @@ import { VirtualBoxBackend } from './backends/virtualbox-backend';
 import { VNCPortManager } from './vnc-port-manager';
 import { VNCWebSocketProxy } from './vnc-ws-proxy';
 import { ComputerUseAdapter } from './computer-use-adapter';
+import { ComputerUseSession } from './computer-use-session';
 import type {
   VMConfig,
   VMStatus,
@@ -47,6 +51,11 @@ export class VMManager {
   // Computer Use
   private computerUseAdapters: Map<string, ComputerUseAdapter> = new Map();
   private computerUseEnabledSet: Set<string> = new Set();
+  private activeComputerUseSessions: Map<string, ComputerUseSession> = new Map();
+
+  // Screenshot polling
+  private screenshotTimers: Map<string, ReturnType<typeof setInterval>> = new Map();
+  private latestScreenshots: Map<string, string> = new Map();
 
   // Guard against concurrent cleanup
   private cleaningUp: Set<string> = new Set();
@@ -80,6 +89,22 @@ export class VMManager {
       this.backendStatus = status;
       this.imageRegistry = new VMImageRegistry();
       log('[VMManager] Initialised with VirtualBox', status.version);
+
+      // Auto-reconnect VNC for any VMs that are already running
+      const configs = vmConfigStore.getVMs();
+      for (const config of configs) {
+        try {
+          const vmStatus = await this.backend.getVMStatus(config.name);
+          if (vmStatus.state === 'running') {
+            log('[VMManager] Auto-reconnecting VNC for running VM:', config.name);
+            await this.reconnectVNC(config.id).catch(err => {
+              logError('[VMManager] Auto-reconnect failed for VM:', config.name, err);
+            });
+          }
+        } catch {
+          // Best effort — don't block startup
+        }
+      }
     } else {
       this.backendStatus = status;
       log('[VMManager] No backend available:', status.error);
@@ -191,7 +216,10 @@ export class VMManager {
       // 6. Start health monitor
       this.startHealthMonitor(vmId, config.name);
 
-      // 7. Emit state change event
+      // 7. Start screenshot polling
+      this.startScreenshotPolling(vmId);
+
+      // 8. Emit state change event
       this.lastKnownStates.set(vmId, 'running');
       this.emitEvent({
         type: 'vm.stateChanged',
@@ -231,24 +259,27 @@ export class VMManager {
       // 1. Stop health monitor
       this.stopHealthMonitor(vmId);
 
-      // 2. Stop WebSocket proxy
+      // 2. Stop screenshot polling
+      this.stopScreenshotPolling(vmId);
+
+      // 3. Stop WebSocket proxy
       const proxy = this.vncProxies.get(vmId);
       if (proxy) {
         await proxy.stop();
         this.vncProxies.delete(vmId);
       }
 
-      // 3. Release VNC port
+      // 4. Release VNC port
       this.portManager.releasePort(vmId);
 
-      // 4. Remove computer use adapter
+      // 5. Remove computer use adapter
       this.computerUseAdapters.delete(vmId);
       this.computerUseEnabledSet.delete(vmId);
 
-      // 5. Stop VM (graceful ACPI)
+      // 6. Stop VM (graceful ACPI)
       const result = await this.backend.stopVM(config.name);
 
-      // 6. Emit state change
+      // 7. Emit state change
       this.lastKnownStates.set(vmId, 'stopping');
       this.emitEvent({
         type: 'vm.stateChanged',
@@ -260,6 +291,76 @@ export class VMManager {
     } catch (error) {
       const msg = error instanceof Error ? error.message : String(error);
       logError('[VMManager] stopWithVNC failed:', msg);
+      return { success: false, error: msg };
+    }
+  }
+
+  /**
+   * Reconnect VNC WebSocket proxy for a VM that is already running.
+   * Called on app restart to reattach to VMs that survived the previous session.
+   */
+  async reconnectVNC(vmId: string): Promise<VMOperationResult & { wsUrl?: string }> {
+    if (!this.backend || !this.vboxBackend) {
+      return { success: false, error: 'VM backend not available' };
+    }
+
+    const config = vmConfigStore.getVM(vmId);
+    if (!config) return { success: false, error: 'VM not found' };
+
+    try {
+      // 1. Verify the VM is actually running
+      const status = await this.backend.getVMStatus(config.name);
+      if (status.state !== 'running') {
+        return { success: false, error: `VM is not running (state: ${status.state})` };
+      }
+
+      // 2. If a proxy already exists and is running, just return the existing URL
+      const existingProxy = this.vncProxies.get(vmId);
+      if (existingProxy && existingProxy.isRunning()) {
+        const wsUrl = existingProxy.getWebSocketUrl();
+        log('[VMManager] VNC proxy already running for VM:', config.name, 'wsUrl:', wsUrl);
+        return { success: true, wsUrl };
+      }
+
+      // 3. Discover the active VRDE port
+      const vrdePort = await this.vboxBackend.getVRDEPort(config.name);
+      if (!vrdePort) {
+        return { success: false, error: 'Could not determine VRDE port for running VM' };
+      }
+
+      // 4. Create and start a new WebSocket proxy against the discovered port
+      // Register the port with the port manager so it can be released later
+      this.portManager.registerPort(vmId, vrdePort);
+      const proxy = new VNCWebSocketProxy(vrdePort);
+      await proxy.start();
+      this.vncProxies.set(vmId, proxy);
+      const wsUrl = proxy.getWebSocketUrl();
+
+      // 5. Start health monitor
+      this.startHealthMonitor(vmId, config.name);
+
+      // 6. Start screenshot polling
+      this.startScreenshotPolling(vmId);
+
+      // 7. Emit state change event
+      this.lastKnownStates.set(vmId, 'running');
+      this.emitEvent({
+        type: 'vm.stateChanged',
+        payload: { vmId, state: 'running', wsUrl },
+      });
+
+      log('[VMManager] Reconnected VNC for VM:', config.name, 'vrdePort:', vrdePort, 'wsUrl:', wsUrl);
+      return { success: true, wsUrl };
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : String(error);
+      logError('[VMManager] reconnectVNC failed for VM:', config.name, msg);
+      // Cleanup on failure
+      const proxy = this.vncProxies.get(vmId);
+      if (proxy) {
+        try { await proxy.stop(); } catch { /* ignore */ }
+        this.vncProxies.delete(vmId);
+      }
+      this.portManager.releasePort(vmId);
       return { success: false, error: msg };
     }
   }
@@ -476,6 +577,68 @@ export class VMManager {
     return adapter.execute(action as any);
   }
 
+  // ── ComputerUseSession Tracking ─────────────────────────────────
+
+  setActiveComputerUseSession(vmId: string, session: ComputerUseSession | null): void {
+    if (session) {
+      this.activeComputerUseSessions.set(vmId, session);
+    } else {
+      this.activeComputerUseSessions.delete(vmId);
+    }
+  }
+
+  getActiveComputerUseSession(vmId: string): ComputerUseSession | null {
+    return this.activeComputerUseSessions.get(vmId) ?? null;
+  }
+
+  // ── Screenshot Polling ──────────────────────────────────────────
+
+  startScreenshotPolling(vmId: string): void {
+    // Clear any existing timer first
+    this.stopScreenshotPolling(vmId);
+
+    const config = vmConfigStore.getVM(vmId);
+    if (!config || !this.vboxBackend) return;
+
+    const timer = setInterval(async () => {
+      if (!this.vboxBackend) return;
+      const tmpFile = path.join(os.tmpdir(), `vm-screenshot-${vmId}.png`);
+      try {
+        const result = await this.vboxBackend.screenshotVM(config.name, tmpFile);
+        if (!result.success) return;
+
+        const data = await fs.promises.readFile(tmpFile);
+        const base64Png = data.toString('base64');
+        this.latestScreenshots.set(vmId, base64Png);
+        this.emitEvent({
+          type: 'vm.screenshot',
+          payload: { vmId, base64Png },
+        });
+      } catch {
+        // Ignore transient screenshot failures
+      } finally {
+        // Best-effort temp file cleanup
+        fs.promises.unlink(tmpFile).catch(() => {});
+      }
+    }, 30000);
+
+    this.screenshotTimers.set(vmId, timer);
+    log('[VMManager] Screenshot polling started for VM:', config.name);
+  }
+
+  stopScreenshotPolling(vmId: string): void {
+    const timer = this.screenshotTimers.get(vmId);
+    if (timer) {
+      clearInterval(timer);
+      this.screenshotTimers.delete(vmId);
+    }
+    this.latestScreenshots.delete(vmId);
+  }
+
+  getLatestScreenshot(vmId: string): string | null {
+    return this.latestScreenshots.get(vmId) ?? null;
+  }
+
   // ── Health Monitor ──────────────────────────────────────────────
 
   private startHealthMonitor(vmId: string, vmName: string): void {
@@ -503,6 +666,7 @@ export class VMManager {
             if (this.cleaningUp.has(vmId)) return;
             this.cleaningUp.add(vmId);
             this.stopHealthMonitor(vmId);
+            this.stopScreenshotPolling(vmId);
             try {
               const proxy = this.vncProxies.get(vmId);
               if (proxy) {
@@ -602,6 +766,11 @@ export class VMManager {
       this.stopHealthMonitor(vmId);
     }
 
+    // Stop all screenshot pollers
+    for (const vmId of Array.from(this.screenshotTimers.keys())) {
+      this.stopScreenshotPolling(vmId);
+    }
+
     // Stop all WebSocket proxies
     for (const [vmId, proxy] of this.vncProxies) {
       try {
@@ -614,6 +783,7 @@ export class VMManager {
     this.portManager.releaseAll();
     this.computerUseAdapters.clear();
     this.computerUseEnabledSet.clear();
+    this.activeComputerUseSessions.clear();
 
     // Disconnect guest Navi clients
     for (const [vmId, client] of this.naviClients) {

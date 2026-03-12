@@ -488,6 +488,7 @@ export type ServerEvent =
   | { type: 'vm.stateChanged'; payload: { vmId: string; state: VMState; wsUrl?: string } }
   | { type: 'vm.healthEvent'; payload: VMHealthEvent }
   | { type: 'vm.provisionProgress'; payload: GuestProvisionProgress }
+  | { type: 'vm.screenshot'; payload: { vmId: string; base64Png: string } }
   | { type: 'error'; payload: { message: string } };
 
 // Settings types
