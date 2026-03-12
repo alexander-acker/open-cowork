@@ -179,7 +179,7 @@ export interface Session {
   updatedAt: number;
 }
 
-export type SessionStatus = 'idle' | 'running' | 'completed' | 'error';
+export type SessionStatus = 'idle' | 'running' | 'completed' | 'error' | 'cancelled';
 
 export interface MountedPath {
   virtual: string;
@@ -489,6 +489,7 @@ export type ServerEvent =
   | { type: 'vm.healthEvent'; payload: VMHealthEvent }
   | { type: 'vm.provisionProgress'; payload: GuestProvisionProgress }
   | { type: 'vm.screenshot'; payload: { vmId: string; base64Png: string } }
+  | { type: 'vm.interactiveMode'; payload: { vmId: string; enabled: boolean } }
   | { type: 'error'; payload: { message: string } };
 
 // Settings types
