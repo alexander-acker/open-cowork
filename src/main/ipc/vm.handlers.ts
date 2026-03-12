@@ -346,4 +346,59 @@ export function registerVMHandlers(deps: HandlerDependencies) {
       return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
     }
   });
+
+  ipcMain.handle('vm.checkVRDE', async () => {
+    try {
+      const vbox = vmManager.getVBoxBackend();
+      if (!vbox) return { installed: false, error: 'VirtualBox backend not available' };
+      return await vbox.checkVRDE();
+    } catch (error) {
+      logError('[VM] Error checking VRDE:', error);
+      return { installed: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
+  });
+
+  ipcMain.handle('vm.reconnectVNC', async (_event, vmId: string) => {
+    try {
+      return await vmManager.reconnectVNC(vmId);
+    } catch (error) {
+      logError('[VM] Error reconnecting VNC:', error);
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
+  });
+
+  ipcMain.handle('vm.getLatestScreenshot', (_event, vmId: string) => {
+    return vmManager.getLatestScreenshot(vmId);
+  });
+
+  ipcMain.handle('vm.cancelComputerUse', (_event, vmId: string) => {
+    try {
+      const session = vmManager.getActiveComputerUseSession(vmId);
+      if (session) {
+        session.abort();
+      }
+      const sessionId = session ? (session as any).sessionId : vmId;
+      deps.sendToRenderer({
+        type: 'session.status',
+        payload: { sessionId, status: 'cancelled' },
+      });
+      return { success: true };
+    } catch (error) {
+      logError('[VM] Error cancelling computer use:', error);
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
+  });
+
+  ipcMain.handle('vm.disableInteractiveMode', (_event, vmId: string) => {
+    try {
+      deps.sendToRenderer({
+        type: 'vm.interactiveMode',
+        payload: { vmId, enabled: false },
+      });
+      return { success: true };
+    } catch (error) {
+      logError('[VM] Error disabling interactive mode:', error);
+      return { success: false };
+    }
+  });
 }
