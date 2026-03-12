@@ -85,6 +85,7 @@ export function VMView() {
   const setActiveCoworkVM = useAppStore((s) => s.setActiveCoworkVM);
   const setCoworkVNCUrl = useAppStore((s) => s.setCoworkVNCUrl);
   const setActiveView = useAppStore((s) => s.setActiveView);
+  const latestVMScreenshots = useAppStore((s) => s.latestVMScreenshots);
 
   const [loading, setLoading] = useState(false);
   const [actionLabel, setActionLabel] = useState('');
@@ -430,6 +431,7 @@ export function VMView() {
           <div className="grid gap-4">
             {vmList.map((vm) => {
               const health = vmHealthSummaries.find(h => h.vmId === vm.id);
+              const screenshot = latestVMScreenshots?.get(vm.id);
               return (
                 <VMCard
                   key={vm.id}
@@ -437,6 +439,7 @@ export function VMView() {
                   health={health}
                   loading={loading}
                   provisionProgress={vmProvisionProgress?.vmId === vm.id ? vmProvisionProgress : null}
+                  screenshot={screenshot}
                   onStart={() => startVM(vm.id, vm.name)}
                   onStop={() => stopVM(vm.id)}
                   onForceStop={() => forceStopVM(vm.id)}
@@ -489,6 +492,7 @@ interface VMCardProps {
   health?: VMHealthSummary;
   loading: boolean;
   provisionProgress?: GuestProvisionProgress | null;
+  screenshot?: string;
   onStart: () => void;
   onStop: () => void;
   onForceStop: () => void;
@@ -503,7 +507,7 @@ interface VMCardProps {
   onConnectNavi: () => void;
 }
 
-function VMCard({ vm, health, loading, provisionProgress, onStart, onStop, onForceStop, onPause, onResume, onOpenDesktop, onOpenDisplayExternal, onDelete, onToggleAutoRestart, onModify, onProvision, onConnectNavi }: VMCardProps) {
+function VMCard({ vm, health, loading, provisionProgress, screenshot, onStart, onStop, onForceStop, onPause, onResume, onOpenDesktop, onOpenDisplayExternal, onDelete, onToggleAutoRestart, onModify, onProvision, onConnectNavi }: VMCardProps) {
   const [provisionStatus, setProvisionStatus] = useState<string | null>(null);
   const [showOverflow, setShowOverflow] = useState(false);
 
@@ -734,6 +738,18 @@ function VMCard({ vm, health, loading, provisionProgress, onStart, onStop, onFor
           )}
         </div>
       </div>
+
+      {/* Screenshot thumbnail for running VMs */}
+      {vm.state === 'running' && screenshot && (
+        <div className="mt-3">
+          <img
+            src={`data:image/png;base64,${screenshot}`}
+            alt={`${vm.name} screen`}
+            className="w-full rounded-lg border border-border object-cover"
+            style={{ maxHeight: '120px' }}
+          />
+        </div>
+      )}
     </div>
   );
 }
