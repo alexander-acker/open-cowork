@@ -47,7 +47,7 @@ export function VMCreateWizard({ onClose, onCreated }: VMCreateWizardProps) {
     cpuCount: 2,
     memoryMb: 4096,
     diskSizeGb: 25,
-    displayMode: 'separate_window',
+    displayMode: 'embedded',
     vramMb: 128,
     enableEFI: true,
   });
@@ -55,6 +55,7 @@ export function VMCreateWizard({ onClose, onCreated }: VMCreateWizardProps) {
   const [downloading, setDownloading] = useState(false);
   const [importing, setImporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [osFamily, setOsFamily] = useState<string>('other');
 
   // Load available images
   useEffect(() => {
@@ -113,7 +114,7 @@ export function VMCreateWizard({ onClose, onCreated }: VMCreateWizardProps) {
     setImporting(true);
     setError(null);
     try {
-      const image = await window.electronAPI.vm.importISO();
+      const image = await window.electronAPI.vm.importISO(osFamily);
       if (image) {
         setAvailableImages(prev => [...prev, image]);
         setDownloadedIds(prev => new Set([...prev, image.id]));
@@ -277,6 +278,23 @@ export function VMCreateWizard({ onClose, onCreated }: VMCreateWizardProps) {
                   altImg.name,
                   'A familiar Windows-like desktop. Lightweight, beginner-friendly, and polished.',
                 )}
+
+                {/* OS Family selector for custom ISO */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-text-primary">OS Family</label>
+                  <select
+                    value={osFamily}
+                    onChange={(e) => setOsFamily(e.target.value)}
+                    className="w-full px-3 py-2 bg-surface border border-border rounded-lg text-sm text-text-primary"
+                  >
+                    <option value="ubuntu-debian">Ubuntu / Debian</option>
+                    <option value="fedora-rhel">Fedora / RHEL</option>
+                    <option value="arch">Arch Linux</option>
+                    <option value="windows">Windows</option>
+                    <option value="other">Other Linux (default)</option>
+                  </select>
+                  <p className="text-xs text-text-muted">Helps configure optimal VM settings for your OS.</p>
+                </div>
 
                 {/* Import custom ISO */}
                 <button

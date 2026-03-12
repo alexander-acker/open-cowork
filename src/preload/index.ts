@@ -315,8 +315,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.invoke('vm.cancelDownload'),
     deleteImage: (imageId: string): Promise<{ success: boolean; error?: string }> =>
       ipcRenderer.invoke('vm.deleteImage', imageId),
-    importISO: (): Promise<any | null> =>
-      ipcRenderer.invoke('vm.importISO'),
+    importISO: (osFamily?: string): Promise<any | null> =>
+      ipcRenderer.invoke('vm.importISO', osFamily),
     // Cowork Desktop (VNC + Computer Use)
     startWithVNC: (vmId: string): Promise<{ success: boolean; wsUrl?: string; error?: string }> =>
       ipcRenderer.invoke('vm.startWithVNC', vmId),
@@ -592,7 +592,7 @@ declare global {
         downloadImage: (imageId: string) => Promise<{ success: boolean; path?: string; error?: string }>;
         cancelDownload: () => Promise<{ success: boolean }>;
         deleteImage: (imageId: string) => Promise<{ success: boolean; error?: string }>;
-        importISO: () => Promise<any | null>;
+        importISO: (osFamily?: string) => Promise<any | null>;
         // Cowork Desktop (VNC + Computer Use)
         startWithVNC: (vmId: string) => Promise<{ success: boolean; wsUrl?: string; error?: string }>;
         stopWithVNC: (vmId: string) => Promise<{ success: boolean; error?: string }>;
