@@ -33,17 +33,33 @@ export function useIPC() {
           store.setSessions(event.payload.sessions);
           break;
 
-        case 'session.status':
-          store.updateSession(event.payload.sessionId, {
-            status: event.payload.status,
-          });
-          if (event.payload.status !== 'running') {
+        case 'session.status': {
+          const { sessionId, status } = event.payload;
+          store.updateSession(sessionId, { status });
+          if (status !== 'running') {
             store.setLoading(false);
-            store.clearActiveTurn(event.payload.sessionId);
-            store.clearPendingTurns(event.payload.sessionId);
-            store.clearQueuedMessages(event.payload.sessionId);
+            store.clearActiveTurn(sessionId);
+            store.clearPendingTurns(sessionId);
+            store.clearQueuedMessages(sessionId);
+          }
+          // Track Navi agent working state per session/VM
+          if (status === 'running') {
+            store.setNaviAgentWorking(sessionId, true);
+          } else if (status === 'idle' || status === 'error' || status === 'cancelled') {
+            store.setNaviAgentWorking(sessionId, false);
+            // Notify user if they're not on the cowork-desktop view
+            const currentView = useAppStore.getState().activeView;
+            if (currentView !== 'cowork-desktop') {
+              if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+                new Notification(
+                  status === 'error' ? 'Navi needs your help' : 'Navi finished',
+                  { body: status === 'error' ? 'Something went wrong on the VM' : 'Task completed on the VM' },
+                );
+              }
+            }
           }
           break;
+        }
         
         case 'session.update':
           store.updateSession(event.payload.sessionId, event.payload.updates);
@@ -167,6 +183,18 @@ export function useIPC() {
           console.log('[useIPC] vm.provisionProgress:', event.payload.phase, event.payload.vmId);
           store.setVmProvisionProgress(event.payload);
           break;
+
+        case 'vm.screenshot': {
+          const { vmId, base64Png } = event.payload as { vmId: string; base64Png: string };
+          store.setVMScreenshot(vmId, base64Png);
+          break;
+        }
+
+        case 'vm.interactiveMode': {
+          const { vmId, enabled } = event.payload as { vmId: string; enabled: boolean };
+          store.setInteractiveMode(vmId, enabled);
+          break;
+        }
 
         case 'workdir.changed':
           console.log('[useIPC] workdir.changed received:', event.payload.path);
