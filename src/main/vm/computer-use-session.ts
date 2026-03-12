@@ -14,13 +14,14 @@ import { v4 as uuidv4 } from 'uuid';
 
 const MAX_TOOL_LOOPS = 25; // Safety limit for tool execution loops
 
-interface ComputerUseSessionOptions {
+export interface ComputerUseSessionOptions {
   adapter: ComputerUseAdapter;
   apiKey: string;
   model?: string;
   sendToRenderer: (event: ServerEvent) => void;
   saveMessage?: (message: Message) => void;
   sessionId: string;
+  vmId?: string; // For interactive mode events
 }
 
 export class ComputerUseSession {
@@ -31,6 +32,7 @@ export class ComputerUseSession {
   private saveMessage?: (message: Message) => void;
   private sessionId: string;
   private aborted = false;
+  private vmId: string;
 
   constructor(options: ComputerUseSessionOptions) {
     this.adapter = options.adapter;
@@ -39,6 +41,7 @@ export class ComputerUseSession {
     this.sendToRenderer = options.sendToRenderer;
     this.saveMessage = options.saveMessage;
     this.sessionId = options.sessionId;
+    this.vmId = options.vmId || '';
   }
 
   /** Abort the current session loop */
@@ -63,6 +66,22 @@ export class ComputerUseSession {
         display_width_px: displaySize.width,
         display_height_px: displaySize.height,
         display_number: 1,
+      },
+      {
+        type: 'custom' as any,
+        name: 'enable_user_input',
+        description:
+          'Temporarily grant the user direct keyboard/mouse access to the VM. Call this when the user needs to type sensitive input (passwords, 2FA codes) or when they explicitly ask to interact with the VM directly.',
+        input_schema: {
+          type: 'object' as const,
+          properties: {
+            reason: {
+              type: 'string',
+              description: 'Why the user needs direct input access',
+            },
+          },
+          required: ['reason'],
+        },
       },
     ];
 
@@ -157,6 +176,27 @@ export class ComputerUseSession {
           }
 
           if (block.type === 'tool_use') {
+            // Handle enable_user_input custom tool
+            if (block.name === 'enable_user_input') {
+              this.sendToRenderer({
+                type: 'vm.interactiveMode',
+                payload: { vmId: this.vmId, enabled: true },
+              });
+
+              toolResults.push({
+                type: 'tool_result',
+                tool_use_id: block.id,
+                content: [
+                  {
+                    type: 'text',
+                    text: 'User has been granted keyboard and mouse access. They can press Esc to release control.',
+                  },
+                ],
+              });
+
+              continue; // Skip adapter execution
+            }
+
             // Emit trace step for the tool call
             const traceStepId = uuidv4();
             this.sendToRenderer({
