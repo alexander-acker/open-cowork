@@ -181,7 +181,7 @@ export function registerVMHandlers(deps: HandlerDependencies) {
     }
   });
 
-  ipcMain.handle('vm.importISO', async () => {
+  ipcMain.handle('vm.importISO', async (_event, osFamily?: string) => {
     log('[VM IPC] importISO dialog opening...');
     try {
       const mainWindow = deps.getMainWindow();
@@ -203,8 +203,8 @@ export function registerVMHandlers(deps: HandlerDependencies) {
       // Strip .iso extension, then sanitize to VBoxManage-safe characters
       const stripped = rawName.replace(/\.iso$/i, '') || 'Custom ISO';
       const fileName = stripped.replace(/[^a-zA-Z0-9 ._-]/g, '').trim() || 'Custom ISO';
-      log('[VM IPC] importISO selected:', filePath, '→ name:', fileName);
-      const image = await vmManager.importISO(filePath, fileName);
+      log('[VM IPC] importISO selected:', filePath, '→ name:', fileName, 'osFamily:', osFamily);
+      const image = await vmManager.importISO(filePath, fileName, osFamily);
       log('[VM IPC] importISO result:', JSON.stringify(image));
       return image;
     } catch (error) {

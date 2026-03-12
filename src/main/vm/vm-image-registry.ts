@@ -100,9 +100,9 @@ export class VMImageRegistry {
   }
 
   /** Register a user-imported ISO */
-  async importISO(filePath: string, name: string): Promise<OSImage> {
+  async importISO(filePath: string, name: string, osFamily?: string): Promise<OSImage> {
     const id = `custom-${Date.now()}`;
-    log('[ImageRegistry] importISO start:', { filePath, name, id });
+    log('[ImageRegistry] importISO start:', { filePath, name, id, osFamily });
 
     const stats = await fs.promises.stat(filePath);
     log('[ImageRegistry] ISO file size:', (stats.size / (1024 * 1024)).toFixed(1), 'MB');
@@ -113,6 +113,15 @@ export class VMImageRegistry {
     // Copy into cache (async to avoid freezing the main process on large ISOs)
     await fs.promises.copyFile(filePath, targetPath);
     log('[ImageRegistry] ISO copy complete');
+
+    const osFamilyMap: Record<string, string> = {
+      'ubuntu-debian': 'Ubuntu_64',
+      'fedora-rhel': 'Fedora_64',
+      'arch': 'ArchLinux_64',
+      'windows': 'Windows11_64',
+      'other': 'Linux_64',
+    };
+    const vboxOsType = osFamilyMap[osFamily || 'other'] || 'Linux_64';
 
     const image: OSImage = {
       id,
@@ -125,7 +134,7 @@ export class VMImageRegistry {
       category: 'other',
       minDiskGb: 20,
       minMemoryMb: 2048,
-      vboxOsType: 'Linux_64',
+      vboxOsType,
     };
 
     this.customImages.set(id, { image, filePath: targetPath });

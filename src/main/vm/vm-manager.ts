@@ -535,8 +535,8 @@ export class VMManager {
     return this.imageRegistry?.isDownloaded(imageId) || false;
   }
 
-  async importISO(filePath: string, name: string): Promise<OSImage | null> {
-    return (await this.imageRegistry?.importISO(filePath, name)) || null;
+  async importISO(filePath: string, name: string, osFamily?: string): Promise<OSImage | null> {
+    return (await this.imageRegistry?.importISO(filePath, name, osFamily)) || null;
   }
 
   // ── Computer Use ────────────────────────────────────────────────
