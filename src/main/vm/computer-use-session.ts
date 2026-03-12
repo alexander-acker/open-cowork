@@ -49,6 +49,11 @@ export class ComputerUseSession {
     this.aborted = true;
   }
 
+  /** Get the session ID associated with this computer use session */
+  getSessionId(): string {
+    return this.sessionId;
+  }
+
   /** Run a computer use session with the given prompt and system instructions */
   async run(
     prompt: string,

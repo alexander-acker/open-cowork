@@ -250,6 +250,18 @@ export class VMManager {
     if (!this.backend) return { success: false, error: 'VM backend not available' };
     const config = vmConfigStore.getVM(vmId);
     if (!config) return { success: false, error: 'VM not found' };
+
+    // Clean up VNC infrastructure if present
+    this.stopScreenshotPolling(vmId);
+    this.stopHealthMonitor(vmId);
+    this.activeComputerUseSessions.delete(vmId);
+    const proxy = this.vncProxies.get(vmId);
+    if (proxy) {
+      proxy.stop();
+      this.vncProxies.delete(vmId);
+      this.portManager.releasePort(vmId);
+    }
+
     return this.backend.stopVM(config.name);
   }
 
@@ -276,9 +288,10 @@ export class VMManager {
       // 4. Release VNC port
       this.portManager.releasePort(vmId);
 
-      // 5. Remove computer use adapter
+      // 5. Remove computer use adapter and active session
       this.computerUseAdapters.delete(vmId);
       this.computerUseEnabledSet.delete(vmId);
+      this.activeComputerUseSessions.delete(vmId);
 
       // 6. Stop VM (graceful ACPI)
       const result = await this.backend.stopVM(config.name);
@@ -689,6 +702,7 @@ export class VMManager {
               this.portManager.releasePort(vmId);
               this.computerUseAdapters.delete(vmId);
               this.computerUseEnabledSet.delete(vmId);
+              this.activeComputerUseSessions.delete(vmId);
             } finally {
               this.cleaningUp.delete(vmId);
             }

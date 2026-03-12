@@ -377,7 +377,7 @@ export function registerVMHandlers(deps: HandlerDependencies) {
       if (session) {
         session.abort();
       }
-      const sessionId = session ? (session as any).sessionId : vmId;
+      const sessionId = session ? session.getSessionId() : vmId;
       deps.sendToRenderer({
         type: 'session.status',
         payload: { sessionId, status: 'cancelled' },

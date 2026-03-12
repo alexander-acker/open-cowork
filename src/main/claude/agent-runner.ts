@@ -1261,12 +1261,20 @@ Cowork mode includes **WebFetch** and **WebSearch** tools for retrieving web con
             sendToRenderer: this.sendToRenderer,
             saveMessage: this.saveMessage,
             sessionId: session.id,
+            vmId: computerUseVM.id,
           });
 
           // Register abort handler
           controller.signal.addEventListener('abort', () => cuSession.abort());
 
           const cuSystemPrompt = `You are Navi, the user's career navigation agent inside Coeadapt. You are currently co-working with the user inside a VirtualBox VM desktop (${computerUseVM.name}). Use the computer tool to interact with the desktop — take screenshots, click, type, scroll, and use keyboard shortcuts. Describe what you see and explain your actions as you work.`;
+
+          // Register session with VMManager and notify renderer
+          vmManager.setActiveComputerUseSession(computerUseVM.id, cuSession);
+          this.sendToRenderer({
+            type: 'vm.agentWorking',
+            payload: { vmId: computerUseVM.id, working: true },
+          });
 
           try {
             await cuSession.run(contextualPrompt, cuSystemPrompt);
@@ -1276,6 +1284,12 @@ Cowork mode includes **WebFetch** and **WebSearch** tools for retrieving web con
             this.sendToRenderer({
               type: 'session.status',
               payload: { sessionId: session.id, status: 'error', error: msg },
+            });
+          } finally {
+            vmManager.setActiveComputerUseSession(computerUseVM.id, null);
+            this.sendToRenderer({
+              type: 'vm.agentWorking',
+              payload: { vmId: computerUseVM.id, working: false },
             });
           }
 

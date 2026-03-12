@@ -42,22 +42,6 @@ export function useIPC() {
             store.clearPendingTurns(sessionId);
             store.clearQueuedMessages(sessionId);
           }
-          // Track Navi agent working state per session/VM
-          if (status === 'running') {
-            store.setNaviAgentWorking(sessionId, true);
-          } else if (status === 'idle' || status === 'error' || status === 'cancelled') {
-            store.setNaviAgentWorking(sessionId, false);
-            // Notify user if they're not on the cowork-desktop view
-            const currentView = useAppStore.getState().activeView;
-            if (currentView !== 'cowork-desktop') {
-              if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
-                new Notification(
-                  status === 'error' ? 'Navi needs your help' : 'Navi finished',
-                  { body: status === 'error' ? 'Something went wrong on the VM' : 'Task completed on the VM' },
-                );
-              }
-            }
-          }
           break;
         }
         
@@ -193,6 +177,12 @@ export function useIPC() {
         case 'vm.interactiveMode': {
           const { vmId, enabled } = event.payload as { vmId: string; enabled: boolean };
           store.setInteractiveMode(vmId, enabled);
+          break;
+        }
+
+        case 'vm.agentWorking': {
+          const { vmId, working } = event.payload as { vmId: string; working: boolean };
+          store.setNaviAgentWorking(vmId, working);
           break;
         }
 

@@ -490,6 +490,7 @@ export type ServerEvent =
   | { type: 'vm.provisionProgress'; payload: GuestProvisionProgress }
   | { type: 'vm.screenshot'; payload: { vmId: string; base64Png: string } }
   | { type: 'vm.interactiveMode'; payload: { vmId: string; enabled: boolean } }
+  | { type: 'vm.agentWorking'; payload: { vmId: string; working: boolean } }
   | { type: 'error'; payload: { message: string } };
 
 // Settings types
