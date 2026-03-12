@@ -414,6 +414,21 @@ export class VirtualBoxBackend implements VMBackend {
     }
   }
 
+  /** Check whether the VirtualBox Extension Pack (VRDE) is installed */
+  async checkVRDE(): Promise<{ installed: boolean; error?: string }> {
+    try {
+      const { stdout } = await this.vbox('list', 'extpacks');
+      // Output starts with "Extension Packs: N"
+      const match = stdout.match(/Extension Packs:\s*(\d+)/i);
+      const count = match ? parseInt(match[1], 10) : 0;
+      return { installed: count >= 1 };
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : String(error);
+      logError('[VBox] checkVRDE failed:', msg);
+      return { installed: false, error: msg };
+    }
+  }
+
   async screenshotVM(vmId: string, outputPath: string): Promise<VMOperationResult> {
     try {
       await this.vbox('controlvm', vmId, 'screenshotpng', outputPath);

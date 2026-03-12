@@ -77,3 +77,59 @@ describe('VirtualBoxBackend — graphics controller defaults', () => {
     expect(modifyArgs![idx + 1]).toBe('off');
   });
 });
+
+describe('VirtualBoxBackend — checkVRDE', () => {
+  let backend: VirtualBoxBackend;
+  let mockExecFile: ReturnType<typeof vi.fn>;
+
+  beforeEach(() => {
+    backend = new VirtualBoxBackend();
+    (backend as any).vboxManagePath = '/usr/bin/VBoxManage';
+    mockExecFile = vi.mocked(execFile);
+  });
+
+  it('returns installed: true when extpacks output shows count >= 1', async () => {
+    mockExecFile.mockImplementation((_cmd: string, args: string[], _opts: any, cb: any) => {
+      if (args[0] === 'list' && args[1] === 'extpacks') {
+        cb(null, 'Extension Packs: 1\nPack no. 0:   Oracle VM VirtualBox Extension Pack\nVersion:      7.0.14\n', '');
+      } else {
+        cb(null, '', '');
+      }
+      return {} as any;
+    });
+
+    const result = await backend.checkVRDE();
+    expect(result.installed).toBe(true);
+    expect(result.error).toBeUndefined();
+  });
+
+  it('returns installed: false when extpacks output shows count 0', async () => {
+    mockExecFile.mockImplementation((_cmd: string, args: string[], _opts: any, cb: any) => {
+      if (args[0] === 'list' && args[1] === 'extpacks') {
+        cb(null, 'Extension Packs: 0\n', '');
+      } else {
+        cb(null, '', '');
+      }
+      return {} as any;
+    });
+
+    const result = await backend.checkVRDE();
+    expect(result.installed).toBe(false);
+  });
+
+  it('returns installed: false with error message when VBoxManage fails', async () => {
+    mockExecFile.mockImplementation((_cmd: string, args: string[], _opts: any, cb: any) => {
+      if (args[0] === 'list' && args[1] === 'extpacks') {
+        cb(new Error('VBoxManage: command not found'), '', '');
+      } else {
+        cb(null, '', '');
+      }
+      return {} as any;
+    });
+
+    const result = await backend.checkVRDE();
+    expect(result.installed).toBe(false);
+    expect(result.error).toBeDefined();
+    expect(typeof result.error).toBe('string');
+  });
+});
