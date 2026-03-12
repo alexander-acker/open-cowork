@@ -47,6 +47,11 @@ export class VNCPortManager {
    * Used when reconnecting to a VM whose VRDE port was already assigned in a previous session.
    */
   registerPort(vmId: string, port: number): void {
+    for (const [existingVmId, existingPort] of this.allocatedPorts) {
+      if (existingPort === port && existingVmId !== vmId) {
+        log('[VNCPortManager] Warning: port', port, 'already in use by VM:', existingVmId);
+      }
+    }
     this.allocatedPorts.set(vmId, port);
     log('[VNCPortManager] Registered port', port, 'for VM:', vmId);
   }

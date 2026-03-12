@@ -35,6 +35,7 @@ import { getVMGuestProvisioner } from './vm-guest-provisioner';
 import { NaviGuestClient } from './navi-guest-client';
 
 const HEALTH_POLL_INTERVAL_MS = 5000;
+const SCREENSHOT_POLL_INTERVAL_MS = 30_000;
 
 export class VMManager {
   private backend: VMBackend | null = null;
@@ -59,6 +60,9 @@ export class VMManager {
 
   // Guard against concurrent cleanup
   private cleaningUp: Set<string> = new Set();
+
+  // Guard against concurrent VNC reconnect for the same VM
+  private reconnecting: Set<string> = new Set();
 
   // Guest Navi agent connections
   private naviClients: Map<string, NaviGuestClient> = new Map();
@@ -307,6 +311,10 @@ export class VMManager {
     const config = vmConfigStore.getVM(vmId);
     if (!config) return { success: false, error: 'VM not found' };
 
+    if (this.reconnecting.has(vmId)) {
+      return { success: false, error: 'Reconnect already in progress' };
+    }
+    this.reconnecting.add(vmId);
     try {
       // 1. Verify the VM is actually running
       const status = await this.backend.getVMStatus(config.name);
@@ -362,6 +370,8 @@ export class VMManager {
       }
       this.portManager.releasePort(vmId);
       return { success: false, error: msg };
+    } finally {
+      this.reconnecting.delete(vmId);
     }
   }
 
@@ -399,6 +409,8 @@ export class VMManager {
       this.vncProxies.delete(vmId);
       this.portManager.releasePort(vmId);
     }
+    this.stopScreenshotPolling(vmId);
+    this.activeComputerUseSessions.delete(vmId);
     this.computerUseAdapters.delete(vmId);
     this.computerUseEnabledSet.delete(vmId);
 
@@ -406,6 +418,7 @@ export class VMManager {
     if (result.success) {
       vmConfigStore.removeVM(vmId);
       this.lastKnownStates.delete(vmId);
+      this.latestScreenshots.delete(vmId);
     }
     return result;
   }
@@ -593,7 +606,7 @@ export class VMManager {
 
   // ── Screenshot Polling ──────────────────────────────────────────
 
-  startScreenshotPolling(vmId: string): void {
+  private startScreenshotPolling(vmId: string): void {
     // Clear any existing timer first
     this.stopScreenshotPolling(vmId);
 
@@ -620,19 +633,19 @@ export class VMManager {
         // Best-effort temp file cleanup
         fs.promises.unlink(tmpFile).catch(() => {});
       }
-    }, 30000);
+    }, SCREENSHOT_POLL_INTERVAL_MS);
 
     this.screenshotTimers.set(vmId, timer);
     log('[VMManager] Screenshot polling started for VM:', config.name);
   }
 
-  stopScreenshotPolling(vmId: string): void {
+  private stopScreenshotPolling(vmId: string): void {
     const timer = this.screenshotTimers.get(vmId);
     if (timer) {
       clearInterval(timer);
       this.screenshotTimers.delete(vmId);
     }
-    this.latestScreenshots.delete(vmId);
+    // Keep latestScreenshots — useful as last-known thumbnail
   }
 
   getLatestScreenshot(vmId: string): string | null {
