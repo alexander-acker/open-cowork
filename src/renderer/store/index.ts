@@ -75,6 +75,11 @@ interface AppState {
   coraChatOpen: boolean;
   coeadaptConnected: boolean;
 
+  // Per-VM agent / interactive state
+  naviAgentWorkingVMs: Set<string>;
+  interactiveModeVMs: Set<string>;
+  latestVMScreenshots: Map<string, string>;
+
   // Actions
   setSessions: (sessions: Session[]) => void;
   addSession: (session: Session) => void;
@@ -150,6 +155,11 @@ interface AppState {
   // Coeadapt / Cora actions
   setCoraChatOpen: (open: boolean) => void;
   setCoeadaptConnected: (connected: boolean) => void;
+
+  // Per-VM agent / interactive actions
+  setNaviAgentWorking: (vmId: string, working: boolean) => void;
+  setInteractiveMode: (vmId: string, enabled: boolean) => void;
+  setVMScreenshot: (vmId: string, base64: string) => void;
 }
 
 const defaultSettings: Settings = {
@@ -222,6 +232,9 @@ export const useAppStore = create<AppState>((set) => ({
   workEnvironment: null,
   coraChatOpen: false,
   coeadaptConnected: false,
+  naviAgentWorkingVMs: new Set<string>(),
+  interactiveModeVMs: new Set<string>(),
+  latestVMScreenshots: new Map<string, string>(),
 
   // Session actions
   setSessions: (sessions) => set({ sessions }),
@@ -538,4 +551,21 @@ export const useAppStore = create<AppState>((set) => ({
   // Coeadapt / Cora actions
   setCoraChatOpen: (open) => set({ coraChatOpen: open }),
   setCoeadaptConnected: (connected) => set({ coeadaptConnected: connected }),
+
+  // Per-VM agent / interactive actions
+  setNaviAgentWorking: (vmId, working) => set((state) => {
+    const next = new Set(state.naviAgentWorkingVMs);
+    if (working) next.add(vmId); else next.delete(vmId);
+    return { naviAgentWorkingVMs: next };
+  }),
+  setInteractiveMode: (vmId, enabled) => set((state) => {
+    const next = new Set(state.interactiveModeVMs);
+    if (enabled) next.add(vmId); else next.delete(vmId);
+    return { interactiveModeVMs: next };
+  }),
+  setVMScreenshot: (vmId, base64) => set((state) => {
+    const next = new Map(state.latestVMScreenshots);
+    next.set(vmId, base64);
+    return { latestVMScreenshots: next };
+  }),
 }));
