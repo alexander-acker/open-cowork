@@ -81,6 +81,10 @@ export function VMView() {
     setVmHealthSummaries,
   } = useAppStore();
 
+  const setActiveCoworkVM = useAppStore((s) => s.setActiveCoworkVM);
+  const setCoworkVNCUrl = useAppStore((s) => s.setCoworkVNCUrl);
+  const setActiveView = useAppStore((s) => s.setActiveView);
+
   const [loading, setLoading] = useState(false);
   const [actionLabel, setActionLabel] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -167,7 +171,37 @@ export function VMView() {
     }
   }, [refresh]);
 
-  const startVM = (vmId: string) => doAction('Starting VM...', () => window.electronAPI.vm.startVM(vmId));
+  const startVM = async (vmId: string, vmName: string) => {
+    setLoading(true);
+    setActionLabel('Starting VM...');
+    setError(null);
+    try {
+      // Check VRDE first
+      const vrdeCheck = await window.electronAPI.vm.checkVRDE();
+      if (!vrdeCheck.installed) {
+        setError('VirtualBox Extension Pack is required for embedded display. Please install it from virtualbox.org.');
+        setLoading(false);
+        setActionLabel('');
+        return;
+      }
+
+      const result = await window.electronAPI.vm.startWithVNC(vmId);
+      if (result.success && result.wsUrl) {
+        setActiveCoworkVM({ id: vmId, name: vmName, state: 'running' });
+        setCoworkVNCUrl(result.wsUrl);
+        setActiveView('cowork-desktop');
+      } else {
+        setError(result.error || 'Failed to start VM');
+      }
+      await refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to start VM');
+    } finally {
+      setLoading(false);
+      setActionLabel('');
+    }
+  };
+
   const stopVM = (vmId: string) => doAction('Stopping VM...', () => window.electronAPI.vm.stopVM(vmId));
   const forceStopVM = (vmId: string) => doAction('Force stopping VM...', () => window.electronAPI.vm.forceStopVM(vmId));
   const pauseVM = (vmId: string) => doAction('Pausing VM...', () => window.electronAPI.vm.pauseVM(vmId));
@@ -382,7 +416,7 @@ export function VMView() {
                   health={health}
                   loading={loading}
                   provisionProgress={vmProvisionProgress?.vmId === vm.id ? vmProvisionProgress : null}
-                  onStart={() => startVM(vm.id)}
+                  onStart={() => startVM(vm.id, vm.name)}
                   onStop={() => stopVM(vm.id)}
                   onForceStop={() => forceStopVM(vm.id)}
                   onPause={() => pauseVM(vm.id)}
