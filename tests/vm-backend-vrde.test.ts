@@ -195,4 +195,25 @@ describe('VirtualBoxBackend — getVRDEPort', () => {
     const port = await backend.getVRDEPort('NonExistentVM');
     expect(port).toBeNull();
   });
+
+  it('returns null when vrdeport=-1 (VRDE not yet active)', async () => {
+    const machineReadableOutput = [
+      'name="TestVM"',
+      'VMState="running"',
+      'vrde="on"',
+      'vrdeport=-1',
+    ].join('\n');
+
+    mockExecFile.mockImplementation((_cmd: string, args: string[], _opts: any, cb: any) => {
+      if (args[0] === 'showvminfo' && args.includes('--machinereadable')) {
+        cb(null, machineReadableOutput, '');
+      } else {
+        cb(null, '', '');
+      }
+      return {} as any;
+    });
+
+    const port = await backend.getVRDEPort('TestVM');
+    expect(port).toBeNull();
+  });
 });

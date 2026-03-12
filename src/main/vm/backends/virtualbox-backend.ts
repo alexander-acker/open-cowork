@@ -421,7 +421,12 @@ export class VirtualBoxBackend implements VMBackend {
       // Output starts with "Extension Packs: N"
       const match = stdout.match(/Extension Packs:\s*(\d+)/i);
       const count = match ? parseInt(match[1], 10) : 0;
-      return { installed: count >= 1 };
+      if (count < 1) return { installed: false };
+      // Verify the pack is the Oracle VirtualBox Extension Pack that provides VRDE
+      const hasVRDE =
+        stdout.includes('VRDE Module') ||
+        stdout.includes('Oracle VM VirtualBox Extension Pack');
+      return { installed: hasVRDE };
     } catch (error) {
       const msg = error instanceof Error ? error.message : String(error);
       logError('[VBox] checkVRDE failed:', msg);
@@ -438,7 +443,9 @@ export class VirtualBoxBackend implements VMBackend {
       if (portStr === undefined || portStr === '' || portStr === '-1') return null;
       const port = parseInt(portStr, 10);
       return isNaN(port) ? null : port;
-    } catch {
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : String(error);
+      logError('[VBox] getVRDEPort failed for', vmId, ':', msg);
       return null;
     }
   }
