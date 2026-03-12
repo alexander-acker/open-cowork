@@ -11,8 +11,6 @@ import {
   Monitor,
   Play,
   Square,
-  Eye,
-  EyeOff,
   Server,
   Plus,
   RefreshCw,
@@ -30,7 +28,13 @@ export function CoworkDesktopView() {
     setCoworkVNCUrl,
   } = useAppStore();
 
-  const [viewOnly, setViewOnly] = useState(false);
+  const naviAgentWorkingVMs = useAppStore((s) => s.naviAgentWorkingVMs);
+  const interactiveModeVMs = useAppStore((s) => s.interactiveModeVMs);
+
+  const vmId = activeCoworkVM?.id;
+  const isAgentWorking = vmId ? naviAgentWorkingVMs.has(vmId) : false;
+  const isInteractive = vmId ? interactiveModeVMs.has(vmId) : false;
+
   const [vncConnected, setVncConnected] = useState(false);
 
   // If we have an active VM and VNC URL, show the desktop
@@ -43,9 +47,14 @@ export function CoworkDesktopView() {
             wsUrl={coworkVNCUrl}
             vmId={activeCoworkVM.id}
             vmName={activeCoworkVM.name}
-            viewOnly={viewOnly}
+            isAgentWorking={isAgentWorking}
+            isInteractive={isInteractive}
             onConnect={() => setVncConnected(true)}
             onDisconnect={() => setVncConnected(false)}
+            onStopAgent={async () => {
+              const api = (window as any).electronAPI;
+              await api?.vm?.cancelComputerUse(activeCoworkVM.id);
+            }}
             className="h-full"
           />
         </div>
@@ -55,10 +64,8 @@ export function CoworkDesktopView() {
           vmId={activeCoworkVM.id}
           vmName={activeCoworkVM.name}
           vmState={activeCoworkVM.state}
-          viewOnly={viewOnly}
           computerUseEnabled={coworkComputerUseEnabled}
           vncConnected={vncConnected}
-          onToggleViewOnly={() => setViewOnly(!viewOnly)}
           onToggleComputerUse={async () => {
             const api = (window as any).electronAPI;
             const newEnabled = !coworkComputerUseEnabled;
@@ -87,35 +94,21 @@ interface ControlBarProps {
   vmId: string;
   vmName: string;
   vmState: string;
-  viewOnly: boolean;
   computerUseEnabled: boolean;
   vncConnected: boolean;
-  onToggleViewOnly: () => void;
   onToggleComputerUse: () => void;
   onStop: () => void;
 }
 
 function ControlBar({
-  viewOnly,
   computerUseEnabled,
   vncConnected,
-  onToggleViewOnly,
   onToggleComputerUse,
   onStop,
 }: ControlBarProps) {
   return (
     <div className="flex items-center justify-between px-4 py-2 bg-surface border-t border-border">
       <div className="flex items-center gap-4">
-        {/* View-only toggle */}
-        <button
-          onClick={onToggleViewOnly}
-          className="flex items-center gap-1.5 text-xs text-text-secondary hover:text-text-primary transition-colors"
-          title={viewOnly ? 'Enable input to VM' : 'View only (no mouse/keyboard)'}
-        >
-          {viewOnly ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-          {viewOnly ? 'View Only' : 'Interactive'}
-        </button>
-
         {/* Computer Use toggle */}
         <button
           onClick={onToggleComputerUse}
