@@ -348,6 +348,16 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.invoke('vm.connectGuestNavi', vmId),
     notifyOSInstallComplete: (vmId: string): Promise<{ success: boolean; error?: string }> =>
       ipcRenderer.invoke('vm.notifyOSInstallComplete', vmId),
+    checkVRDE: (): Promise<{ installed: boolean; error?: string }> =>
+      ipcRenderer.invoke('vm.checkVRDE'),
+    reconnectVNC: (vmId: string): Promise<{ success: boolean; wsUrl?: string; error?: string }> =>
+      ipcRenderer.invoke('vm.reconnectVNC', vmId),
+    getLatestScreenshot: (vmId: string): Promise<string | null> =>
+      ipcRenderer.invoke('vm.getLatestScreenshot', vmId),
+    cancelComputerUse: (vmId: string): Promise<{ success: boolean; error?: string }> =>
+      ipcRenderer.invoke('vm.cancelComputerUse', vmId),
+    disableInteractiveMode: (vmId: string): Promise<{ success: boolean }> =>
+      ipcRenderer.invoke('vm.disableInteractiveMode', vmId),
   },
 
   // Onboarding methods
@@ -600,6 +610,11 @@ declare global {
         isProvisioned: (vmId: string) => Promise<boolean>;
         connectGuestNavi: (vmId: string) => Promise<{ success: boolean; error?: string }>;
         notifyOSInstallComplete: (vmId: string) => Promise<{ success: boolean; error?: string }>;
+        checkVRDE: () => Promise<{ installed: boolean; error?: string }>;
+        reconnectVNC: (vmId: string) => Promise<{ success: boolean; wsUrl?: string; error?: string }>;
+        getLatestScreenshot: (vmId: string) => Promise<string | null>;
+        cancelComputerUse: (vmId: string) => Promise<{ success: boolean; error?: string }>;
+        disableInteractiveMode: (vmId: string) => Promise<{ success: boolean }>;
       };
       onboarding: {
         getWorkEnvironment: () => Promise<'real-machine' | 'vm' | null>;
