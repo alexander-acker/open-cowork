@@ -43,6 +43,7 @@ export function Sidebar() {
     setCoraChatOpen,
     activeCoworkVM,
   } = useAppStore();
+  const naviAgentWorkingVMs = useAppStore((s) => s.naviAgentWorkingVMs);
   const { deleteSession, getSessionMessages, getSessionTraceSteps, isElectron } = useIPC();
   const [hoveredSession, setHoveredSession] = useState<string | null>(null);
   const [loadingSession, setLoadingSession] = useState<string | null>(null);
@@ -175,7 +176,16 @@ export function Sidebar() {
       >
         {sidebarCollapsed ? (
           <>
-            <img src={CoeadaptIcon} alt="Coeadapt Icon" className="w-8 h-8 object-contain mb-2 drop-shadow-md" />
+            <div className="relative mb-2">
+              <img src={CoeadaptIcon} alt="Coeadapt Icon" className="w-8 h-8 object-contain drop-shadow-md" />
+              {naviAgentWorkingVMs.size > 0 && (
+                <span
+                  className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full"
+                  style={{ backgroundColor: 'rgb(59, 130, 246)', animation: 'pulse 1.5s ease-in-out infinite' }}
+                  title="Navi is working..."
+                />
+              )}
+            </div>
             <button
               onClick={toggleSidebar}
               className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-surface-hover transition-colors text-text-secondary focus:outline-none focus:ring-2 focus:ring-accent focus:ring-opacity-30"
@@ -199,11 +209,18 @@ export function Sidebar() {
         ) : (
           <>
             <div className="flex items-center gap-2">
-              <img 
-                src={CoeadaptLogo} 
-                alt="Coeadapt Logo" 
-                className="h-8 w-auto object-contain transition-all duration-300 drop-shadow-sm dark:brightness-0 dark:invert" 
+              <img
+                src={CoeadaptLogo}
+                alt="Coeadapt Logo"
+                className="h-8 w-auto object-contain transition-all duration-300 drop-shadow-sm dark:brightness-0 dark:invert"
               />
+              {naviAgentWorkingVMs.size > 0 && (
+                <span
+                  className="w-2 h-2 rounded-full flex-shrink-0"
+                  style={{ backgroundColor: 'rgb(59, 130, 246)', animation: 'pulse 1.5s ease-in-out infinite' }}
+                  title="Navi is working..."
+                />
+              )}
             </div>
             <div className="flex items-center gap-2">
         <button
