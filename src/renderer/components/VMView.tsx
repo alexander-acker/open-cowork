@@ -18,6 +18,7 @@ import {
   ShieldAlert,
   Settings2,
   X,
+  MoreVertical,
 } from 'lucide-react';
 import type { VMStatus, VMState, VMHealthSummary, VMResourceConfig, GuestProvisionProgress } from '../types';
 import { VMCreateWizard } from './VMCreateWizard';
@@ -196,6 +197,26 @@ export function VMView() {
       await refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to start VM');
+    } finally {
+      setLoading(false);
+      setActionLabel('');
+    }
+  };
+
+  const openDesktop = async (vmId: string, vmName: string) => {
+    setLoading(true);
+    setActionLabel('Connecting to VM...');
+    try {
+      const result = await window.electronAPI.vm.reconnectVNC(vmId);
+      if (result.success && result.wsUrl) {
+        setActiveCoworkVM({ id: vmId, name: vmName, state: 'running' });
+        setCoworkVNCUrl(result.wsUrl);
+        setActiveView('cowork-desktop');
+      } else {
+        setError(result.error || 'Could not connect to VM display');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to connect');
     } finally {
       setLoading(false);
       setActionLabel('');
@@ -421,7 +442,8 @@ export function VMView() {
                   onForceStop={() => forceStopVM(vm.id)}
                   onPause={() => pauseVM(vm.id)}
                   onResume={() => resumeVM(vm.id)}
-                  onOpenDisplay={() => openDisplay(vm.id)}
+                  onOpenDesktop={() => openDesktop(vm.id, vm.name)}
+                  onOpenDisplayExternal={() => openDisplay(vm.id)}
                   onDelete={() => deleteVM(vm.id, vm.name)}
                   onToggleAutoRestart={async (enabled) => {
                     await window.electronAPI.vm.setAutoRestart(vm.id, enabled);
@@ -472,7 +494,8 @@ interface VMCardProps {
   onForceStop: () => void;
   onPause: () => void;
   onResume: () => void;
-  onOpenDisplay: () => void;
+  onOpenDesktop: () => void;
+  onOpenDisplayExternal: () => void;
   onDelete: () => void;
   onToggleAutoRestart: (enabled: boolean) => void;
   onModify: (vmId: string) => void;
@@ -480,8 +503,9 @@ interface VMCardProps {
   onConnectNavi: () => void;
 }
 
-function VMCard({ vm, health, loading, provisionProgress, onStart, onStop, onForceStop, onPause, onResume, onOpenDisplay, onDelete, onToggleAutoRestart, onModify, onProvision, onConnectNavi }: VMCardProps) {
+function VMCard({ vm, health, loading, provisionProgress, onStart, onStop, onForceStop, onPause, onResume, onOpenDesktop, onOpenDisplayExternal, onDelete, onToggleAutoRestart, onModify, onProvision, onConnectNavi }: VMCardProps) {
   const [provisionStatus, setProvisionStatus] = useState<string | null>(null);
+  const [showOverflow, setShowOverflow] = useState(false);
 
   useEffect(() => {
     if (!isElectron) return;
@@ -585,14 +609,47 @@ function VMCard({ vm, health, loading, provisionProgress, onStart, onStop, onFor
             </button>
           ) : vm.state === 'running' ? (
             <>
+              {/* Open Desktop (embedded) */}
               <button
-                onClick={onOpenDisplay}
+                onClick={onOpenDesktop}
                 disabled={loading}
                 className="p-2 rounded-lg bg-accent/10 text-accent hover:bg-accent/20 transition-colors disabled:opacity-50"
-                title="Open Display"
+                title="Open Desktop"
               >
-                <ExternalLink className="w-4 h-4" />
+                <Monitor className="w-4 h-4" />
               </button>
+
+              {/* Overflow menu with VirtualBox escape hatch */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowOverflow((v) => !v)}
+                  disabled={loading}
+                  className="p-2 rounded-lg bg-surface-hover text-text-secondary hover:text-text-primary transition-colors disabled:opacity-50"
+                  title="More options"
+                >
+                  <MoreVertical className="w-4 h-4" />
+                </button>
+                {showOverflow && (
+                  <>
+                    {/* Backdrop */}
+                    <div
+                      className="fixed inset-0 z-10"
+                      onClick={() => setShowOverflow(false)}
+                    />
+                    <div className="absolute right-0 top-full mt-1 z-20 min-w-max bg-surface border border-border rounded-lg shadow-lg py-1">
+                      <button
+                        onClick={() => { setShowOverflow(false); onOpenDisplayExternal(); }}
+                        className="flex items-center gap-2 w-full px-3 py-2 text-xs text-text-muted hover:bg-surface-hover hover:text-text-primary transition-colors"
+                        title="Open VM in VirtualBox window"
+                      >
+                        <ExternalLink className="w-3 h-3" />
+                        Advanced: Open in VirtualBox
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+
               <button
                 onClick={onPause}
                 disabled={loading}
