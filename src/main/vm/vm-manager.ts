@@ -146,8 +146,8 @@ export class VMManager {
     const config = vmConfigStore.getVM(vmId);
     if (!config) return { success: false, error: 'VM not found' };
 
-    const gui = config.resources.displayMode === 'separate_window';
-    return this.backend.startVM(config.name, gui);
+    // Always headless — the app never opens VirtualBox GUI
+    return this.backend.startVM(config.name, false);
   }
 
   /** Start a VM with VRDE enabled and a WebSocket proxy for embedded noVNC display */
