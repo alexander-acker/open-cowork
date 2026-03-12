@@ -429,6 +429,20 @@ export class VirtualBoxBackend implements VMBackend {
     }
   }
 
+  /** Get the active VRDE port for a running VM, or null if not available */
+  async getVRDEPort(vmId: string): Promise<number | null> {
+    try {
+      const { stdout } = await this.vbox('showvminfo', vmId, '--machinereadable');
+      const info = parseMachineReadable(stdout);
+      const portStr = info['vrdeport'];
+      if (portStr === undefined || portStr === '' || portStr === '-1') return null;
+      const port = parseInt(portStr, 10);
+      return isNaN(port) ? null : port;
+    } catch {
+      return null;
+    }
+  }
+
   async screenshotVM(vmId: string, outputPath: string): Promise<VMOperationResult> {
     try {
       await this.vbox('controlvm', vmId, 'screenshotpng', outputPath);

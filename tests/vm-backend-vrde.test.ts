@@ -133,3 +133,66 @@ describe('VirtualBoxBackend — checkVRDE', () => {
     expect(typeof result.error).toBe('string');
   });
 });
+
+describe('VirtualBoxBackend — getVRDEPort', () => {
+  let backend: VirtualBoxBackend;
+  let mockExecFile: ReturnType<typeof vi.fn>;
+
+  beforeEach(() => {
+    backend = new VirtualBoxBackend();
+    (backend as any).vboxManagePath = '/usr/bin/VBoxManage';
+    mockExecFile = vi.mocked(execFile);
+  });
+
+  it('parses vrdeport from machinereadable showvminfo output', async () => {
+    const machineReadableOutput = [
+      'name="TestVM"',
+      'VMState="running"',
+      'vrde="on"',
+      'vrdeport=3389',
+      'vrdeaddress="127.0.0.1"',
+    ].join('\n');
+
+    mockExecFile.mockImplementation((_cmd: string, args: string[], _opts: any, cb: any) => {
+      if (args[0] === 'showvminfo' && args.includes('--machinereadable')) {
+        cb(null, machineReadableOutput, '');
+      } else {
+        cb(null, '', '');
+      }
+      return {} as any;
+    });
+
+    const port = await backend.getVRDEPort('TestVM');
+    expect(port).toBe(3389);
+  });
+
+  it('returns null when vrdeport is not present in output', async () => {
+    const machineReadableOutput = [
+      'name="TestVM"',
+      'VMState="running"',
+      'vrde="off"',
+    ].join('\n');
+
+    mockExecFile.mockImplementation((_cmd: string, args: string[], _opts: any, cb: any) => {
+      if (args[0] === 'showvminfo' && args.includes('--machinereadable')) {
+        cb(null, machineReadableOutput, '');
+      } else {
+        cb(null, '', '');
+      }
+      return {} as any;
+    });
+
+    const port = await backend.getVRDEPort('TestVM');
+    expect(port).toBeNull();
+  });
+
+  it('returns null when VBoxManage throws', async () => {
+    mockExecFile.mockImplementation((_cmd: string, args: string[], _opts: any, cb: any) => {
+      cb(new Error('VM not found'), '', '');
+      return {} as any;
+    });
+
+    const port = await backend.getVRDEPort('NonExistentVM');
+    expect(port).toBeNull();
+  });
+});
