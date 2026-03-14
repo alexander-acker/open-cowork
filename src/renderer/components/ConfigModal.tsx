@@ -60,18 +60,29 @@ const FALLBACK_PRESETS: ProviderPresets = {
     keyPlaceholder: 'sk-xxx',
     keyHint: 'Enter your API Key',
   },
+  navi: {
+    name: 'Navi (Career Coach)',
+    baseUrl: 'https://api.anthropic.com',
+    models: [
+      { id: 'claude-sonnet-4-20250514', name: 'Claude Sonnet 4 (Recommended)' },
+      { id: 'claude-haiku-4-5-20251001', name: 'Claude Haiku 4.5 (Faster)' },
+    ],
+    keyPlaceholder: 'sk-ant-...',
+    keyHint: 'Anthropic API key for Navi career agents',
+  },
 };
 
-const PROVIDER_LABELS: Record<'openrouter' | 'anthropic' | 'openai' | 'custom', string> = {
+const PROVIDER_LABELS: Record<AppConfig['provider'], string> = {
   openrouter: 'OpenRouter',
   anthropic: 'Anthropic',
   openai: 'OpenAI',
   custom: 'Custom',
+  navi: 'Navi',
 };
 
 export function ConfigModal({ isOpen, onClose, onSave, initialConfig, isFirstRun }: ConfigModalProps) {
   const { t } = useTranslation();
-  const [provider, setProvider] = useState<'openrouter' | 'anthropic' | 'custom' | 'openai'>('openrouter');
+  const [provider, setProvider] = useState<AppConfig['provider']>('openrouter');
   const [apiKey, setApiKey] = useState('');
   const [baseUrl, setBaseUrl] = useState('');
   const [customProtocol, setCustomProtocol] = useState<'anthropic' | 'openai'>('anthropic');
@@ -336,7 +347,7 @@ export function ConfigModal({ isOpen, onClose, onSave, initialConfig, isFirstRun
               {t('api.provider')}
             </label>
             <div className="grid grid-cols-3 gap-2">
-              {(['openrouter', 'anthropic', 'openai', 'custom'] as const).map((p) => (
+              {(['openrouter', 'anthropic', 'openai', 'custom', 'navi'] as const).map((p) => (
                 <button
                   key={p}
                   onClick={() => setProvider(p)}

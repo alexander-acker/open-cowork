@@ -5,8 +5,8 @@ import { log } from '../utils/logger';
  * Application configuration schema
  */
 export interface AppConfig {
-  // API Provider
-  provider: 'openrouter' | 'anthropic' | 'custom' | 'openai';
+  // API Provider ('navi' enables the LangGraph career agent system)
+  provider: 'openrouter' | 'anthropic' | 'custom' | 'openai' | 'navi';
   
   // API credentials
   apiKey: string;
@@ -99,6 +99,16 @@ export const PROVIDER_PRESETS = {
     ],
     keyPlaceholder: 'sk-xxx',
     keyHint: '输入你的 API Key',
+  },
+  navi: {
+    name: 'Navi (Career Coach)',
+    baseUrl: 'https://api.anthropic.com',
+    models: [
+      { id: 'claude-sonnet-4-20250514', name: 'Claude Sonnet 4 (Recommended)' },
+      { id: 'claude-haiku-4-5-20251001', name: 'Claude Haiku 4.5 (Faster)' },
+    ],
+    keyPlaceholder: 'sk-ant-...',
+    keyHint: 'Anthropic API key for Navi career agents',
   },
 };
 
@@ -202,7 +212,14 @@ class ConfigStore {
       config.provider === 'openai' ||
       (config.provider === 'custom' && config.customProtocol === 'openai');
 
-    if (useOpenAI) {
+    if (config.provider === 'navi') {
+      // Navi career agents use Anthropic API directly via LangGraph
+      // The NaviRunner reads the API key from config store, not env vars
+      if (config.apiKey) {
+        process.env.ANTHROPIC_API_KEY = config.apiKey;
+      }
+      log('[Config] Navi provider configured — LangGraph career agents enabled');
+    } else if (useOpenAI) {
       if (config.apiKey) {
         process.env.OPENAI_API_KEY = config.apiKey;
       }

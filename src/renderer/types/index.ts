@@ -347,7 +347,7 @@ export interface ExecutionContext {
 
 // App Config types
 export interface AppConfig {
-  provider: 'openrouter' | 'anthropic' | 'custom' | 'openai';
+  provider: 'openrouter' | 'anthropic' | 'custom' | 'openai' | 'navi';
   apiKey: string;
   baseUrl?: string;
   customProtocol?: 'anthropic' | 'openai';
@@ -373,6 +373,7 @@ export interface ProviderPresets {
   anthropic: ProviderPreset;
   custom: ProviderPreset;
   openai: ProviderPreset;
+  navi: ProviderPreset;
 }
 
 export interface ApiTestInput {

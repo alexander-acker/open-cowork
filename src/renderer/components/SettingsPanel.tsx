@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, Key, Plug, Settings, ChevronRight, AlertCircle, Eye, EyeOff, Plus, Trash2, Edit3, Save, Mail, Globe, Lock, Server, Cpu, Loader2, Power, PowerOff, CheckCircle, ChevronDown, Package, Languages, Shield, Wifi } from 'lucide-react';
 import type {
+  AppConfig,
   ProviderPresets,
   Skill,
   ApiTestResult,
@@ -193,7 +194,7 @@ export function SettingsPanel({ isOpen, onClose, initialTab = 'api' }: SettingsP
 
 function APISettingsTab() {
   const { t } = useTranslation();
-  const [provider, setProvider] = useState<'openrouter' | 'anthropic' | 'custom' | 'openai'>('openrouter');
+  const [provider, setProvider] = useState<AppConfig['provider']>('openrouter');
   const [apiKey, setApiKey] = useState('');
   const [baseUrl, setBaseUrl] = useState('');
   const [customProtocol, setCustomProtocol] = useState<'anthropic' | 'openai'>('anthropic');
@@ -388,7 +389,7 @@ function APISettingsTab() {
           {t('api.provider')}
         </label>
         <div className="grid grid-cols-3 gap-2">
-          {(['openrouter', 'anthropic', 'openai', 'custom'] as const).map((p) => (
+          {(['openrouter', 'anthropic', 'openai', 'custom', 'navi'] as const).map((p) => (
             <button
               key={p}
               onClick={() => handleProviderChange(p)}

@@ -10,6 +10,7 @@ import { SandboxAdapter, getSandboxAdapter, initializeSandbox, reinitializeSandb
 import { SandboxSync } from '../sandbox/sandbox-sync';
 import { ClaudeAgentRunner } from '../claude/agent-runner';
 import { OpenAIResponsesRunner } from '../openai/responses-runner';
+import { NaviRunner } from '../navi/navi-runner';
 import { configStore } from '../config/config-store';
 import { MCPManager } from '../mcp/mcp-manager';
 import { mcpConfigStore } from '../mcp/mcp-config-store';
@@ -75,7 +76,28 @@ export class SessionManager {
     const provider = configStore.get('provider');
     const customProtocol = configStore.get('customProtocol');
     const useOpenAI = provider === 'openai' || (provider === 'custom' && customProtocol === 'openai');
-    if (useOpenAI) {
+    const useNavi = provider === 'navi';
+
+    if (useNavi) {
+      // Navi career agent system — uses LangGraph with Anthropic API directly
+      const apiKey = configStore.get('apiKey');
+      const baseUrl = configStore.get('baseUrl');
+      const model = configStore.get('model');
+      this.agentRunner = new NaviRunner(
+        {
+          apiKey,
+          model: model || undefined,
+          baseUrl: baseUrl || undefined,
+          maxTurns: 6,
+          maxTokensPerResponse: 1024,
+        },
+        {
+          sendToRenderer: this.sendToRenderer,
+          saveMessage: (message: Message) => this.saveMessage(message),
+        }
+      );
+      log('[SessionManager] Using Navi career agent runner');
+    } else if (useOpenAI) {
       this.agentRunner = new OpenAIResponsesRunner({
         sendToRenderer: this.sendToRenderer,
         saveMessage: (message: Message) => this.saveMessage(message),
