@@ -352,11 +352,12 @@ export interface AppConfig {
   baseUrl?: string;
   customProtocol?: 'anthropic' | 'openai';
   model: string;
-  openaiMode?: 'responses' | 'chat';
+  openaiMode: 'responses' | 'chat';
   claudeCodePath?: string;
   defaultWorkdir?: string;
-  sandboxEnabled?: boolean;
-  enableThinking?: boolean;
+  enableDevLogs: boolean;
+  sandboxEnabled: boolean;
+  enableThinking: boolean;
   isConfigured: boolean;
 }
 

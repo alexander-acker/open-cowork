@@ -212,7 +212,7 @@ class ConfigStore {
       if (config.model) {
         process.env.OPENAI_MODEL = config.model;
       }
-      process.env.OPENAI_API_MODE = 'responses';
+      process.env.OPENAI_API_MODE = config.openaiMode || 'responses';
     } else {
       if (config.provider === 'anthropic' || (config.provider === 'custom' && config.customProtocol !== 'openai')) {
         // Anthropic direct API or Anthropic-compatible custom: use ANTHROPIC_API_KEY
