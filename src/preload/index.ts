@@ -229,6 +229,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.invoke('sandbox.retryLimaSetup'),
   },
 
+  // CopilotKit methods
+  copilotkit: {
+    getRuntimeUrl: (): Promise<string | null> => ipcRenderer.invoke('copilotkit.getRuntimeUrl'),
+  },
+
   // Logs methods
   logs: {
     getPath: (): Promise<string | null> => ipcRenderer.invoke('logs.getPath'),
@@ -411,6 +416,9 @@ declare global {
         stopLimaInstance: () => Promise<boolean>;
         retrySetup: () => Promise<{ success: boolean; error?: string; result?: unknown }>;
         retryLimaSetup: () => Promise<{ success: boolean; error?: string; result?: unknown }>;
+      };
+      copilotkit: {
+        getRuntimeUrl: () => Promise<string | null>;
       };
       logs: {
         getPath: () => Promise<string | null>;

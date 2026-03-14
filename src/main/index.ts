@@ -21,6 +21,7 @@ import type { ClientEvent, ServerEvent, ApiTestInput, ApiTestResult } from '../r
 import { remoteManager, type AgentExecutor } from './remote/remote-manager';
 import { remoteConfigStore } from './remote/remote-config-store';
 import type { GatewayConfig, FeishuChannelConfig, ChannelType } from './remote/types';
+import { startCopilotKitServer, stopCopilotKitServer, getCopilotKitUrl } from './copilotkit/copilotkit-server';
 import {
   log,
   logWarn,
@@ -449,6 +450,13 @@ app.whenReady().then(async () => {
     });
   }
 
+  // Start CopilotKit runtime server
+  if (configStore.isConfigured()) {
+    startCopilotKitServer().catch(err => {
+      logError('[App] Failed to start CopilotKit server:', err);
+    });
+  }
+
   createWindow();
 
   app.on('activate', () => {
@@ -471,6 +479,15 @@ async function cleanupSandboxResources(): Promise<void> {
     return;
   }
   isCleaningUp = true;
+
+  // Stop CopilotKit server
+  try {
+    log('[App] Stopping CopilotKit server...');
+    await stopCopilotKitServer();
+    log('[App] CopilotKit server stopped');
+  } catch (error) {
+    logError('[App] Error stopping CopilotKit server:', error);
+  }
 
   // 停止远程控制
   try {
@@ -544,6 +561,16 @@ ipcMain.handle('client-invoke', async (_event, data: ClientEvent) => {
 
 ipcMain.handle('get-version', () => {
   return app.getVersion();
+});
+
+ipcMain.handle('copilotkit.getRuntimeUrl', async () => {
+  let url = getCopilotKitUrl();
+  if (!url) {
+    // Server not started yet, start it now
+    await startCopilotKitServer();
+    url = getCopilotKitUrl();
+  }
+  return url;
 });
 
 ipcMain.handle('shell.openExternal', async (_event, url: string) => {

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 import { useAppStore } from './store';
 import { useIPC } from './hooks/useIPC';
 import { Sidebar } from './components/Sidebar';
@@ -10,6 +10,9 @@ import { ConfigModal } from './components/ConfigModal';
 import { Titlebar } from './components/Titlebar';
 import { SandboxSetupDialog } from './components/SandboxSetupDialog';
 import { SandboxSyncToast } from './components/SandboxSyncToast';
+import { CopilotKitBridge } from './components/CopilotKitBridge';
+import { CopilotKit } from '@copilotkit/react-core';
+import { CopilotSidebar } from '@copilotkit/react-ui';
 import type { AppConfig } from './types';
 
 // Check if running in Electron
@@ -33,6 +36,7 @@ function App() {
   } = useAppStore();
   const { listSessions, isElectron } = useIPC();
   const initialized = useRef(false);
+  const [copilotKitUrl, setCopilotKitUrl] = useState<string | null>(null);
 
   useEffect(() => {
     // Only run once on mount
@@ -41,6 +45,15 @@ function App() {
 
     if (isElectron) {
       listSessions();
+      // Fetch CopilotKit runtime URL
+      window.electronAPI.copilotkit.getRuntimeUrl().then((url) => {
+        if (url) {
+          console.log('[App] CopilotKit runtime URL:', url);
+          setCopilotKitUrl(url);
+        }
+      }).catch((err) => {
+        console.warn('[App] Failed to get CopilotKit runtime URL:', err);
+      });
     }
   }, []); // Empty deps - run once
 
@@ -81,16 +94,16 @@ function App() {
   // Show if there's progress and setup is not complete
   const showSandboxSetup = sandboxSetupProgress && !isSandboxSetupComplete;
 
-  return (
+  const appContent = (
     <div className="h-screen w-screen flex flex-col overflow-hidden bg-background">
       {/* Titlebar - draggable region */}
       <Titlebar />
-      
+
       {/* Main Content */}
       <div className="flex-1 flex overflow-hidden">
         {/* Sidebar */}
         <Sidebar />
-        
+
         {/* Main Content Area */}
         <main className="flex-1 flex flex-col overflow-hidden bg-background">
           {activeSessionId ? <ChatView /> : <WelcomeView />}
@@ -99,10 +112,10 @@ function App() {
         {/* Context Panel - only show when in session */}
         {activeSessionId && <ContextPanel />}
       </div>
-      
+
       {/* Permission Dialog */}
       {pendingPermission && <PermissionDialog permission={pendingPermission} />}
-      
+
       {/* Config Modal */}
       <ConfigModal
         isOpen={showConfigModal}
@@ -111,21 +124,43 @@ function App() {
         initialConfig={appConfig}
         isFirstRun={!isConfigured}
       />
-      
+
       {/* Sandbox Setup Dialog */}
       {showSandboxSetup && (
-        <SandboxSetupDialog 
+        <SandboxSetupDialog
           progress={sandboxSetupProgress}
           onComplete={handleSandboxSetupComplete}
         />
       )}
-      
+
       {/* Sandbox Sync Toast */}
       <SandboxSyncToast status={sandboxSyncStatus} />
-      
+
       {/* AskUserQuestion is now rendered inline in MessageCard */}
     </div>
   );
+
+  // Wrap with CopilotKit when runtime URL is available
+  if (copilotKitUrl) {
+    return (
+      <CopilotKit runtimeUrl={copilotKitUrl}>
+        <CopilotKitBridge />
+        <CopilotSidebar
+          labels={{
+            title: 'Open Cowork Copilot',
+            initial: 'Hi! I can help you manage your agent sessions, start new tasks, and provide context about your work. What would you like to do?',
+            placeholder: 'Ask your copilot...',
+          }}
+          defaultOpen={false}
+          clickOutsideToClose={true}
+        >
+          {appContent}
+        </CopilotSidebar>
+      </CopilotKit>
+    );
+  }
+
+  return appContent;
 }
 
 export default App;
