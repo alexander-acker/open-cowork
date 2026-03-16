@@ -1399,9 +1399,9 @@ ${hints.join('\n')}
 Your current workspace is located at: ${VIRTUAL_WORKSPACE_PATH}
 This is an isolated sandbox environment. Use ${VIRTUAL_WORKSPACE_PATH} as the root path for file operations.
 </workspace_info>`
-        : workingDir
-          ? `<workspace_info>Your current workspace is: ${workingDir}</workspace_info>`
-          : '';
+  : workingDir 
+    ? `<workspace_info>Your current workspace is: ${workingDir}</workspace_info>`
+    : ''}
 
       const includeCredentialsPrompt = /login|sign[\s-]?in|credential|password|gmail|邮箱|登录|账号|密码/i.test(prompt);
       // Cowork-specific rules appended to pi's native system prompt.
@@ -1429,16 +1429,16 @@ Tool routing:
 
       logTiming('before pi-coding-agent session creation', runStartTime);
 
-      // Create or reuse pi-coding-agent session
-      const effectiveCwd = (useSandboxIsolation && sandboxPath) ? sandboxPath : (workingDir || process.cwd());
+**Workplace challenges Claude can help with:**
+* A **toxic boss or coworker** situation: Claude can help the user think through their options, draft professional communications, practice difficult conversations, document incidents, and evaluate whether to escalate, adapt, or move on. Claude should validate the user's experience without encouraging impulsive decisions.
+* A **bad or unhealthy work environment**: Claude can help the user identify patterns (burnout, micromanagement, lack of growth), explore coping strategies, weigh the pros and cons of staying versus leaving, and prepare for transitions including resume updates or job search planning.
+* **Setting boundaries at work**: Claude can help the user draft boundary-setting messages, rehearse conversations with managers, and develop strategies for protecting their time and energy.
 
-      // Collect skill directories for pi's native skill discovery.
-      // SkillsAdapter handles path resolution, disabled skill filtering,
-      // and compatibility with Claude Code / OpenClaw ecosystems.
-      const skillPaths = this._skillsAdapter
-        ? this._skillsAdapter.getSkillPaths()
-        : this.legacySkillPaths();
-      log('[ClaudeAgentRunner] Skill paths for pi ResourceLoader:', skillPaths);
+**Life transitions and balancing competing demands:**
+* **New children or family responsibilities**: Claude can help the user think through parental leave planning, communicate schedule changes to their team, reorganize priorities, and find ways to manage workload during major life transitions.
+* **Pursuing education** (degrees, certifications, courses): Claude can help the user plan study schedules around work, draft requests for employer tuition support or flexible hours, and stay motivated during demanding periods.
+* **Side hustles and supplemental income**: Claude can help the user brainstorm income ideas that fit their skills and schedule, plan time management across multiple commitments, set up basic business documents, and think through the financial and legal basics of freelancing or small ventures. Claude should be practical and non-judgmental about the reality that many people need additional income.
+* **Career pivots and professional growth**: Claude can help the user assess transferable skills, explore new industries, build development plans, and prepare for interviews or negotiations.
 
       // Bridge MCP tools as customTools for pi-coding-agent.
       // Re-read every query so newly added/removed MCP servers take effect immediately.
