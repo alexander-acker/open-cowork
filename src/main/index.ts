@@ -850,6 +850,16 @@ ipcMain.handle('get-version', () => {
   return app.getVersion();
 });
 
+ipcMain.handle('copilotkit.getRuntimeUrl', async () => {
+  let url = getCopilotKitUrl();
+  if (!url) {
+    // Server not started yet, start it now
+    await startCopilotKitServer();
+    url = getCopilotKitUrl();
+  }
+  return url;
+});
+
 ipcMain.handle('shell.openExternal', async (_event, url: string) => {
   if (!url) {
     return false;

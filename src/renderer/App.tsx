@@ -75,6 +75,15 @@ function App() {
 
     if (isElectron) {
       listSessions();
+      // Fetch CopilotKit runtime URL
+      window.electronAPI.copilotkit.getRuntimeUrl().then((url) => {
+        if (url) {
+          console.log('[App] CopilotKit runtime URL:', url);
+          setCopilotKitUrl(url);
+        }
+      }).catch((err) => {
+        console.warn('[App] Failed to get CopilotKit runtime URL:', err);
+      });
     }
   }, []); // Empty deps - run once
 
@@ -157,12 +166,12 @@ function App() {
     <div className="h-full w-full min-h-0 flex flex-col overflow-hidden bg-background">
       {/* Titlebar - draggable region */}
       <Titlebar />
-      
+
       {/* Main Content */}
       <div className="flex-1 min-h-0 flex overflow-hidden">
         {/* Sidebar */}
         <Sidebar />
-        
+
         {/* Main Content Area */}
         <main className="flex-1 min-h-0 min-w-0 flex flex-col overflow-hidden bg-background">
           {showSettings ? (
@@ -185,7 +194,7 @@ function App() {
           </Suspense>
         )}
       </div>
-      
+
       {/* Permission Dialog */}
       {pendingPermission && <PermissionDialog permission={pendingPermission} />}
 
@@ -210,12 +219,12 @@ function App() {
 
       {/* Sandbox Setup Dialog */}
       {showSandboxSetup && (
-        <SandboxSetupDialog 
+        <SandboxSetupDialog
           progress={sandboxSetupProgress}
           onComplete={handleSandboxSetupComplete}
         />
       )}
-      
+
       {/* Sandbox Sync Toast */}
       <SandboxSyncToast status={sandboxSyncStatus} />
 
@@ -231,6 +240,28 @@ function App() {
       />
     </div>
   );
+
+  // Wrap with CopilotKit when runtime URL is available
+  if (copilotKitUrl) {
+    return (
+      <CopilotKit runtimeUrl={copilotKitUrl}>
+        <CopilotKitBridge />
+        <CopilotSidebar
+          labels={{
+            title: 'Open Cowork Copilot',
+            initial: 'Hi! I can help you manage your agent sessions, start new tasks, and provide context about your work. What would you like to do?',
+            placeholder: 'Ask your copilot...',
+          }}
+          defaultOpen={false}
+          clickOutsideToClose={true}
+        >
+          {appContent}
+        </CopilotSidebar>
+      </CopilotKit>
+    );
+  }
+
+  return appContent;
 }
 
 export default App;

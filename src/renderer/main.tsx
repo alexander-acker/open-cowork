@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import { CoeadaptAuth } from './components/CoeadaptAuth';
 import './styles/globals.css';
+import '@copilotkit/react-ui/styles.css';
 import 'katex/dist/katex.min.css';
 import './i18n/config'; // Initialize i18n
 import {
