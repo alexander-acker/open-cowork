@@ -276,7 +276,7 @@ export class ToolExecutor {
     }
 
     // Block path traversal attempts
-    if (/(?:^|[\s;|&])\.\.(?:[\s;|&\/\\]|$)/.test(command) || command.includes('../') || command.includes('..\\')) {
+    if (/(?:^|[\s;|&])\.\.(?:[\s;|&/\\]|$)/.test(command) || command.includes('../') || command.includes('..\\')) {
       throw new Error('Command blocked: path traversal (..) is not allowed');
     }
 
@@ -323,7 +323,7 @@ export class ToolExecutor {
 
     // Block dangerous patterns
     const dangerousPatterns = [
-      /rm\s+-rf?\s+[\/~]/i,
+      /rm\s+-rf?\s+[/~]/i,
       /dd\s+if=/i,
       /mkfs/i,
       />\s*\/dev\//i,

@@ -156,7 +156,7 @@ export class PathGuard {
     }
 
     // Check for Windows-style paths that weren't converted
-    if (/[A-Za-z]:[\\\/]/.test(command)) {
+    if (/[A-Za-z]:[/\\]/.test(command)) {
       // This shouldn't happen if paths are properly converted, but log it
       log(`[PathGuard] Windows path detected in command, needs conversion`);
     }

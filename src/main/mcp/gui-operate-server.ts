@@ -2779,8 +2779,8 @@ async function resolveClickCoordinates(
     return convertNormalizedToDisplayCoordinates(xInput, yInput, displayIndex);
   }
 
-  let x = Math.round(xInput);
-  let y = Math.round(yInput);
+  const x = Math.round(xInput);
+  const y = Math.round(yInput);
 
   if (coordinateType === 'auto') {
     const isOutOfBounds = x < 0 || y < 0 || x >= display.width || y >= display.height;
@@ -2833,7 +2833,7 @@ async function performClick(
     await ensureAppContextRestored();
   }
 
-  let localX = x;
+  const localX = x;
   let localY = y;
 
   // Dock auto-hide on macOS can swallow the first click near the bottom edge.
@@ -2945,7 +2945,8 @@ async function performType(
   }
 
   // macOS implementation
-  const hasNonAscii = /[^\x00-\x7F]/.test(text);
+  // eslint-disable-next-line no-control-regex
+  const hasNonAscii = /[^\u0000-\u007F]/.test(text);
   const usePaste = inputMethod === 'paste' || (inputMethod === 'auto' && hasNonAscii);
 
   // Clipboard-paste method is much more reliable for Unicode/CJK (e.g. Chinese)
@@ -3920,6 +3921,7 @@ async function callVisionAPIWithTimeout(
     }
     
     return new Promise<string>((resolve, reject) => {
+      // eslint-disable-next-line prefer-const
       let timeoutId: NodeJS.Timeout;
       let isResolved = false;
       

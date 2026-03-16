@@ -2397,8 +2397,18 @@ async function handleClientEvent(event: ClientEvent): Promise<unknown> {
     }
 
     case 'settings.update':
-      // TODO: Implement settings update
-      return null;
+      if (event.payload && typeof event.payload === 'object') {
+        const updates = event.payload as Partial<AppConfig>;
+        for (const [key, value] of Object.entries(updates)) {
+          configStore.set(key as keyof AppConfig, value);
+        }
+        // Apply dev logs setting immediately if changed
+        if ('enableDevLogs' in updates) {
+          setDevLogsEnabled(updates.enableDevLogs as boolean);
+        }
+        log('[Settings] Updated:', Object.keys(updates).join(', '));
+      }
+      return { success: true };
 
     default:
       logWarn('Unknown event type:', event);

@@ -251,7 +251,7 @@ export class MessageRouter {
     });
     
     // Convert remote content to agent content blocks
-    const content = this.convertToContentBlocks(message);
+    const content = await this.convertToContentBlocks(message);
     const { prompt, cwd } = this.extractPromptAndCwd(message);
     
     // Get session mapping to update/get working directory
@@ -362,7 +362,7 @@ export class MessageRouter {
   /**
    * Convert remote message content to agent content blocks
    */
-  private convertToContentBlocks(message: RemoteMessage): ContentBlock[] {
+  private async convertToContentBlocks(message: RemoteMessage): Promise<ContentBlock[]> {
     const blocks: ContentBlock[] = [];
     
     switch (message.content.type) {
@@ -376,7 +376,6 @@ export class MessageRouter {
         break;
         
       case 'image':
-        // TODO: Download image and convert to base64
         if (message.content.imageUrl) {
           // For now, add as text description
           blocks.push({

@@ -411,7 +411,7 @@ export class ClaudeAgentRunner {
         return lines.join('\n');
       };
 
-      let sections: string[] = [];
+      const sections: string[] = [];
       
       if (emailCredentials.length > 0) {
         sections.push(`**Email Accounts (${emailCredentials.length}):**\n${emailCredentials.map(formatCredential).join('\n\n')}`);
