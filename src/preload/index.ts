@@ -118,6 +118,14 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.invoke('config.discover-local', payload),
   },
 
+  // Onboarding methods
+  onboarding: {
+    getWorkEnvironment: (): Promise<'real-machine' | 'vm' | null> =>
+      ipcRenderer.invoke('onboarding.getWorkEnvironment'),
+    setWorkEnvironment: (env: 'real-machine' | 'vm'): Promise<{ success: boolean }> =>
+      ipcRenderer.invoke('onboarding.setWorkEnvironment', env),
+  },
+
   auth: {
     getStatus: (): Promise<Array<Record<string, unknown>>> => ipcRenderer.invoke('auth.getStatus'),
     importToken: (provider: string): Promise<Record<string, unknown> | null> => ipcRenderer.invoke('auth.importToken', provider),
@@ -511,6 +519,10 @@ declare global {
         listModels: (payload: { provider: AppConfig['provider']; apiKey: string; baseUrl?: string }) => Promise<ProviderModelInfo[]>;
         diagnose: (input: DiagnosticInput) => Promise<DiagnosticResult>;
         discoverLocal: (payload?: { baseUrl?: string }) => Promise<{ available: boolean; baseUrl: string; models?: string[]; status: 'unavailable' | 'service_available' | 'model_usable' | 'model_unusable'; probeModel?: string; probeError?: string }>;
+      };
+      onboarding: {
+        getWorkEnvironment: () => Promise<'real-machine' | 'vm' | null>;
+        setWorkEnvironment: (env: 'real-machine' | 'vm') => Promise<{ success: boolean }>;
       };
       auth: {
         getStatus: () => Promise<Array<Record<string, unknown>>>;

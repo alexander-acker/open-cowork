@@ -13,6 +13,7 @@ import { Titlebar } from './components/Titlebar';
 import { SandboxSetupDialog } from './components/SandboxSetupDialog';
 import { OnboardingModal } from './components/OnboardingModal';
 import { SandboxSyncToast } from './components/SandboxSyncToast';
+import { OnboardingModal } from './components/OnboardingModal';
 import { GlobalNoticeToast } from './components/GlobalNoticeToast';
 import type { AppConfig } from './types';
 import type { GlobalNoticeAction } from './store';
@@ -51,6 +52,7 @@ function App() {
   const sandboxSetupProgress = useAppStore((s) => s.sandboxSetupProgress);
   const isSandboxSetupComplete = useAppStore((s) => s.isSandboxSetupComplete);
   const sandboxSyncStatus = useAppStore((s) => s.sandboxSyncStatus);
+  const showOnboardingModal = useAppStore((s) => s.showOnboardingModal);
   const setShowConfigModal = useAppStore((s) => s.setShowConfigModal);
   const setIsConfigured = useAppStore((s) => s.setIsConfigured);
   const setAppConfig = useAppStore((s) => s.setAppConfig);
@@ -59,6 +61,8 @@ function App() {
   const setShowSettings = useAppStore((s) => s.setShowSettings);
   const setSidebarCollapsed = useAppStore((s) => s.setSidebarCollapsed);
   const setContextPanelCollapsed = useAppStore((s) => s.setContextPanelCollapsed);
+  const setWorkEnvironment = useAppStore((s) => s.setWorkEnvironment);
+  const setShowOnboardingModal = useAppStore((s) => s.setShowOnboardingModal);
   const { listSessions, isElectron } = useIPC();
   const { width } = useWindowSize();
   const initialized = useRef(false);
@@ -82,6 +86,19 @@ function App() {
       document.documentElement.classList.remove('light');
     }
   }, [settings.theme]);
+
+  // Check onboarding state
+  useEffect(() => {
+    if (!isConfigured || !isElectronEnv) return;
+
+    window.electronAPI.onboarding.getWorkEnvironment().then((env) => {
+      if (env === null) {
+        setShowOnboardingModal(true);
+      } else {
+        setWorkEnvironment(env);
+      }
+    });
+  }, [isConfigured, setShowOnboardingModal, setWorkEnvironment]);
 
   // Auto-collapse panels based on window width
   useEffect(() => {
@@ -201,6 +218,11 @@ function App() {
       
       {/* Sandbox Sync Toast */}
       <SandboxSyncToast status={sandboxSyncStatus} />
+
+      {/* Onboarding Modal */}
+      {showOnboardingModal && (
+        <OnboardingModal onComplete={() => setShowOnboardingModal(false)} />
+      )}
 
       <GlobalNoticeToast
         notice={globalNotice}
