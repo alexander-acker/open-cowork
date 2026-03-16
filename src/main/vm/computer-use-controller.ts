@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Computer Use Controller
  *

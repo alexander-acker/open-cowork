@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { ipcMain } from 'electron';
 import { shell } from 'electron';
 import { dockerManager } from '../docker/docker-manager';

@@ -2,7 +2,6 @@ import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppStore } from '../store';
 import { useIPC } from '../hooks/useIPC';
-import { useFileAttachments } from '../hooks/useFileAttachments';
 import type { ContentBlock } from '../types';
 import { getInitialSessionTitle } from '../../shared/session-title';
 import {
@@ -15,12 +14,15 @@ import {
   Paperclip,
   BookOpen,
   FileSearch,
-  Target,
-  Briefcase,
-  GraduationCap,
-  MessageSquare,
 } from 'lucide-react';
-import CoeadaptLogo from '../assets/logo-full-1.png';
+
+type AttachedFile = {
+  name: string;
+  path: string;
+  size: number;
+  type: string;
+  inlineDataBase64?: string;
+};
 
 const welcomeLogoSrc = new URL('../../../resources/logo.png', import.meta.url).href;
 
@@ -28,7 +30,6 @@ export function WelcomeView() {
   const { t } = useTranslation();
   const [prompt, setPrompt] = useState('');
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
-  const [activeCareerCategory, setActiveCareerCategory] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isComposingRef = useRef(false);
   const [pastedImages, setPastedImages] = useState<
@@ -38,11 +39,6 @@ export function WelcomeView() {
   const [isDragging, setIsDragging] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { startSession, changeWorkingDir, isElectron } = useIPC();
-  const {
-    pastedImages, attachedFiles, isDragging,
-    handlePaste, handleDragOver, handleDragLeave, handleDrop,
-    handleFileSelect, removeImage, removeFile, clearAll,
-  } = useFileAttachments(isElectron);
   const workingDir = useAppStore((state) => state.workingDir);
   const setGlobalNotice = useAppStore((state) => state.setGlobalNotice);
   const canSubmit = prompt.trim().length > 0 || pastedImages.length > 0 || attachedFiles.length > 0;
@@ -365,11 +361,7 @@ export function WelcomeView() {
     }
   };
 
-  const handleTagClick = (tag: string, tagPrompt: string, isCareerBox?: boolean) => {
-    if (isCareerBox) {
-      setShowCareerBox(true);
-      return;
-    }
+  const handleTagClick = (tag: string, tagPrompt: string) => {
     setSelectedTag(tag === selectedTag ? null : tag);
     if (tag !== selectedTag) {
       setPrompt(tagPrompt);
@@ -400,49 +392,6 @@ export function WelcomeView() {
   useEffect(() => {
     adjustTextareaHeight();
   }, [prompt]);
-
-  const careerCategories = [
-    {
-      id: 'plan',
-      label: t('career.plan'),
-      icon: Target,
-      suggestions: [
-        { text: t('career.plan90day'), prompt: 'Help me create a focused 90-day career development plan based on my current skills and goals.' },
-        { text: t('career.reviewGoals'), prompt: 'Review my current career goals and provide feedback on my progress.' },
-        { text: t('career.weekFocus'), prompt: 'Based on my goals and current tasks, what should I prioritize this week?' },
-      ],
-    },
-    {
-      id: 'learn',
-      label: t('career.learn'),
-      icon: GraduationCap,
-      suggestions: [
-        { text: t('career.skillGap'), prompt: 'Analyze my skill gaps for my target role and recommend learning resources.' },
-        { text: t('career.findCourses'), prompt: 'Recommend courses and learning resources aligned with my career goals.' },
-        { text: t('career.trendingSkills'), prompt: 'What skills are currently in high demand for my industry?' },
-      ],
-    },
-    {
-      id: 'jobs',
-      label: t('career.jobs'),
-      icon: Briefcase,
-      suggestions: [
-        { text: t('career.findJobs'), prompt: 'Search for job opportunities that match my skills, experience, and career goals.' },
-        { text: t('career.resumeReview'), prompt: 'Review my resume and provide specific improvement suggestions for ATS optimization.' },
-        { text: t('career.interviewPrep'), prompt: 'Help me prepare for interviews for my target role with practice questions.' },
-      ],
-    },
-    {
-      id: 'reflect',
-      label: t('career.reflect'),
-      icon: MessageSquare,
-      suggestions: [
-        { text: t('career.weeklyReflection'), prompt: 'Help me do a weekly review of my progress, wins, and areas to improve.' },
-        { text: t('career.processThoughts'), prompt: 'I need to process some thoughts about my work situation. Help me gain clarity.' },
-        { text: t('career.celebrateWins'), prompt: 'Help me recognize and celebrate my recent accomplishments.' },
-      ],
-    },
-  ];
 
   const quickTags = [
     {
@@ -485,13 +434,6 @@ export function WelcomeView() {
       requiresNotion: true,
     },
   ];
-
-  const getGreeting = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return 'Good morning';
-    if (hour < 17) return 'Good afternoon';
-    return 'Good evening';
-  };
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center px-5 py-10 md:px-8 md:py-14">
@@ -549,7 +491,7 @@ export function WelcomeView() {
           ))}
         </div>
 
-        {/* Main Input — Pill Shape */}
+        {/* Main Input Card - Right aligned */}
         <form
           onSubmit={handleSubmit}
           onDragOver={handleDragOver}
@@ -583,7 +525,7 @@ export function WelcomeView() {
 
           {/* File attachments */}
           {attachedFiles.length > 0 && (
-            <div className="space-y-2 px-4">
+            <div className="space-y-2 mb-3">
               {attachedFiles.map((file, index) => (
                 <div
                   key={index}
@@ -640,129 +582,42 @@ export function WelcomeView() {
             <div className="flex items-center gap-3">
               <button
                 type="button"
-                onClick={handleFileSelect}
-                className="w-9 h-9 rounded-full flex items-center justify-center text-text-muted hover:text-text-primary hover:bg-surface-hover transition-colors"
-                title={t('welcome.attachFiles')}
+                onClick={handleSelectFolder}
+                className={`flex items-center gap-2 text-sm transition-colors ${
+                  workingDir
+                    ? 'text-text-secondary hover:text-text-primary'
+                    : 'text-accent hover:text-accent-hover'
+                }`}
+                title={workingDir || t('welcome.selectWorkingFolder')}
               >
                 <FolderOpen className="w-4 h-4" />
                 <span>
                   {workingDir ? workingDir.split(/[/\\]/).pop() : t('welcome.selectWorkingFolder')}
                 </span>
               </button>
-            )}
 
-            {/* Textarea */}
-            <textarea
-              ref={textareaRef}
-              value={prompt}
-              onChange={(e) => {
-                setPrompt(e.target.value);
-                adjustTextareaHeight();
-              }}
-              onCompositionStart={() => {
-                isComposingRef.current = true;
-              }}
-              onCompositionEnd={() => {
-                isComposingRef.current = false;
-              }}
-              onPaste={handlePaste}
-              placeholder={t('chat.typeMessage')}
-              rows={1}
-              style={{ minHeight: '40px', maxHeight: '200px' }}
-              className="flex-1 resize-none bg-transparent border-none outline-none text-text-primary placeholder:text-text-muted text-sm py-2 overflow-hidden"
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  if (e.nativeEvent.isComposing || isComposingRef.current || e.keyCode === 229) {
-                    return;
-                  }
-                  e.preventDefault();
-                  handleSubmit();
-                }
-              }}
-            />
+              {isElectron && (
+                <button
+                  type="button"
+                  onClick={handleFileSelect}
+                  className="flex items-center gap-2 text-sm text-text-secondary hover:text-text-primary transition-colors"
+                >
+                  <Paperclip className="w-4 h-4" />
+                  <span>{t('welcome.attachFiles')}</span>
+                </button>
+              )}
+            </div>
 
-            {/* Send button */}
             <button
               type="submit"
               disabled={!canSubmit || isSubmitting}
               className="btn btn-primary px-5 py-2.5 rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSubmitting ? (
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              ) : (
-                <ArrowRight className="w-4 h-4" />
-              )}
+              <span>{isSubmitting ? t('welcome.starting') : t('welcome.letsGo')}</span>
+              <ArrowRight className="w-4 h-4" />
             </button>
           </div>
-
-          {/* Workspace indicator */}
-          {workingDir && (
-            <p className="text-xs text-text-muted text-center">
-              {workingDir.split(/[/\\]/).pop()}
-            </p>
-          )}
         </form>
-
-        {/* Quick Action Tags — below input */}
-        <div className="flex flex-wrap gap-2 justify-center">
-          {quickTags.map((tag) => (
-            <button
-              key={tag.id}
-              onClick={() => handleTagClick(tag.id, tag.prompt)}
-              className={`tag text-xs ${selectedTag === tag.id ? 'tag-active' : ''} ${
-                ('requiresChrome' in tag && tag.requiresChrome) || ('requiresNotion' in tag && tag.requiresNotion) ? 'relative' : ''
-              }`}
-            >
-              <tag.icon className={`w-3.5 h-3.5 ${selectedTag === tag.id ? 'text-accent' : 'text-text-muted'}`} />
-              <span>{tag.label}</span>
-              {'requiresChrome' in tag && tag.requiresChrome && (
-                <span className="flex items-center gap-1 ml-1 px-1.5 py-0.5 text-[10px] font-medium rounded-full bg-accent/10 text-accent border border-accent/20">
-                  <Chrome className="w-3 h-3" />
-                </span>
-              )}
-              {'requiresNotion' in tag && tag.requiresNotion && (
-                <span className="flex items-center gap-1 ml-1 px-1.5 py-0.5 text-[10px] font-medium rounded-full bg-surface-muted text-text-muted border border-border">
-                  <span className="text-xs">N</span>
-                </span>
-              )}
-            </button>
-          ))}
-        </div>
-
-        {/* Career Category Pills — compact row below */}
-        <div className="flex items-center justify-center gap-2">
-          {careerCategories.map((cat) => (
-            <button
-              key={cat.id}
-              onClick={() => setActiveCareerCategory(activeCareerCategory === cat.id ? null : cat.id)}
-              className={`tag text-xs py-1.5 px-3 ${activeCareerCategory === cat.id ? 'tag-active' : ''}`}
-            >
-              <cat.icon className={`w-3.5 h-3.5 ${activeCareerCategory === cat.id ? 'text-accent' : 'text-text-muted'}`} />
-              <span>{cat.label}</span>
-            </button>
-          ))}
-        </div>
-
-        {/* Career Suggestions Grid */}
-        {activeCareerCategory && (
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 animate-fade-in">
-            {careerCategories
-              .find((c) => c.id === activeCareerCategory)
-              ?.suggestions.map((suggestion) => (
-                <button
-                  key={suggestion.text}
-                  onClick={() => {
-                    setActiveCareerCategory(null);
-                    handleTagClick(suggestion.text, suggestion.prompt);
-                  }}
-                  className="tag text-left text-xs justify-between"
-                >
-                  <span className="flex-1">{suggestion.text}</span>
-                  <ArrowRight className="w-3.5 h-3.5 text-text-muted flex-shrink-0" />
-                </button>
-              ))}
-          </div>
-        )}
       </div>
     </div>
   );

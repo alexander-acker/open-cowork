@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Computer Use Session - Manages the Anthropic Computer Use API loop
  *

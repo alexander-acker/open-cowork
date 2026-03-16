@@ -1,6 +1,6 @@
 /**
  * Remote Control Types
- * 
+ * 远程控制模块类型定义
  */
 
 // Types are defined locally in this file
@@ -77,7 +77,7 @@ export interface TunnelConfig {
 // Channel Configuration
 // ============================================================================
 
-export type ChannelType = 'wechat' | 'telegram' | 'dingtalk' | 'websocket';
+export type ChannelType = 'feishu' | 'wechat' | 'telegram' | 'dingtalk' | 'websocket';
 
 export interface ChannelConfig {
   /** Channel type */
@@ -87,9 +87,53 @@ export interface ChannelConfig {
   enabled: boolean;
   
   /** Channel-specific configuration */
-  config: WechatChannelConfig | TelegramChannelConfig | DingtalkChannelConfig | WebSocketChannelConfig;
+  config: FeishuChannelConfig | WechatChannelConfig | TelegramChannelConfig | DingtalkChannelConfig | WebSocketChannelConfig;
 }
 
+// Feishu (飞书) Channel
+export interface FeishuChannelConfig {
+  type: 'feishu';
+  
+  /** App ID from Feishu Open Platform */
+  appId: string;
+  
+  /** App Secret from Feishu Open Platform */
+  appSecret: string;
+  
+  /** Verification token for webhook validation */
+  verificationToken?: string;
+  
+  /** Encrypt key for message encryption */
+  encryptKey?: string;
+  
+  /** Use WebSocket mode instead of webhook (recommended for local dev) */
+  useWebSocket?: boolean;
+  
+  /** Direct message policy */
+  dm: {
+    /** Policy for handling DMs from unknown users */
+    policy: 'open' | 'pairing' | 'allowlist';
+    
+    /** Allowed user open_ids (when policy is 'allowlist') */
+    allowFrom?: string[];
+  };
+  
+  /** Group configuration */
+  groups?: {
+    [chatId: string]: {
+      /** Whether to require @mention to activate */
+      requireMention: boolean;
+      
+      /** Allowed users in this group */
+      allowFrom?: string[];
+    };
+  };
+  
+  /** Default group settings (when not specified per-group) */
+  defaultGroupSettings?: {
+    requireMention: boolean;
+  };
+}
 
 // WeChat Channel (via wechaty)
 export interface WechatChannelConfig {
@@ -141,7 +185,7 @@ export interface TelegramChannelConfig {
   };
 }
 
-// DingTalk () Channel
+// DingTalk (钉钉) Channel
 export interface DingtalkChannelConfig {
   type: 'dingtalk';
   
@@ -172,75 +216,13 @@ export interface DingtalkChannelConfig {
 // WebSocket Client Channel
 export interface WebSocketChannelConfig {
   type: 'websocket';
-
+  
   /** Allowed client IDs */
   allowedClients?: string[];
-
+  
   /** Whether to allow anonymous connections */
   allowAnonymous?: boolean;
 }
-
-// Coeadapt Career Platform Channel
-export interface CoeadaptChannelConfig {
-  type: 'coeadapt';
-
-  /** Coeadapt platform base URL */
-  baseUrl: string;
-
-  /** API key for authentication */
-  apiKey?: string;
-
-  /** OAuth2 configuration (via Clerk) */
-  oauth?: {
-    clientId: string;
-    redirectUri: string;
-    scopes: string[];
-  };
-
-  /** WebSocket endpoint for real-time events from Coeadapt */
-  wsEndpoint?: string;
-
-  /** Webhook configuration for receiving Coeadapt platform events */
-  webhook?: {
-    /** Shared secret for webhook signature verification */
-    secret: string;
-    /** Event types to subscribe to */
-    events: CoeadaptEventType[];
-  };
-
-  /** How to map Coeadapt users to local sessions */
-  userMapping: {
-    strategy: 'email' | 'coeadapt_id' | 'custom';
-  };
-
-  /** Feature toggles for Coeadapt integration capabilities */
-  features: {
-    /** Sync career skills and roadmaps from Coeadapt */
-    careerSync: boolean;
-    /** Enable AI-powered job search via Coeadapt market data */
-    jobSearch: boolean;
-    /** Enable interview preparation workflows */
-    interviewPrep: boolean;
-    /** Enable portfolio/case-study generation */
-    portfolioBuilder: boolean;
-    /** Enable daily skill tracking and habit streaks */
-    skillTracking: boolean;
-  };
-}
-
-/** Coeadapt platform event types that can trigger agent actions */
-export type CoeadaptEventType =
-  | 'career.roadmap_updated'
-  | 'career.skill_gap_analyzed'
-  | 'career.plan_generated'
-  | 'portfolio.item_added'
-  | 'portfolio.review_requested'
-  | 'interview.session_started'
-  | 'interview.feedback_ready'
-  | 'job.match_found'
-  | 'job.application_status_changed'
-  | 'user.profile_updated'
-  | 'user.message';
 
 // ============================================================================
 // Remote Message Protocol
@@ -532,11 +514,11 @@ export interface GatewayStatus {
 export interface RemoteConfig {
   gateway: GatewayConfig;
   channels: {
+    feishu?: FeishuChannelConfig;
     wechat?: WechatChannelConfig;
     telegram?: TelegramChannelConfig;
     dingtalk?: DingtalkChannelConfig;
     websocket?: WebSocketChannelConfig;
-    coeadapt?: CoeadaptChannelConfig;
   };
 }
 

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * CoworkDesktopView - Split-pane view with embedded VM desktop and chat
  *

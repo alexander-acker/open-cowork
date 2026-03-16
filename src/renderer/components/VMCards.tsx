@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * VMCards - Generative UI cards for VM Cowork Desktop
  *

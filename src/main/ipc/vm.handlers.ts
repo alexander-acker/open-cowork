@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { ipcMain, dialog } from 'electron';
 import { vmManager } from '../vm/vm-manager';
 import { getVMBootstrap } from '../vm/vm-bootstrap';

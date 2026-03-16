@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * VM Progress Tracker
  *

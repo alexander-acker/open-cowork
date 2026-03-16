@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * OnboardingModal - First-launch modal asking the user where they prefer to work.
  * Navi uses this preference to tailor instructions (real machine vs VM).

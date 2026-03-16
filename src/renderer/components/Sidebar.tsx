@@ -185,7 +185,6 @@ export function Sidebar() {
   );
 
   const handleNewSession = () => {
-    setActiveView('chat');
     setActiveSession(null);
     setShowSettings(false);
   };

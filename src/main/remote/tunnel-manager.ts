@@ -145,6 +145,10 @@ class TunnelManager {
     };
   }
 
+  getWebhookUrl(): string | null {
+    return this.currentUrl;
+  }
+
 
   /**
    * Emit status update

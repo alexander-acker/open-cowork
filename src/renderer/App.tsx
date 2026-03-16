@@ -4,17 +4,11 @@ import { useIPC } from './hooks/useIPC';
 import { useWindowSize } from './hooks/useWindowSize';
 import { Sidebar } from './components/Sidebar';
 import { WelcomeView } from './components/WelcomeView';
-import { CareerBoxView } from './components/CareerBoxView';
-import { CareerBox } from './components/CareerBox';
-import { VMView } from './components/VMView';
-import { CoworkDesktopView } from './components/CoworkDesktopView';
 import { PermissionDialog } from './components/PermissionDialog';
 import { SudoPasswordDialog } from './components/SudoPasswordDialog';
 import { Titlebar } from './components/Titlebar';
 import { SandboxSetupDialog } from './components/SandboxSetupDialog';
-import { OnboardingModal } from './components/OnboardingModal';
 import { SandboxSyncToast } from './components/SandboxSyncToast';
-import { OnboardingModal } from './components/OnboardingModal';
 import { GlobalNoticeToast } from './components/GlobalNoticeToast';
 import type { AppConfig } from './types';
 import type { GlobalNoticeAction } from './store';
@@ -53,7 +47,6 @@ function App() {
   const sandboxSetupProgress = useAppStore((s) => s.sandboxSetupProgress);
   const isSandboxSetupComplete = useAppStore((s) => s.isSandboxSetupComplete);
   const sandboxSyncStatus = useAppStore((s) => s.sandboxSyncStatus);
-  const showOnboardingModal = useAppStore((s) => s.showOnboardingModal);
   const setShowConfigModal = useAppStore((s) => s.setShowConfigModal);
   const setIsConfigured = useAppStore((s) => s.setIsConfigured);
   const setAppConfig = useAppStore((s) => s.setAppConfig);
@@ -62,8 +55,6 @@ function App() {
   const setShowSettings = useAppStore((s) => s.setShowSettings);
   const setSidebarCollapsed = useAppStore((s) => s.setSidebarCollapsed);
   const setContextPanelCollapsed = useAppStore((s) => s.setContextPanelCollapsed);
-  const setWorkEnvironment = useAppStore((s) => s.setWorkEnvironment);
-  const setShowOnboardingModal = useAppStore((s) => s.setShowOnboardingModal);
   const { listSessions, isElectron } = useIPC();
   const { width } = useWindowSize();
   const initialized = useRef(false);
@@ -76,15 +67,6 @@ function App() {
 
     if (isElectron) {
       listSessions();
-      // Fetch CopilotKit runtime URL
-      window.electronAPI.copilotkit.getRuntimeUrl().then((url) => {
-        if (url) {
-          console.log('[App] CopilotKit runtime URL:', url);
-          setCopilotKitUrl(url);
-        }
-      }).catch((err) => {
-        console.warn('[App] Failed to get CopilotKit runtime URL:', err);
-      });
     }
   }, []); // Empty deps - run once
 
@@ -96,19 +78,6 @@ function App() {
       document.documentElement.classList.remove('light');
     }
   }, [settings.theme]);
-
-  // Check onboarding state
-  useEffect(() => {
-    if (!isConfigured || !isElectronEnv) return;
-
-    window.electronAPI.onboarding.getWorkEnvironment().then((env) => {
-      if (env === null) {
-        setShowOnboardingModal(true);
-      } else {
-        setWorkEnvironment(env);
-      }
-    });
-  }, [isConfigured, setShowOnboardingModal, setWorkEnvironment]);
 
   // Auto-collapse panels based on window width
   useEffect(() => {
@@ -167,12 +136,12 @@ function App() {
     <div className="h-full w-full min-h-0 flex flex-col overflow-hidden bg-background">
       {/* Titlebar - draggable region */}
       <Titlebar />
-
+      
       {/* Main Content */}
       <div className="flex-1 min-h-0 flex overflow-hidden">
         {/* Sidebar */}
         <Sidebar />
-
+        
         {/* Main Content Area */}
         <main className="flex-1 min-h-0 min-w-0 flex flex-col overflow-hidden bg-background">
           {showSettings ? (
@@ -195,7 +164,7 @@ function App() {
           </Suspense>
         )}
       </div>
-
+      
       {/* Permission Dialog */}
       {pendingPermission && <PermissionDialog permission={pendingPermission} />}
 
@@ -213,26 +182,16 @@ function App() {
         />
       </Suspense>
       
-      {/* Onboarding Modal */}
-      {showOnboardingModal && (
-        <OnboardingModal onComplete={() => setShowOnboardingModal(false)} />
-      )}
-
       {/* Sandbox Setup Dialog */}
       {showSandboxSetup && (
-        <SandboxSetupDialog
+        <SandboxSetupDialog 
           progress={sandboxSetupProgress}
           onComplete={handleSandboxSetupComplete}
         />
       )}
-
+      
       {/* Sandbox Sync Toast */}
       <SandboxSyncToast status={sandboxSyncStatus} />
-
-      {/* Onboarding Modal */}
-      {showOnboardingModal && (
-        <OnboardingModal onComplete={() => setShowOnboardingModal(false)} />
-      )}
 
       <GlobalNoticeToast
         notice={globalNotice}
@@ -241,28 +200,6 @@ function App() {
       />
     </div>
   );
-
-  // Wrap with CopilotKit when runtime URL is available
-  if (copilotKitUrl) {
-    return (
-      <CopilotKit runtimeUrl={copilotKitUrl}>
-        <CopilotKitBridge />
-        <CopilotSidebar
-          labels={{
-            title: 'Open Cowork Copilot',
-            initial: 'Hi! I can help you manage your agent sessions, start new tasks, and provide context about your work. What would you like to do?',
-            placeholder: 'Ask your copilot...',
-          }}
-          defaultOpen={false}
-          clickOutsideToClose={true}
-        >
-          {appContent}
-        </CopilotSidebar>
-      </CopilotKit>
-    );
-  }
-
-  return appContent;
 }
 
 export default App;

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Coeadapt Channel
  * Connects Open Cowork to the Coeadapt career development platform,

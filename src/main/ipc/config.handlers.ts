@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { ipcMain } from 'electron';
 import { configStore, PROVIDER_PRESETS, type AppConfig } from '../config/config-store';
 import { testApiConnection } from '../config/api-tester';

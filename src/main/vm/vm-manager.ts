@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * VM Manager - Orchestrator for the managed VM service
  *

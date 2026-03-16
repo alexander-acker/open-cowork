@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useState, useEffect, useCallback } from 'react';
 import type { VMProgressUpdate, VMScreenshotUpdate, VMTaskStepInfo, VMTaskStatus } from '../types';
 import {

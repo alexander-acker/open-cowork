@@ -25,6 +25,7 @@ export interface DatabaseInstance {
   // Message operations
   messages: {
     create: (message: MessageRow) => void;
+    update: (id: string, updates: Partial<Pick<MessageRow, 'execution_time_ms'>>) => void;
     getBySessionId: (sessionId: string) => MessageRow[];
     delete: (id: string) => void;
     deleteBySessionId: (sessionId: string) => void;
@@ -383,8 +384,8 @@ export function initDatabase(): DatabaseInstance {
   // Enable foreign keys
   rawDb.pragma('foreign_keys = ON');
   
-  // Run migrations (replaces old initializeSchema)
-  runMigrations(rawDb);
+  // Initialize schema
+  initializeSchema(rawDb);
   
   // Prepare statements for better performance
   const insertSession = rawDb.prepare(`
@@ -487,25 +488,24 @@ export function initDatabase(): DatabaseInstance {
       },
       
       update: (id: string, updates: Partial<SessionRow>) => {
-        // Build dynamic update query with whitelisted column names
-        const ALLOWED_COLS = ['title', 'claude_session_id', 'status', 'cwd', 'mounted_paths', 'allowed_tools', 'memory_enabled'];
+        // Build dynamic update query
         const setClauses: string[] = [];
         const values: unknown[] = [];
-
+        
         for (const [key, value] of Object.entries(updates)) {
-          if (value !== undefined && ALLOWED_COLS.includes(key)) {
+          if (value !== undefined) {
             setClauses.push(`${key} = ?`);
             values.push(value);
           }
         }
-
+        
         if (setClauses.length === 0) return;
-
+        
         // Always update updated_at
         setClauses.push('updated_at = ?');
         values.push(Date.now());
         values.push(id);
-
+        
         const sql = `UPDATE sessions SET ${setClauses.join(', ')} WHERE id = ?`;
         rawDb.prepare(sql).run(...values);
       },
@@ -575,12 +575,11 @@ export function initDatabase(): DatabaseInstance {
       },
 
       update: (id: string, updates: Partial<TraceStepRow>) => {
-        const ALLOWED_COLS = ['type', 'status', 'title', 'content', 'tool_name', 'tool_input', 'tool_output', 'is_error', 'duration'];
         const setClauses: string[] = [];
         const values: unknown[] = [];
 
         for (const [key, value] of Object.entries(updates)) {
-          if (value !== undefined && ALLOWED_COLS.includes(key)) {
+          if (value !== undefined) {
             setClauses.push(`${key} = ?`);
             values.push(value);
           }
@@ -668,7 +667,7 @@ export function initDatabase(): DatabaseInstance {
   };
   
   log('[Database] SQLite database initialized successfully');
-  return db;
+  return db!;
 }
 
 /**

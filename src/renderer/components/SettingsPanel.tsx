@@ -299,12 +299,6 @@ export function SettingsPanel({ onClose, initialTab = 'api' }: SettingsPanelProp
   ];
   const activeTabMeta = tabs.find((tab) => tab.id === activeTab);
 
-  const filteredTabs = tabs.filter(tab => {
-    const q = tabQuery.trim().toLowerCase();
-    if (!q) return true;
-    return tab.label.toLowerCase().includes(q) || tab.description.toLowerCase().includes(q);
-  });
-
   return (
     <div className="flex h-full w-full overflow-hidden bg-background">
       {/* Sidebar */}
@@ -4624,7 +4618,7 @@ function GeneralTab() {
 
   const languages = [
     { code: 'en', nativeName: 'English' },
-    { code: 'zh', nativeName: '' },
+    { code: 'zh', nativeName: '中文' },
   ];
 
   const themeOptions = [

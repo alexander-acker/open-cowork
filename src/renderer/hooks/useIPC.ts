@@ -122,9 +122,9 @@ export function useIPC() {
           if (event.payload.status !== 'running') {
             store.finishExecutionClock(event.payload.sessionId);
             store.setLoading(false);
-            store.clearActiveTurn(sessionId);
-            store.clearPendingTurns(sessionId);
-            store.clearQueuedMessages(sessionId);
+            store.clearActiveTurn(event.payload.sessionId);
+            store.clearPendingTurns(event.payload.sessionId);
+            store.clearQueuedMessages(event.payload.sessionId);
           }
           break;
 
@@ -162,7 +162,7 @@ export function useIPC() {
             if (pending.length > 0) {
               store.activateNextTurn(event.payload.sessionId, event.payload.step.id);
             } else if (activeTurn) {
-              //  stepId mock stepId 
+              // 绑定真实 stepId，避免 mock stepId 导致无法清理
               store.updateActiveTurnStep(event.payload.sessionId, event.payload.step.id);
             }
           }

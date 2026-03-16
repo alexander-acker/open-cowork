@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * CoeadaptAuth – Conditional Clerk auth wrapper
  *

@@ -34,6 +34,8 @@ import { mcpConfigStore } from './mcp/mcp-config-store';
 import { credentialsStore, type UserCredential } from './credentials/credentials-store';
 import { getSandboxAdapter, shutdownSandbox } from './sandbox/sandbox-adapter';
 import { SandboxSync } from './sandbox/sandbox-sync';
+import { WSLBridge } from './sandbox/wsl-bridge';
+import { LimaBridge } from './sandbox/lima-bridge';
 import { getSandboxBootstrap } from './sandbox/sandbox-bootstrap';
 import type { MCPServerConfig } from './mcp/mcp-manager';
 import type {
@@ -71,8 +73,12 @@ import {
   log,
   logWarn,
   logError,
+  getLogFilePath,
+  getLogsDirectory,
+  getAllLogFiles,
   closeLogFile,
   setDevLogsEnabled,
+  isDevLogsEnabled,
 } from './utils/logger';
 import { listRecentWorkspaceFiles } from './utils/recent-workspace-files';
 import { buildDiagnosticsSummary } from './utils/diagnostics-summary';
@@ -203,15 +209,18 @@ if (!hasSingleInstanceLock) {
 }
 
 function createWindow() {
+  // Theme colors (warm cream theme)
   const THEME = {
-    background: '#000000',
-    titleBar: '#000000',
-    titleBarSymbol: '#f0f0f0',
+    background: '#f5f3ee',
+    titleBar: '#f5f3ee',
+    titleBarSymbol: '#1a1a1a',
   };
 
+  // Platform-specific window configuration
   const isMac = process.platform === 'darwin';
   const isWindows = process.platform === 'win32';
 
+  // Base window options
   const windowOptions: Electron.BrowserWindowConstructorOptions = {
     width: 1400,
     height: 900,
@@ -222,16 +231,20 @@ function createWindow() {
       preload: join(__dirname, '../preload/index.js'),
       nodeIntegration: false,
       contextIsolation: true,
-      sandbox: true,
+      sandbox: false, // Temporarily disabled to test if it resolves the console error
     },
   };
 
   if (isMac) {
+    // macOS: Use hiddenInset for native traffic light buttons
     windowOptions.titleBarStyle = 'hiddenInset';
     windowOptions.trafficLightPosition = { x: 16, y: 12 };
   } else if (isWindows) {
+    // Windows: Use frameless window with custom titlebar
+    // Note: frame: false removes native frame, allowing custom titlebar
     windowOptions.frame = false;
   } else {
+    // Linux: Use frameless window
     windowOptions.frame = false;
   }
 
@@ -242,7 +255,7 @@ function createWindow() {
     try {
       allowedOrigins.add(new URL(process.env.VITE_DEV_SERVER_URL).origin);
     } catch {
-      // ignore
+      // 忽略无效的开发服务地址
     }
   }
   const allowedProtocols = new Set<string>(['file:', 'devtools:']);
@@ -250,8 +263,12 @@ function createWindow() {
   const isExternalUrl = (url: string) => {
     try {
       const parsed = new URL(url);
-      if (allowedProtocols.has(parsed.protocol)) return false;
-      if (allowedOrigins.has(parsed.origin)) return false;
+      if (allowedProtocols.has(parsed.protocol)) {
+        return false;
+      }
+      if (allowedOrigins.has(parsed.origin)) {
+        return false;
+      }
       return true;
     } catch {
       return true;
@@ -289,9 +306,9 @@ function createWindow() {
     }
     if (isExternalUrl(url)) {
       void shell.openExternal(url);
-      return { action: 'deny' as const };
+      return { action: 'deny' };
     }
-    return { action: 'allow' as const };
+    return { action: 'allow' };
   });
 
   mainWindow.webContents.on('will-navigate', (event, url) => {
@@ -307,6 +324,7 @@ function createWindow() {
     }
   });
 
+  // Load the app
   if (process.env.VITE_DEV_SERVER_URL) {
     const devServerUrl = process.env.VITE_DEV_SERVER_URL;
     void (async () => {
@@ -328,6 +346,7 @@ function createWindow() {
     mainWindow = null;
   });
 
+  // Notify renderer about config status after window is ready
   mainWindow.webContents.on('did-finish-load', () => {
     const isConfigured = configStore.isConfigured();
     log('[Config] Notifying renderer, isConfigured:', isConfigured);
@@ -339,17 +358,24 @@ function createWindow() {
       },
     });
 
+    // Send current working directory to renderer
     sendToRenderer({
       type: 'workdir.changed',
       payload: { path: currentWorkingDir || '' },
     });
 
+    // Start sandbox bootstrap after window is loaded
     startSandboxBootstrap();
-    startVMBootstrap();
   });
 }
 
+/**
+ * Initialize default working directory
+ * This is always the app's default_working_dir in userData - it never changes
+ * Each session can have its own cwd that differs from this default
+ */
 function initializeDefaultWorkingDir(): string {
+  // Create default working directory in user data path (this is the permanent global default)
   const userDataPath = app.getPath('userData');
   const defaultDir = join(userDataPath, 'default_working_dir');
 
@@ -364,6 +390,9 @@ function initializeDefaultWorkingDir(): string {
   return currentWorkingDir;
 }
 
+/**
+ * Get current working directory
+ */
 function getWorkingDir(): string | null {
   return currentWorkingDir;
 }
@@ -398,6 +427,7 @@ async function setWorkingDir(
   }
 
   if (sessionId && sessionManager) {
+    // Update only this session's cwd - don't change the global default
     log('[App] Updating session cwd:', sessionId, '->', newDir);
     sessionManager.updateSessionCwd(sessionId, newDir);
 
@@ -423,7 +453,12 @@ async function setWorkingDir(
   return { success: true, path: newDir };
 }
 
+/**
+ * Start sandbox bootstrap in the background
+ * This pre-initializes WSL/Lima environment at app startup
+ */
 async function startSandboxBootstrap(): Promise<void> {
+  // Skip sandbox bootstrap if disabled - use native mode directly
   const sandboxEnabled = configStore.get('sandboxEnabled');
   if (sandboxEnabled === false) {
     log('[App] Sandbox disabled, skipping bootstrap (using native mode)');
@@ -438,10 +473,15 @@ async function startSandboxBootstrap(): Promise<void> {
     return;
   }
 
+  // Set up progress callback to notify renderer
   bootstrap.setProgressCallback((progress) => {
-    sendToRenderer({ type: 'sandbox.progress', payload: progress });
+    sendToRenderer({
+      type: 'sandbox.progress',
+      payload: progress,
+    });
   });
 
+  // Start bootstrap (non-blocking)
   log('[App] Starting sandbox bootstrap...');
   try {
     const result = await bootstrap.bootstrap();
@@ -451,45 +491,7 @@ async function startSandboxBootstrap(): Promise<void> {
   }
 }
 
-async function startVMBootstrap(): Promise<void> {
-  const bootstrap = getVMBootstrap();
-
-  if (bootstrap.isComplete()) {
-    log('[App] VM bootstrap already complete');
-    return;
-  }
-
-  bootstrap.setProgressCallback((progress) => {
-    sendToRenderer({
-      type: 'vm.bootstrapProgress' as any,
-      payload: progress,
-    });
-  });
-
-  log('[App] Starting VM bootstrap...');
-  try {
-    const result = await bootstrap.bootstrap();
-    log('[App] VM bootstrap complete, provisioned:', result.provisioned);
-
-    if (result.provisioned || vmManager.getAllVMConfigs().length > 0) {
-      startVMHealthMonitor();
-    }
-  } catch (error) {
-    logError('[App] VM bootstrap error:', error);
-  }
-}
-
-function startVMHealthMonitor(): void {
-  const monitor = getVMHealthMonitor();
-  monitor.start((event) => {
-    sendToRenderer({
-      type: 'vm.healthEvent' as any,
-      payload: event,
-    });
-  });
-  log('[App] VM health monitor started');
-}
-
+// 发送事件到渲染进程（含远程会话拦截）
 function sendToRenderer(event: ServerEvent) {
   const payload = event.payload as { sessionId?: string; [key: string]: any };
   const sessionId = payload?.sessionId;
@@ -505,12 +507,14 @@ function sendToRenderer(event: ServerEvent) {
         content?: Array<{ type: string; text?: string }>;
       };
       if (message?.role === 'assistant' && message?.content) {
+        // 提取助手文本内容
         const textContent = message.content
           .filter((c: any) => c.type === 'text' && c.text)
           .map((c: any) => c.text)
           .join('\n');
 
         if (textContent) {
+          // 发送到远程通道（带缓冲）
           remoteManager.sendResponseToChannel(sessionId, textContent).catch((err: Error) => {
             logError('[Remote] Failed to send response to channel:', err);
           });
@@ -549,6 +553,7 @@ function sendToRenderer(event: ServerEvent) {
     if (event.type === 'session.status') {
       const status = payload.status as string;
       if (status === 'idle' || status === 'error') {
+        // 会话结束，清空缓冲
         remoteManager.clearSessionBuffer(sessionId).catch((err: Error) => {
           logError('[Remote] Failed to clear session buffer:', err);
         });
@@ -737,9 +742,13 @@ app
     app.quit();
   });
 
-// Cleanup
+// Flag to prevent double cleanup
 let isCleaningUp = false;
 
+/**
+ * Cleanup all sandbox resources
+ * Called on app quit (both Windows and macOS)
+ */
 async function cleanupSandboxResources(): Promise<void> {
   if (isCleaningUp) {
     log('[App] Cleanup already in progress, skipping...');
@@ -758,32 +767,23 @@ async function cleanupSandboxResources(): Promise<void> {
     logError('[App] Error stopping remote control:', error);
   }
 
-  try {
-    log('[App] Stopping VM health monitor...');
-    getVMHealthMonitor().stop();
-    log('[App] VM health monitor stopped');
-  } catch (error) {
-    logError('[App] Error stopping VM health monitor:', error);
-  }
-
-  try {
-    log('[App] Shutting down VMs...');
-    await vmManager.shutdownAll();
-    log('[App] VM shutdown complete');
-  } catch (error) {
-    logError('[App] Error shutting down VMs:', error);
-  }
-
+  // Cleanup all sandbox sessions (sync changes back to host OS first)
   try {
     log('[App] Cleaning up all sandbox sessions...');
+
+    // Cleanup WSL sessions
     await SandboxSync.cleanupAllSessions();
+
+    // Cleanup Lima sessions
     const { LimaSync } = await import('./sandbox/lima-sync');
     await LimaSync.cleanupAllSessions();
+
     log('[App] Sandbox sessions cleanup complete');
   } catch (error) {
     logError('[App] Error cleaning up sandbox sessions:', error);
   }
 
+  // Shutdown sandbox adapter
   try {
     await shutdownSandbox();
     log('[App] Sandbox shutdown complete');
@@ -794,6 +794,7 @@ async function cleanupSandboxResources(): Promise<void> {
   // pi-ai doesn't need proxy shutdown
 }
 
+// Handle app quit - window-all-closed (primary for Windows/Linux)
 app.on('window-all-closed', async () => {
   if (process.platform !== 'darwin' || process.env.VITE_DEV_SERVER_URL) {
     // On Windows/Linux, closing all windows means quit.
@@ -848,16 +849,6 @@ ipcMain.handle('client-invoke', async (_event, data: ClientEvent) => {
 
 ipcMain.handle('get-version', () => {
   return app.getVersion();
-});
-
-ipcMain.handle('copilotkit.getRuntimeUrl', async () => {
-  let url = getCopilotKitUrl();
-  if (!url) {
-    // Server not started yet, start it now
-    await startCopilotKitServer();
-    url = getCopilotKitUrl();
-  }
-  return url;
 });
 
 ipcMain.handle('shell.openExternal', async (_event, url: string) => {
@@ -1233,6 +1224,7 @@ ipcMain.handle('mcp.saveServer', async (_event, config: MCPServerConfig) => {
       logError('[MCP] Failed to update server:', err);
     }
   }
+  return { success: true };
 });
 
 ipcMain.handle('mcp.deleteServer', async (_event, serverId: string) => {
@@ -2049,16 +2041,6 @@ ipcMain.handle('remote.updateFeishuConfig', async (_event, config: FeishuChannel
   }
 });
 
-ipcMain.handle('remote.updateCoeadaptConfig', async (_event, config: CoeadaptChannelConfig) => {
-  try {
-    await remoteManager.updateCoeadaptConfig(config);
-    return { success: true };
-  } catch (error) {
-    logError('[Remote] Error updating Coeadapt config:', error);
-    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
-  }
-});
-
 ipcMain.handle('remote.getPairedUsers', () => {
   try {
     return remoteManager.getPairedUsers();
@@ -2397,18 +2379,8 @@ async function handleClientEvent(event: ClientEvent): Promise<unknown> {
     }
 
     case 'settings.update':
-      if (event.payload && typeof event.payload === 'object') {
-        const updates = event.payload as Partial<AppConfig>;
-        for (const [key, value] of Object.entries(updates)) {
-          configStore.set(key as keyof AppConfig, value);
-        }
-        // Apply dev logs setting immediately if changed
-        if ('enableDevLogs' in updates) {
-          setDevLogsEnabled(updates.enableDevLogs as boolean);
-        }
-        log('[Settings] Updated:', Object.keys(updates).join(', '));
-      }
-      return { success: true };
+      // TODO: Implement settings update
+      return null;
 
     default:
       logWarn('Unknown event type:', event);

@@ -118,14 +118,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.invoke('config.discover-local', payload),
   },
 
-  // Onboarding methods
-  onboarding: {
-    getWorkEnvironment: (): Promise<'real-machine' | 'vm' | null> =>
-      ipcRenderer.invoke('onboarding.getWorkEnvironment'),
-    setWorkEnvironment: (env: 'real-machine' | 'vm'): Promise<{ success: boolean }> =>
-      ipcRenderer.invoke('onboarding.setWorkEnvironment', env),
-  },
-
   auth: {
     getStatus: (): Promise<Array<Record<string, unknown>>> => ipcRenderer.invoke('auth.getStatus'),
     importToken: (provider: string): Promise<Record<string, unknown> | null> => ipcRenderer.invoke('auth.importToken', provider),
@@ -280,11 +272,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.invoke('sandbox.retryLimaSetup'),
   },
 
-  // CopilotKit methods
-  copilotkit: {
-    getRuntimeUrl: (): Promise<string | null> => ipcRenderer.invoke('copilotkit.getRuntimeUrl'),
-  },
-
   // Logs methods
   logs: {
     getPath: (): Promise<string | null> => ipcRenderer.invoke('logs.getPath'),
@@ -305,143 +292,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.invoke('logs.write', level, args),
   },
 
-  // CareerBox (Docker) methods
-  careerbox: {
-    checkDocker: (): Promise<{ available: boolean; version?: string }> =>
-      ipcRenderer.invoke('careerbox.checkDocker'),
-    getStatus: (): Promise<ContainerInfo> =>
-      ipcRenderer.invoke('careerbox.getStatus'),
-    pullImage: (): Promise<void> =>
-      ipcRenderer.invoke('careerbox.pullImage'),
-    createContainer: (): Promise<{ success: boolean; error?: string }> =>
-      ipcRenderer.invoke('careerbox.createContainer'),
-    startContainer: (): Promise<{ success: boolean; error?: string }> =>
-      ipcRenderer.invoke('careerbox.startContainer'),
-    stopContainer: (): Promise<{ success: boolean; error?: string }> =>
-      ipcRenderer.invoke('careerbox.stopContainer'),
-    removeContainer: (): Promise<{ success: boolean; error?: string }> =>
-      ipcRenderer.invoke('careerbox.removeContainer'),
-    openWorkspace: (): Promise<void> =>
-      ipcRenderer.invoke('careerbox.openWorkspace'),
-    checkHealth: (): Promise<{ healthy: boolean }> =>
-      ipcRenderer.invoke('careerbox.checkHealth'),
-    getConfig: (): Promise<CareerBoxConfig> =>
-      ipcRenderer.invoke('careerbox.getConfig'),
-    saveConfig: (config: Partial<CareerBoxConfig>): Promise<{ success: boolean }> =>
-      ipcRenderer.invoke('careerbox.saveConfig', config),
-  },
-
-  // Virtual Machine methods
-  vm: {
-    checkBackend: (): Promise<{ type: string; available: boolean; version?: string; error?: string }> =>
-      ipcRenderer.invoke('vm.checkBackend'),
-    listVMs: (): Promise<any[]> =>
-      ipcRenderer.invoke('vm.listVMs'),
-    getVMStatus: (vmId: string): Promise<any> =>
-      ipcRenderer.invoke('vm.getVMStatus', vmId),
-    getVMConfig: (vmId: string): Promise<any> =>
-      ipcRenderer.invoke('vm.getVMConfig', vmId),
-    createVM: (params: { name: string; osImageId: string; resources: any }): Promise<{ success: boolean; vmId?: string; error?: string }> =>
-      ipcRenderer.invoke('vm.createVM', params),
-    startVM: (vmId: string): Promise<{ success: boolean; error?: string }> =>
-      ipcRenderer.invoke('vm.startVM', vmId),
-    stopVM: (vmId: string): Promise<{ success: boolean; error?: string }> =>
-      ipcRenderer.invoke('vm.stopVM', vmId),
-    forceStopVM: (vmId: string): Promise<{ success: boolean; error?: string }> =>
-      ipcRenderer.invoke('vm.forceStopVM', vmId),
-    pauseVM: (vmId: string): Promise<{ success: boolean; error?: string }> =>
-      ipcRenderer.invoke('vm.pauseVM', vmId),
-    resumeVM: (vmId: string): Promise<{ success: boolean; error?: string }> =>
-      ipcRenderer.invoke('vm.resumeVM', vmId),
-    deleteVM: (vmId: string): Promise<{ success: boolean; error?: string }> =>
-      ipcRenderer.invoke('vm.deleteVM', vmId),
-    openDisplay: (vmId: string): Promise<{ success: boolean; error?: string }> =>
-      ipcRenderer.invoke('vm.openDisplay', vmId),
-    modifyVM: (vmId: string, resources: any): Promise<{ success: boolean; error?: string }> =>
-      ipcRenderer.invoke('vm.modifyVM', vmId, resources),
-    getAvailableImages: (): Promise<any[]> =>
-      ipcRenderer.invoke('vm.getAvailableImages'),
-    getDownloadedImages: (): Promise<any[]> =>
-      ipcRenderer.invoke('vm.getDownloadedImages'),
-    downloadImage: (imageId: string): Promise<{ success: boolean; path?: string; error?: string }> =>
-      ipcRenderer.invoke('vm.downloadImage', imageId),
-    cancelDownload: (): Promise<{ success: boolean }> =>
-      ipcRenderer.invoke('vm.cancelDownload'),
-    deleteImage: (imageId: string): Promise<{ success: boolean; error?: string }> =>
-      ipcRenderer.invoke('vm.deleteImage', imageId),
-    importISO: (osFamily?: string): Promise<any | null> =>
-      ipcRenderer.invoke('vm.importISO', osFamily),
-    // Cowork Desktop (VNC + Computer Use)
-    startWithVNC: (vmId: string): Promise<{ success: boolean; wsUrl?: string; error?: string }> =>
-      ipcRenderer.invoke('vm.startWithVNC', vmId),
-    stopWithVNC: (vmId: string): Promise<{ success: boolean; error?: string }> =>
-      ipcRenderer.invoke('vm.stopWithVNC', vmId),
-    getVNCUrl: (vmId: string): Promise<string | null> =>
-      ipcRenderer.invoke('vm.getVNCUrl', vmId),
-    enableComputerUse: (vmId: string, enabled: boolean): Promise<{ success: boolean; error?: string }> =>
-      ipcRenderer.invoke('vm.enableComputerUse', vmId, enabled),
-    isComputerUseEnabled: (vmId: string): Promise<boolean> =>
-      ipcRenderer.invoke('vm.isComputerUseEnabled', vmId),
-    executeComputerUse: (vmId: string, action: unknown): Promise<unknown> =>
-      ipcRenderer.invoke('vm.executeComputerUse', vmId, action),
-    // Health monitor + Bootstrap
-    getHealthSummary: (): Promise<any[]> =>
-      ipcRenderer.invoke('vm.getHealthSummary'),
-    setAutoRestart: (vmId: string, enabled: boolean): Promise<{ success: boolean; error?: string }> =>
-      ipcRenderer.invoke('vm.setAutoRestart', vmId, enabled),
-    notifyBootstrapCreated: (vmId: string): Promise<{ success: boolean; error?: string }> =>
-      ipcRenderer.invoke('vm.notifyBootstrapCreated', vmId),
-    // Guest provisioning
-    provisionGuest: (vmId: string): Promise<any> =>
-      ipcRenderer.invoke('vm.provisionGuest', vmId),
-    getProvisionStatus: (vmId: string): Promise<any> =>
-      ipcRenderer.invoke('vm.getProvisionStatus', vmId),
-    isProvisioned: (vmId: string): Promise<boolean> =>
-      ipcRenderer.invoke('vm.isProvisioned', vmId),
-    connectGuestNavi: (vmId: string): Promise<{ success: boolean; error?: string }> =>
-      ipcRenderer.invoke('vm.connectGuestNavi', vmId),
-    notifyOSInstallComplete: (vmId: string): Promise<{ success: boolean; error?: string }> =>
-      ipcRenderer.invoke('vm.notifyOSInstallComplete', vmId),
-    checkVRDE: (): Promise<{ installed: boolean; error?: string }> =>
-      ipcRenderer.invoke('vm.checkVRDE'),
-    reconnectVNC: (vmId: string): Promise<{ success: boolean; wsUrl?: string; error?: string }> =>
-      ipcRenderer.invoke('vm.reconnectVNC', vmId),
-    getLatestScreenshot: (vmId: string): Promise<string | null> =>
-      ipcRenderer.invoke('vm.getLatestScreenshot', vmId),
-    cancelComputerUse: (vmId: string): Promise<{ success: boolean; error?: string }> =>
-      ipcRenderer.invoke('vm.cancelComputerUse', vmId),
-    disableInteractiveMode: (vmId: string): Promise<{ success: boolean }> =>
-      ipcRenderer.invoke('vm.disableInteractiveMode', vmId),
-  },
-
-  // Onboarding methods
-  onboarding: {
-    getWorkEnvironment: (): Promise<'real-machine' | 'vm' | null> =>
-      ipcRenderer.invoke('onboarding.getWorkEnvironment'),
-    setWorkEnvironment: (env: 'real-machine' | 'vm'): Promise<{ success: boolean }> =>
-      ipcRenderer.invoke('onboarding.setWorkEnvironment', env),
-  },
-
-  // Coeadapt API methods
-  coeadapt: {
-    getConfig: (): Promise<{ clerkPublishableKey: string; coeadaptApiUrl: string; isConnected: boolean }> =>
-      ipcRenderer.invoke('coeadapt.getConfig'),
-    saveConfig: (config: { clerkPublishableKey?: string; coeadaptApiUrl?: string }): Promise<{ success: boolean; error?: string }> =>
-      ipcRenderer.invoke('coeadapt.saveConfig', config),
-    deviceToken: {
-      get: (): Promise<{ hasToken: boolean; metadata: { userId: string; expiresAt: string; createdAt: string } | null }> =>
-        ipcRenderer.invoke('coeadapt.deviceToken.get'),
-      generate: (clerkJwt: string): Promise<{ success: boolean; error?: string }> =>
-        ipcRenderer.invoke('coeadapt.deviceToken.generate', clerkJwt),
-      verify: (): Promise<{ valid: boolean; error?: string }> =>
-        ipcRenderer.invoke('coeadapt.deviceToken.verify'),
-      clear: (): Promise<{ success: boolean }> =>
-        ipcRenderer.invoke('coeadapt.deviceToken.clear'),
-      getRaw: (): Promise<string | null> =>
-        ipcRenderer.invoke('coeadapt.deviceToken.getRaw'),
-    },
-  },
-
   // Remote control methods
   remote: {
     getConfig: (): Promise<any> => ipcRenderer.invoke('remote.getConfig'),
@@ -457,6 +307,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.invoke('remote.setEnabled', enabled),
     updateGatewayConfig: (config: any): Promise<{ success: boolean; error?: string }> =>
       ipcRenderer.invoke('remote.updateGatewayConfig', config),
+    updateFeishuConfig: (config: any): Promise<{ success: boolean; error?: string }> =>
+      ipcRenderer.invoke('remote.updateFeishuConfig', config),
     getPairedUsers: (): Promise<any[]> => ipcRenderer.invoke('remote.getPairedUsers'),
     getPendingPairings: (): Promise<any[]> => ipcRenderer.invoke('remote.getPendingPairings'),
     approvePairing: (channelType: string, userId: string): Promise<{ success: boolean; error?: string }> =>
@@ -524,10 +376,6 @@ declare global {
         listModels: (payload: { provider: AppConfig['provider']; apiKey: string; baseUrl?: string }) => Promise<ProviderModelInfo[]>;
         diagnose: (input: DiagnosticInput) => Promise<DiagnosticResult>;
         discoverLocal: (payload?: { baseUrl?: string }) => Promise<{ available: boolean; baseUrl: string; models?: string[]; status: 'unavailable' | 'service_available' | 'model_usable' | 'model_unusable'; probeModel?: string; probeError?: string }>;
-      };
-      onboarding: {
-        getWorkEnvironment: () => Promise<'real-machine' | 'vm' | null>;
-        setWorkEnvironment: (env: 'real-machine' | 'vm') => Promise<{ success: boolean }>;
       };
       auth: {
         getStatus: () => Promise<Array<Record<string, unknown>>>;
@@ -645,9 +493,6 @@ declare global {
         retrySetup: () => Promise<{ success: boolean; error?: string; result?: unknown }>;
         retryLimaSetup: () => Promise<{ success: boolean; error?: string; result?: unknown }>;
       };
-      copilotkit: {
-        getRuntimeUrl: () => Promise<string | null>;
-      };
       logs: {
         getPath: () => Promise<string | null>;
         getDirectory: () => Promise<string>;
@@ -658,77 +503,6 @@ declare global {
         setEnabled: (enabled: boolean) => Promise<{ success: boolean; enabled?: boolean; error?: string }>;
         isEnabled: () => Promise<{ success: boolean; enabled?: boolean; error?: string }>;
         write: (level: 'info' | 'warn' | 'error', ...args: any[]) => Promise<{ success: boolean; error?: string }>;
-      };
-      careerbox: {
-        checkDocker: () => Promise<{ available: boolean; version?: string }>;
-        getStatus: () => Promise<ContainerInfo>;
-        pullImage: () => Promise<void>;
-        createContainer: () => Promise<{ success: boolean; error?: string }>;
-        startContainer: () => Promise<{ success: boolean; error?: string }>;
-        stopContainer: () => Promise<{ success: boolean; error?: string }>;
-        removeContainer: () => Promise<{ success: boolean; error?: string }>;
-        openWorkspace: () => Promise<void>;
-        checkHealth: () => Promise<{ healthy: boolean }>;
-        getConfig: () => Promise<CareerBoxConfig>;
-        saveConfig: (config: Partial<CareerBoxConfig>) => Promise<{ success: boolean }>;
-      };
-      vm: {
-        checkBackend: () => Promise<{ type: string; available: boolean; version?: string; error?: string }>;
-        listVMs: () => Promise<any[]>;
-        getVMStatus: (vmId: string) => Promise<any>;
-        getVMConfig: (vmId: string) => Promise<any>;
-        createVM: (params: { name: string; osImageId: string; resources: any }) => Promise<{ success: boolean; vmId?: string; error?: string }>;
-        startVM: (vmId: string) => Promise<{ success: boolean; error?: string }>;
-        stopVM: (vmId: string) => Promise<{ success: boolean; error?: string }>;
-        forceStopVM: (vmId: string) => Promise<{ success: boolean; error?: string }>;
-        pauseVM: (vmId: string) => Promise<{ success: boolean; error?: string }>;
-        resumeVM: (vmId: string) => Promise<{ success: boolean; error?: string }>;
-        deleteVM: (vmId: string) => Promise<{ success: boolean; error?: string }>;
-        openDisplay: (vmId: string) => Promise<{ success: boolean; error?: string }>;
-        modifyVM: (vmId: string, resources: any) => Promise<{ success: boolean; error?: string }>;
-        getAvailableImages: () => Promise<any[]>;
-        getDownloadedImages: () => Promise<any[]>;
-        downloadImage: (imageId: string) => Promise<{ success: boolean; path?: string; error?: string }>;
-        cancelDownload: () => Promise<{ success: boolean }>;
-        deleteImage: (imageId: string) => Promise<{ success: boolean; error?: string }>;
-        importISO: (osFamily?: string) => Promise<any | null>;
-        // Cowork Desktop (VNC + Computer Use)
-        startWithVNC: (vmId: string) => Promise<{ success: boolean; wsUrl?: string; error?: string }>;
-        stopWithVNC: (vmId: string) => Promise<{ success: boolean; error?: string }>;
-        getVNCUrl: (vmId: string) => Promise<string | null>;
-        enableComputerUse: (vmId: string, enabled: boolean) => Promise<{ success: boolean; error?: string }>;
-        isComputerUseEnabled: (vmId: string) => Promise<boolean>;
-        executeComputerUse: (vmId: string, action: unknown) => Promise<unknown>;
-        // Health monitor + Bootstrap
-        getHealthSummary: () => Promise<any[]>;
-        setAutoRestart: (vmId: string, enabled: boolean) => Promise<{ success: boolean; error?: string }>;
-        notifyBootstrapCreated: (vmId: string) => Promise<{ success: boolean; error?: string }>;
-        // Guest provisioning
-        provisionGuest: (vmId: string) => Promise<any>;
-        getProvisionStatus: (vmId: string) => Promise<any>;
-        isProvisioned: (vmId: string) => Promise<boolean>;
-        connectGuestNavi: (vmId: string) => Promise<{ success: boolean; error?: string }>;
-        notifyOSInstallComplete: (vmId: string) => Promise<{ success: boolean; error?: string }>;
-        checkVRDE: () => Promise<{ installed: boolean; error?: string }>;
-        reconnectVNC: (vmId: string) => Promise<{ success: boolean; wsUrl?: string; error?: string }>;
-        getLatestScreenshot: (vmId: string) => Promise<string | null>;
-        cancelComputerUse: (vmId: string) => Promise<{ success: boolean; error?: string }>;
-        disableInteractiveMode: (vmId: string) => Promise<{ success: boolean }>;
-      };
-      onboarding: {
-        getWorkEnvironment: () => Promise<'real-machine' | 'vm' | null>;
-        setWorkEnvironment: (env: 'real-machine' | 'vm') => Promise<{ success: boolean }>;
-      };
-      coeadapt: {
-        getConfig: () => Promise<{ clerkPublishableKey: string; coeadaptApiUrl: string; isConnected: boolean }>;
-        saveConfig: (config: { clerkPublishableKey?: string; coeadaptApiUrl?: string }) => Promise<{ success: boolean; error?: string }>;
-        deviceToken: {
-          get: () => Promise<{ hasToken: boolean; metadata: { userId: string; expiresAt: string; createdAt: string } | null }>;
-          generate: (clerkJwt: string) => Promise<{ success: boolean; error?: string }>;
-          verify: () => Promise<{ valid: boolean; error?: string }>;
-          clear: () => Promise<{ success: boolean }>;
-          getRaw: () => Promise<string | null>;
-        };
       };
       remote: {
         getConfig: () => Promise<any>;
@@ -742,6 +516,7 @@ declare global {
         }>;
         setEnabled: (enabled: boolean) => Promise<{ success: boolean; error?: string }>;
         updateGatewayConfig: (config: any) => Promise<{ success: boolean; error?: string }>;
+        updateFeishuConfig: (config: any) => Promise<{ success: boolean; error?: string }>;
         getPairedUsers: () => Promise<any[]>;
         getPendingPairings: () => Promise<any[]>;
         approvePairing: (channelType: string, userId: string) => Promise<{ success: boolean; error?: string }>;

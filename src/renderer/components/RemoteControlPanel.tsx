@@ -1,6 +1,6 @@
 /**
  * Remote Control Settings Panel
- *  - 
+ * 远程控制设置面板 - 重新设计的现代化界面
  */
 
 import { useState, useEffect } from 'react';
@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import {
   Power,
   Users,
+  MessageSquare,
   Check,
   Trash2,
   Shield,
@@ -20,7 +21,6 @@ import {
   Link2,
   CheckCircle2,
   AlertTriangle,
-  Briefcase,
 } from 'lucide-react';
 import { formatAppDate } from '../utils/i18n-format';
 
@@ -82,18 +82,6 @@ interface RemoteConfig {
         policy: string;
       };
     };
-    coeadapt?: {
-      baseUrl: string;
-      apiKey?: string;
-      wsEndpoint?: string;
-      features: {
-        careerSync: boolean;
-        jobSearch: boolean;
-        interviewPrep: boolean;
-        portfolioBuilder: boolean;
-        skillTracking: boolean;
-      };
-    };
   };
 }
 
@@ -104,7 +92,7 @@ interface TunnelStatus {
   error?: string;
 }
 
-// 
+// 配置步骤
 type ConfigStep = 'feishu' | 'connection' | 'advanced';
 type LocalizedBanner = { key?: string; text?: string | null };
 
@@ -179,7 +167,12 @@ export function RemoteControlPanel({ isActive }: { isActive: boolean }) {
         setAutoApproveSafeTools(configResult.gateway?.autoApproveSafeTools !== false);
         setTunnelEnabled(configResult.gateway?.tunnel?.enabled || false);
         setNgrokAuthToken(configResult.gateway?.tunnel?.ngrok?.authToken || '');
-        // Feishu config removed
+        if (configResult.channels?.feishu) {
+          setFeishuAppId(configResult.channels.feishu.appId || '');
+          setFeishuAppSecret(configResult.channels.feishu.appSecret || '');
+          setFeishuDmPolicy(configResult.channels.feishu.dm?.policy || 'pairing');
+          setUseLongConnection(configResult.channels.feishu.useWebSocket !== false);
+        }
       }
     } catch (err) {
       console.error('Failed to load remote config:', err);
@@ -317,7 +310,7 @@ export function RemoteControlPanel({ isActive }: { isActive: boolean }) {
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
-      {/*  */}
+      {/* 通知 */}
       {error && (
         <div className="p-4 bg-error/10 border border-error/30 rounded-xl flex items-center gap-3">
           <AlertTriangle className="w-5 h-5 text-error flex-shrink-0" />
@@ -390,7 +383,7 @@ export function RemoteControlPanel({ isActive }: { isActive: boolean }) {
         </div>
       </div>
 
-      {/*  */}
+      {/* 配对请求 */}
       {pendingPairings.length > 0 && (
         <div className="p-5 rounded-2xl border-2 border-warning/30 bg-warning/5">
           <h3 className="font-medium text-warning mb-4 flex items-center gap-2">
@@ -427,7 +420,7 @@ export function RemoteControlPanel({ isActive }: { isActive: boolean }) {
         </div>
       )}
 
-      {/*  */}
+      {/* 配置步骤导航 */}
       <div className="flex items-center gap-2 p-1 bg-surface rounded-xl">
         {[
           {
@@ -551,7 +544,7 @@ export function RemoteControlPanel({ isActive }: { isActive: boolean }) {
           </div>
         )}
 
-        {/*  2:  */}
+        {/* 步骤 2: 连接方式 */}
         {activeStep === 'connection' && (
           <div className="space-y-6">
             <div>
@@ -739,7 +732,7 @@ export function RemoteControlPanel({ isActive }: { isActive: boolean }) {
           </div>
         )}
 
-        {/*  3:  */}
+        {/* 步骤 3: 高级设置 */}
         {activeStep === 'advanced' && (
           <div className="space-y-6">
             <div>
@@ -822,7 +815,7 @@ export function RemoteControlPanel({ isActive }: { isActive: boolean }) {
         </div>
       </div>
 
-      {/*  */}
+      {/* 已授权用户 */}
       {pairedUsers.length > 0 && (
         <div className="p-6 rounded-[2rem] border border-border-subtle bg-background/60">
           <h3 className="font-medium text-text-primary mb-4 flex items-center gap-2">

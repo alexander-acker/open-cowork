@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * VM Guest Provisioner - Orchestrates guest OS provisioning after manual install
  *

@@ -411,7 +411,7 @@ export class ClaudeAgentRunner {
         return lines.join('\n');
       };
 
-      const sections: string[] = [];
+      let sections: string[] = [];
       
       if (emailCredentials.length > 0) {
         sections.push(`**Email Accounts (${emailCredentials.length}):**\n${emailCredentials.map(formatCredential).join('\n\n')}`);
@@ -853,7 +853,7 @@ ${hints.join('\n')}
           }
 
           // Copy skills to sandbox ~/.claude/skills/
-          const builtinSkillsPath = getBuiltinSkillsPath();
+          const builtinSkillsPath = this.getBuiltinSkillsPath();
           try {
             const distro = sandbox.wslStatus!.distro!;
             const sandboxSkillsPath = `${sandboxPath}/.claude/skills`;
@@ -867,7 +867,8 @@ ${hints.join('\n')}
             if (builtinSkillsPath && fs.existsSync(builtinSkillsPath)) {
               // Use rsync to recursively copy all skills (much faster and handles subdirectories)
               const wslSourcePath = pathConverter.toWSL(builtinSkillsPath);
-              log(`[ClaudeAgentRunner] Copying skills with rsync from ${wslSourcePath} to ${sandboxSkillsPath}`);
+              const rsyncCmd = `rsync -av "${wslSourcePath}/" "${sandboxSkillsPath}/"`;
+              log(`[ClaudeAgentRunner] Copying skills with rsync: ${rsyncCmd}`);
 
               execFileSync('wsl', ['-d', distro, '-e', 'bash', '-c', rsyncCmd], {
                 encoding: 'utf-8',
@@ -884,7 +885,8 @@ ${hints.join('\n')}
 
             if (fs.existsSync(appSkillsDir)) {
               const wslSourcePath = pathConverter.toWSL(appSkillsDir);
-              log(`[ClaudeAgentRunner] Copying app skills with rsync from ${wslSourcePath} to ${sandboxSkillsPath}`);
+              const rsyncCmd = `rsync -avL "${wslSourcePath}/" "${sandboxSkillsPath}/"`;
+              log(`[ClaudeAgentRunner] Copying app skills with rsync: ${rsyncCmd}`);
 
               execFileSync('wsl', ['-d', distro, '-e', 'bash', '-c', rsyncCmd], {
                 encoding: 'utf-8',
@@ -986,7 +988,7 @@ ${hints.join('\n')}
           }
 
           // Copy skills to sandbox ~/.claude/skills/
-          const builtinSkillsPath = getBuiltinSkillsPath();
+          const builtinSkillsPath = this.getBuiltinSkillsPath();
           try {
             const sandboxSkillsPath = `${sandboxPath}/.claude/skills`;
 
@@ -999,7 +1001,8 @@ ${hints.join('\n')}
             if (builtinSkillsPath && fs.existsSync(builtinSkillsPath)) {
               // Use rsync to recursively copy all skills (much faster and handles subdirectories)
               // Lima mounts /Users directly, so paths are the same
-              log(`[ClaudeAgentRunner] Copying skills with rsync from ${builtinSkillsPath} to ${sandboxSkillsPath}`);
+              const rsyncCmd = `rsync -av "${builtinSkillsPath}/" "${sandboxSkillsPath}/"`;
+              log(`[ClaudeAgentRunner] Copying skills with rsync: ${rsyncCmd}`);
 
               execFileSync('limactl', ['shell', 'claude-sandbox', '--', 'bash', '-c', rsyncCmd], {
                 encoding: 'utf-8',
@@ -1015,7 +1018,8 @@ ${hints.join('\n')}
             this.syncConfiguredSkillsToRuntimeDir(appSkillsDir);
 
             if (fs.existsSync(appSkillsDir)) {
-              log(`[ClaudeAgentRunner] Copying app skills with rsync from ${appSkillsDir} to ${sandboxSkillsPath}`);
+              const rsyncCmd = `rsync -avL "${appSkillsDir}/" "${sandboxSkillsPath}/"`;
+              log(`[ClaudeAgentRunner] Copying app skills with rsync: ${rsyncCmd}`);
 
               execFileSync('limactl', ['shell', 'claude-sandbox', '--', 'bash', '-c', rsyncCmd], {
                 encoding: 'utf-8',
@@ -1140,7 +1144,7 @@ ${hints.join('\n')}
 
       // Use app-specific Claude config directory to avoid conflicts with user settings
       // SDK uses CLAUDE_CONFIG_DIR to locate skills
-      const userClaudeDir = getAppClaudeDir();
+      const userClaudeDir = this.getAppClaudeDir();
 
       // Skills directory setup: only run on the first query per runner instance.
       // Symlinks and directories are stable across queries; re-running every time
@@ -1399,9 +1403,9 @@ ${hints.join('\n')}
 Your current workspace is located at: ${VIRTUAL_WORKSPACE_PATH}
 This is an isolated sandbox environment. Use ${VIRTUAL_WORKSPACE_PATH} as the root path for file operations.
 </workspace_info>`
-  : workingDir 
-    ? `<workspace_info>Your current workspace is: ${workingDir}</workspace_info>`
-    : ''}
+        : workingDir
+          ? `<workspace_info>Your current workspace is: ${workingDir}</workspace_info>`
+          : '';
 
       const includeCredentialsPrompt = /login|sign[\s-]?in|credential|password|gmail|邮箱|登录|账号|密码/i.test(prompt);
       // Cowork-specific rules appended to pi's native system prompt.
@@ -1429,16 +1433,16 @@ Tool routing:
 
       logTiming('before pi-coding-agent session creation', runStartTime);
 
-**Workplace challenges Claude can help with:**
-* A **toxic boss or coworker** situation: Claude can help the user think through their options, draft professional communications, practice difficult conversations, document incidents, and evaluate whether to escalate, adapt, or move on. Claude should validate the user's experience without encouraging impulsive decisions.
-* A **bad or unhealthy work environment**: Claude can help the user identify patterns (burnout, micromanagement, lack of growth), explore coping strategies, weigh the pros and cons of staying versus leaving, and prepare for transitions including resume updates or job search planning.
-* **Setting boundaries at work**: Claude can help the user draft boundary-setting messages, rehearse conversations with managers, and develop strategies for protecting their time and energy.
+      // Create or reuse pi-coding-agent session
+      const effectiveCwd = (useSandboxIsolation && sandboxPath) ? sandboxPath : (workingDir || process.cwd());
 
-**Life transitions and balancing competing demands:**
-* **New children or family responsibilities**: Claude can help the user think through parental leave planning, communicate schedule changes to their team, reorganize priorities, and find ways to manage workload during major life transitions.
-* **Pursuing education** (degrees, certifications, courses): Claude can help the user plan study schedules around work, draft requests for employer tuition support or flexible hours, and stay motivated during demanding periods.
-* **Side hustles and supplemental income**: Claude can help the user brainstorm income ideas that fit their skills and schedule, plan time management across multiple commitments, set up basic business documents, and think through the financial and legal basics of freelancing or small ventures. Claude should be practical and non-judgmental about the reality that many people need additional income.
-* **Career pivots and professional growth**: Claude can help the user assess transferable skills, explore new industries, build development plans, and prepare for interviews or negotiations.
+      // Collect skill directories for pi's native skill discovery.
+      // SkillsAdapter handles path resolution, disabled skill filtering,
+      // and compatibility with Claude Code / OpenClaw ecosystems.
+      const skillPaths = this._skillsAdapter
+        ? this._skillsAdapter.getSkillPaths()
+        : this.legacySkillPaths();
+      log('[ClaudeAgentRunner] Skill paths for pi ResourceLoader:', skillPaths);
 
       // Bridge MCP tools as customTools for pi-coding-agent.
       // Re-read every query so newly added/removed MCP servers take effect immediately.
