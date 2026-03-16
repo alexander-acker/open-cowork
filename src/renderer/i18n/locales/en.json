@@ -632,6 +632,27 @@
     "contextUsage": "Context Usage",
     "contextUsageLabel": "{{used}} / {{total}}"
   },
+  "career": {
+    "title": "Career Box",
+    "subtitle": "Navi Labs — interactive skill-building for high-demand tech roles",
+    "labsCompleted": "Labs Completed",
+    "totalXP": "Total XP",
+    "focus": "Focus",
+    "techJobs": "High-Demand Tech",
+    "allTracks": "All Tracks",
+    "highDemand": "High Demand",
+    "startLab": "Start Lab",
+    "continueLab": "Continue",
+    "completed": "Completed",
+    "locked": "Prerequisites required",
+    "noLabs": "No labs available for this track",
+    "openCareerBox": "Career Box",
+    "difficulty": {
+      "beginner": "Beginner",
+      "intermediate": "Intermediate",
+      "advanced": "Advanced"
+    }
+  },
   "messageCard": {
     "request": "Request",
     "queued": "Queued",

@@ -365,7 +365,11 @@ export function WelcomeView() {
     }
   };
 
-  const handleTagClick = (tag: string, tagPrompt: string) => {
+  const handleTagClick = (tag: string, tagPrompt: string, isCareerBox?: boolean) => {
+    if (isCareerBox) {
+      setShowCareerBox(true);
+      return;
+    }
     setSelectedTag(tag === selectedTag ? null : tag);
     if (tag !== selectedTag) {
       setPrompt(tagPrompt);
