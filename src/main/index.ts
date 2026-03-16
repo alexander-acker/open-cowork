@@ -2039,6 +2039,16 @@ ipcMain.handle('remote.updateFeishuConfig', async (_event, config: FeishuChannel
   }
 });
 
+ipcMain.handle('remote.updateCoeadaptConfig', async (_event, config: CoeadaptChannelConfig) => {
+  try {
+    await remoteManager.updateCoeadaptConfig(config);
+    return { success: true };
+  } catch (error) {
+    logError('[Remote] Error updating Coeadapt config:', error);
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+  }
+});
+
 ipcMain.handle('remote.getPairedUsers', () => {
   try {
     return remoteManager.getPairedUsers();

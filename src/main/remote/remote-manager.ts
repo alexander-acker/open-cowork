@@ -896,6 +896,14 @@ export class RemoteManager extends EventEmitter {
     if (!this.gateway) return;
     
     
+    // Register Coeadapt channel if configured
+    const coeadaptConfig = config.channels.coeadapt;
+    if (coeadaptConfig && coeadaptConfig.baseUrl) {
+      const coeadaptChannel = new CoeadaptChannel(coeadaptConfig);
+      this.gateway.registerChannel(coeadaptChannel);
+      log('[RemoteManager] Coeadapt channel registered');
+    }
+
     // TODO: Register other channels (WeChat, Telegram, DingTalk)
   }
   

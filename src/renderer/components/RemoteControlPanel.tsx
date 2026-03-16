@@ -20,6 +20,7 @@ import {
   Link2,
   CheckCircle2,
   AlertTriangle,
+  Briefcase,
 } from 'lucide-react';
 import { formatAppDate } from '../utils/i18n-format';
 
@@ -79,6 +80,18 @@ interface RemoteConfig {
       useWebSocket?: boolean;
       dm: {
         policy: string;
+      };
+    };
+    coeadapt?: {
+      baseUrl: string;
+      apiKey?: string;
+      wsEndpoint?: string;
+      features: {
+        careerSync: boolean;
+        jobSearch: boolean;
+        interviewPrep: boolean;
+        portfolioBuilder: boolean;
+        skillTracking: boolean;
       };
     };
   };
