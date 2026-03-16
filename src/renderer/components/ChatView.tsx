@@ -2,17 +2,11 @@ import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppStore } from '../store';
 import { useIPC } from '../hooks/useIPC';
+import { useFileAttachments } from '../hooks/useFileAttachments';
+import { ErrorBoundary } from './ErrorBoundary';
 import { MessageCard } from './MessageCard';
 import type { Message, ContentBlock } from '../types';
 import { Send, Square, Plus, Loader2, Plug, X, Clock } from 'lucide-react';
-
-type AttachedFile = {
-  name: string;
-  path: string;
-  size: number;
-  type: string;
-  inlineDataBase64?: string;
-};
 
 export function ChatView() {
   const { t } = useTranslation();
@@ -26,6 +20,11 @@ export function ChatView() {
   const executionClockBySession = useAppStore((s) => s.executionClockBySession);
   const appConfig = useAppStore((s) => s.appConfig);
   const { continueSession, stopSession, isElectron } = useIPC();
+  const {
+    pastedImages, attachedFiles, isDragging,
+    handlePaste, handleDragOver, handleDragLeave, handleDrop,
+    handleFileSelect, removeImage, removeFile, clearAll,
+  } = useFileAttachments(isElectron);
   const [prompt, setPrompt] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeConnectors, setActiveConnectors] = useState<any[]>([]);
@@ -175,7 +174,7 @@ export function ChatView() {
       isUserAtBottomRef.current = distanceToBottom <= 80;
     };
     updateScrollState();
-    // 用户阅读旧消息时，阻止新消息自动滚动打断视线
+    // 
     const onScroll = () => updateScrollState();
     container.addEventListener('scroll', onScroll, { passive: true });
     return () => container.removeEventListener('scroll', onScroll);
@@ -764,6 +763,7 @@ export function ChatView() {
                 onClick={handleFileSelect}
                 className="w-9 h-9 rounded-2xl flex items-center justify-center text-text-muted hover:text-text-primary hover:bg-surface-hover transition-colors"
                 title={t('welcome.attachFiles')}
+                aria-label={t('welcome.attachFiles')}
               >
                 <Plus className="w-5 h-5" />
               </button>
@@ -771,7 +771,10 @@ export function ChatView() {
               <textarea
                 ref={textareaRef}
                 value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
+                onChange={(e) => {
+                  setPrompt(e.target.value);
+                  adjustTextareaHeight();
+                }}
                 onCompositionStart={() => {
                   isComposingRef.current = true;
                 }}

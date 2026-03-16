@@ -853,7 +853,7 @@ ${hints.join('\n')}
           }
 
           // Copy skills to sandbox ~/.claude/skills/
-          const builtinSkillsPath = this.getBuiltinSkillsPath();
+          const builtinSkillsPath = getBuiltinSkillsPath();
           try {
             const distro = sandbox.wslStatus!.distro!;
             const sandboxSkillsPath = `${sandboxPath}/.claude/skills`;
@@ -867,8 +867,7 @@ ${hints.join('\n')}
             if (builtinSkillsPath && fs.existsSync(builtinSkillsPath)) {
               // Use rsync to recursively copy all skills (much faster and handles subdirectories)
               const wslSourcePath = pathConverter.toWSL(builtinSkillsPath);
-              const rsyncCmd = `rsync -av "${wslSourcePath}/" "${sandboxSkillsPath}/"`;
-              log(`[ClaudeAgentRunner] Copying skills with rsync: ${rsyncCmd}`);
+              log(`[ClaudeAgentRunner] Copying skills with rsync from ${wslSourcePath} to ${sandboxSkillsPath}`);
 
               execFileSync('wsl', ['-d', distro, '-e', 'bash', '-c', rsyncCmd], {
                 encoding: 'utf-8',
@@ -885,8 +884,7 @@ ${hints.join('\n')}
 
             if (fs.existsSync(appSkillsDir)) {
               const wslSourcePath = pathConverter.toWSL(appSkillsDir);
-              const rsyncCmd = `rsync -avL "${wslSourcePath}/" "${sandboxSkillsPath}/"`;
-              log(`[ClaudeAgentRunner] Copying app skills with rsync: ${rsyncCmd}`);
+              log(`[ClaudeAgentRunner] Copying app skills with rsync from ${wslSourcePath} to ${sandboxSkillsPath}`);
 
               execFileSync('wsl', ['-d', distro, '-e', 'bash', '-c', rsyncCmd], {
                 encoding: 'utf-8',
@@ -988,7 +986,7 @@ ${hints.join('\n')}
           }
 
           // Copy skills to sandbox ~/.claude/skills/
-          const builtinSkillsPath = this.getBuiltinSkillsPath();
+          const builtinSkillsPath = getBuiltinSkillsPath();
           try {
             const sandboxSkillsPath = `${sandboxPath}/.claude/skills`;
 
@@ -1001,8 +999,7 @@ ${hints.join('\n')}
             if (builtinSkillsPath && fs.existsSync(builtinSkillsPath)) {
               // Use rsync to recursively copy all skills (much faster and handles subdirectories)
               // Lima mounts /Users directly, so paths are the same
-              const rsyncCmd = `rsync -av "${builtinSkillsPath}/" "${sandboxSkillsPath}/"`;
-              log(`[ClaudeAgentRunner] Copying skills with rsync: ${rsyncCmd}`);
+              log(`[ClaudeAgentRunner] Copying skills with rsync from ${builtinSkillsPath} to ${sandboxSkillsPath}`);
 
               execFileSync('limactl', ['shell', 'claude-sandbox', '--', 'bash', '-c', rsyncCmd], {
                 encoding: 'utf-8',
@@ -1018,8 +1015,7 @@ ${hints.join('\n')}
             this.syncConfiguredSkillsToRuntimeDir(appSkillsDir);
 
             if (fs.existsSync(appSkillsDir)) {
-              const rsyncCmd = `rsync -avL "${appSkillsDir}/" "${sandboxSkillsPath}/"`;
-              log(`[ClaudeAgentRunner] Copying app skills with rsync: ${rsyncCmd}`);
+              log(`[ClaudeAgentRunner] Copying app skills with rsync from ${appSkillsDir} to ${sandboxSkillsPath}`);
 
               execFileSync('limactl', ['shell', 'claude-sandbox', '--', 'bash', '-c', rsyncCmd], {
                 encoding: 'utf-8',
@@ -1144,7 +1140,7 @@ ${hints.join('\n')}
 
       // Use app-specific Claude config directory to avoid conflicts with user settings
       // SDK uses CLAUDE_CONFIG_DIR to locate skills
-      const userClaudeDir = this.getAppClaudeDir();
+      const userClaudeDir = getAppClaudeDir();
 
       // Skills directory setup: only run on the first query per runner instance.
       // Symlinks and directories are stable across queries; re-running every time

@@ -1,3 +1,170 @@
+// CareerBox / Docker types
+export interface ContainerInfo {
+  name: string;
+  id: string;
+  status: 'not_found' | 'created' | 'running' | 'paused' | 'exited' | 'removing';
+  image: string;
+  startedAt?: string;
+  ports?: string;
+}
+
+export interface PullProgress {
+  status: string;
+  progress?: string;
+  percent: number; // -1 if unknown
+}
+
+export interface CareerBoxConfig {
+  containerName: string;
+  imageName: string;
+  volumeName: string;
+  port: number;
+  memoryMb: number;
+  password: string;
+}
+
+// VM types
+export type VMState =
+  | 'not_created'
+  | 'powered_off'
+  | 'starting'
+  | 'running'
+  | 'paused'
+  | 'saving'
+  | 'saved'
+  | 'stopping'
+  | 'error';
+
+export interface VMStatus {
+  id: string;
+  name: string;
+  state: VMState;
+  cpuUsagePercent?: number;
+  memoryUsedMb?: number;
+  uptimeSeconds?: number;
+  guestOs?: string;
+  ipAddress?: string;
+}
+
+export interface VMConfig {
+  id: string;
+  name: string;
+  osImageId: string;
+  resources: VMResourceConfig;
+  createdAt: string;
+  updatedAt: string;
+  backendType: string;
+}
+
+export interface VMResourceConfig {
+  cpuCount: number;
+  memoryMb: number;
+  diskSizeGb: number;
+  displayMode: 'separate_window' | 'embedded';
+  vramMb?: number;
+  enableEFI?: boolean;
+}
+
+export interface OSImage {
+  id: string;
+  name: string;
+  distro: string;
+  version: string;
+  arch: 'x64' | 'arm64';
+  downloadUrl: string;
+  fileSize: number;
+  sha256?: string;
+  category: 'linux' | 'windows' | 'other';
+  requiresLicense?: boolean;
+  minDiskGb: number;
+  minMemoryMb: number;
+  vboxOsType?: string;
+}
+
+export interface ImageDownloadProgress {
+  imageId: string;
+  status: 'downloading' | 'verifying' | 'complete' | 'error';
+  bytesDownloaded: number;
+  totalBytes: number;
+  percent: number;
+  error?: string;
+}
+
+export interface BackendStatus {
+  type: string;
+  available: boolean;
+  version?: string;
+  error?: string;
+}
+
+// VM Bootstrap types
+export type VMBootstrapPhase =
+  | 'checking_backend'
+  | 'checking_existing'
+  | 'prompting_setup'
+  | 'starting_vm'
+  | 'ready'
+  | 'skipped'
+  | 'error';
+
+export interface VMBootstrapProgress {
+  phase: VMBootstrapPhase;
+  message: string;
+  detail?: string;
+  progress?: number;
+  error?: string;
+}
+
+// VM Health types
+export interface VMHealthEvent {
+  vmId: string;
+  vmName: string;
+  type: 'state_changed' | 'crash_detected' | 'auto_restart' | 'health_check';
+  previousState?: VMState;
+  currentState: VMState;
+  timestamp: number;
+  message: string;
+  autoRestartAttempt?: number;
+}
+
+export interface VMHealthSummary {
+  vmId: string;
+  vmName: string;
+  state: VMState;
+  healthy: boolean;
+  lastChecked: number;
+  upSince?: number;
+  crashCount: number;
+  lastCrash?: number;
+  autoRestartEnabled: boolean;
+}
+
+// VM Guest Provisioning types
+export type GuestProvisionPhase =
+  | 'idle'
+  | 'preparing'
+  | 'waiting_for_user'
+  | 'injecting_bootstrap'
+  | 'provisioning'
+  | 'installing_deps'
+  | 'installing_guest_additions'
+  | 'installing_node'
+  | 'installing_navi'
+  | 'configuring_service'
+  | 'verifying'
+  | 'connecting_agent'
+  | 'done'
+  | 'error';
+
+export interface GuestProvisionProgress {
+  vmId: string;
+  phase: GuestProvisionPhase;
+  message: string;
+  detail?: string;
+  progress?: number;
+  error?: string;
+}
+
 // Session types
 export interface Session {
   id: string;
@@ -14,7 +181,7 @@ export interface Session {
   updatedAt: number;
 }
 
-export type SessionStatus = 'idle' | 'running' | 'completed' | 'error';
+export type SessionStatus = 'idle' | 'running' | 'completed' | 'error' | 'cancelled';
 
 export interface MountedPath {
   virtual: string;
@@ -480,6 +647,8 @@ export interface AppConfig {
   sandboxEnabled?: boolean;
   enableThinking?: boolean;
   isConfigured: boolean;
+  clerkPublishableKey?: string;
+  coeadaptApiUrl?: string;
 }
 
 export interface ProviderPreset {

@@ -1,0 +1,531 @@
+﻿
+> coeadapt@3.1.0 lint
+> eslint src --ext .ts,.tsx
+
+
+C:\dev3\open-cowork\src\main\claude\agent-runner.ts
+   222:38  error    Require statement not part of import statement                                                                       @typescript-eslint/no-var-requires
+   355:38  error    Require statement not part of import statement                                                                       @typescript-eslint/no-var-requires
+   442:55  warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+   446:57  warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+   478:7   error    Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free  @typescript-eslint/ban-ts-comment
+   540:51  error    Unnecessary escape character: \/                                                                                     no-useless-escape
+   633:29  warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+   647:40  warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+   698:17  error    'serverEnv' is never reassigned. Use 'const' instead                                                                 prefer-const
+   876:27  warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+   898:15  error    'spawnOptions2' is never reassigned. Use 'const' instead                                                             prefer-const
+   898:30  warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+   932:71  error    Unnecessary escape character: \'                                                                                     no-useless-escape
+   933:72  error    Unnecessary escape character: \'                                                                                     no-useless-escape
+  1298:72  warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  1322:22  warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  1371:54  warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  1372:44  warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  1378:52  warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  1392:39  warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  1392:76  warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  1514:39  warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  1697:28  warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  1699:28  warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+
+C:\dev3\open-cowork\src\main\config\config-store.ts
+  119:25  warning  Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+  257:18  error    Require statement not part of import statement  @typescript-eslint/no-var-requires
+
+C:\dev3\open-cowork\src\main\credentials\credentials-store.ts
+  43:10   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  55:105  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\dev3\open-cowork\src\main\credentials\device-token-store.ts
+  34:10   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  39:108  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\dev3\open-cowork\src\main\docker\docker-config-store.ts
+  19:6   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  27:44  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\dev3\open-cowork\src\main\docker\docker-manager.ts
+  160:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  175:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  190:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  206:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  221:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\dev3\open-cowork\src\main\index.ts
+  121:21  error    Require statement not part of import statement  @typescript-eslint/no-var-requires
+  247:39  warning  Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+  269:33  warning  Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+  277:73  warning  Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+  286:23  warning  Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+  287:20  warning  Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+
+C:\dev3\open-cowork\src\main\ipc\careerbox.handlers.ts
+  40:45  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\dev3\open-cowork\src\main\ipc\logs.handlers.ts
+  171:81  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\dev3\open-cowork\src\main\ipc\vm.handlers.ts
+  154:42  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  303:43  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\dev3\open-cowork\src\main\mcp\gui-operate-server.ts
+   135:19  warning  Unexpected any. Specify a different type                     @typescript-eslint/no-explicit-any
+   191:19  warning  Unexpected any. Specify a different type                     @typescript-eslint/no-explicit-any
+   369:19  warning  Unexpected any. Specify a different type                     @typescript-eslint/no-explicit-any
+   428:21  warning  Unexpected any. Specify a different type                     @typescript-eslint/no-explicit-any
+   439:19  warning  Unexpected any. Specify a different type                     @typescript-eslint/no-explicit-any
+   476:21  warning  Unexpected any. Specify a different type                     @typescript-eslint/no-explicit-any
+   552:19  warning  Unexpected any. Specify a different type                     @typescript-eslint/no-explicit-any
+   597:19  warning  Unexpected any. Specify a different type                     @typescript-eslint/no-explicit-any
+   685:21  warning  Unexpected any. Specify a different type                     @typescript-eslint/no-explicit-any
+  1220:19  warning  Unexpected any. Specify a different type                     @typescript-eslint/no-explicit-any
+  1392:19  warning  Unexpected any. Specify a different type                     @typescript-eslint/no-explicit-any
+  2127:21  warning  Unexpected any. Specify a different type                     @typescript-eslint/no-explicit-any
+  2305:19  warning  Unexpected any. Specify a different type                     @typescript-eslint/no-explicit-any
+  2359:29  warning  Unexpected any. Specify a different type                     @typescript-eslint/no-explicit-any
+  2475:7   error    'x' is never reassigned. Use 'const' instead                 prefer-const
+  2476:7   error    'y' is never reassigned. Use 'const' instead                 prefer-const
+  2529:7   error    'localX' is never reassigned. Use 'const' instead            prefer-const
+  2639:23  error    Unexpected control character(s) in regular expression: \x00  no-control-regex
+  3082:19  warning  Unexpected any. Specify a different type                     @typescript-eslint/no-explicit-any
+  3125:7   error    'finalPath' is never reassigned. Use 'const' instead         prefer-const
+  3152:34  warning  Unexpected any. Specify a different type                     @typescript-eslint/no-explicit-any
+  3332:21  warning  Unexpected any. Specify a different type                     @typescript-eslint/no-explicit-any
+  3394:19  error    Require statement not part of import statement               @typescript-eslint/no-var-requires
+  3395:18  error    Require statement not part of import statement               @typescript-eslint/no-var-requires
+  3396:17  error    Require statement not part of import statement               @typescript-eslint/no-var-requires
+  3402:27  warning  Unexpected any. Specify a different type                     @typescript-eslint/no-explicit-any
+  3426:20  warning  Unexpected any. Specify a different type                     @typescript-eslint/no-explicit-any
+  3438:11  error    'timeoutId' is never reassigned. Use 'const' instead         prefer-const
+  3450:53  warning  Unexpected any. Specify a different type                     @typescript-eslint/no-explicit-any
+  3473:25  warning  Unexpected any. Specify a different type                     @typescript-eslint/no-explicit-any
+  3513:23  error    Require statement not part of import statement               @typescript-eslint/no-var-requires
+  3562:21  warning  Unexpected any. Specify a different type                     @typescript-eslint/no-explicit-any
+  3880:19  warning  Unexpected any. Specify a different type                     @typescript-eslint/no-explicit-any
+  3971:26  warning  Unexpected any. Specify a different type                     @typescript-eslint/no-explicit-any
+  4028:19  warning  Unexpected any. Specify a different type                     @typescript-eslint/no-explicit-any
+  4103:19  warning  Unexpected any. Specify a different type                     @typescript-eslint/no-explicit-any
+  4142:19  warning  Unexpected any. Specify a different type                     @typescript-eslint/no-explicit-any
+  4244:24  warning  Unexpected any. Specify a different type                     @typescript-eslint/no-explicit-any
+  4285:25  warning  Unexpected any. Specify a different type                     @typescript-eslint/no-explicit-any
+  4317:23  warning  Unexpected any. Specify a different type                     @typescript-eslint/no-explicit-any
+  4443:19  warning  Unexpected any. Specify a different type                     @typescript-eslint/no-explicit-any
+  4477:19  warning  Unexpected any. Specify a different type                     @typescript-eslint/no-explicit-any
+  5260:19  warning  Unexpected any. Specify a different type                     @typescript-eslint/no-explicit-any
+
+C:\dev3\open-cowork\src\main\mcp\mcp-config-store.ts
+  123:10  warning  Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+  191:16  error    Require statement not part of import statement  @typescript-eslint/no-var-requires
+
+C:\dev3\open-cowork\src\main\mcp\mcp-manager.ts
+    31:32  warning  Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+    44:34  warning  Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+    75:21  warning  Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+    90:18  error    Require statement not part of import statement  @typescript-eslint/no-var-requires
+    91:16  error    Require statement not part of import statement  @typescript-eslint/no-var-requires
+    92:16  error    Require statement not part of import statement  @typescript-eslint/no-var-requires
+   220:23  warning  Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+   334:16  error    Require statement not part of import statement  @typescript-eslint/no-var-requires
+   541:27  warning  Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+   563:43  warning  Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+   606:19  warning  Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+   641:21  warning  Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+   684:21  warning  Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+   742:23  warning  Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+   784:31  warning  Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+   796:26  warning  Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+   807:16  error    Require statement not part of import statement  @typescript-eslint/no-var-requires
+   808:18  error    Require statement not part of import statement  @typescript-eslint/no-var-requires
+   894:21  warning  Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+  1002:48  warning  Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+  1003:46  warning  Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+  1011:23  warning  Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+  1041:57  warning  Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+  1041:72  warning  Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+  1065:20  warning  Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+  1081:23  warning  Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+
+C:\dev3\open-cowork\src\main\mcp\pinchtab-server.ts
+  255:82  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  270:63  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  270:78  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  440:36  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  464:36  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  522:36  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  544:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\dev3\open-cowork\src\main\mcp\software-dev-server-example.ts
+    59:12   warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+   211:19   warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+   278:21   warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+   348:19   warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+   391:9    error    Unexpected lexical declaration in case block                                                                         no-case-declarations
+   444:21   warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+   466:19   warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+   477:19   warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+   502:19   warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+   515:19   warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+   528:19   warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+   541:19   warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+   554:19   warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+   567:19   warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+   580:19   warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+   593:19   warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+   606:19   warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+   619:19   warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+   642:20   error    Require statement not part of import statement                                                                       @typescript-eslint/no-var-requires
+   713:21   warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+   720:20   error    Require statement not part of import statement                                                                       @typescript-eslint/no-var-requires
+   780:19   error    Require statement not part of import statement                                                                       @typescript-eslint/no-var-requires
+   781:18   error    Require statement not part of import statement                                                                       @typescript-eslint/no-var-requires
+   782:17   error    Require statement not part of import statement                                                                       @typescript-eslint/no-var-requires
+   789:27   warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+   819:20   warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+   839:53   warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+   856:25   warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+   874:23   error    Require statement not part of import statement                                                                       @typescript-eslint/no-var-requires
+   916:22   error    Require statement not part of import statement                                                                       @typescript-eslint/no-var-requires
+   960:19   warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+   970:22   error    Require statement not part of import statement                                                                       @typescript-eslint/no-var-requires
+  1006:19   warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  1119:19   warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  1218:19   warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  1226:20   error    Require statement not part of import statement                                                                       @typescript-eslint/no-var-requires
+  1244:24   warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  1251:26   warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  1259:30   warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  1288:21   warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  1295:19   warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  1302:142  warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  1307:20   error    Require statement not part of import statement                                                                       @typescript-eslint/no-var-requires
+  1474:11   error    Unexpected lexical declaration in case block                                                                         no-case-declarations
+  1590:19   warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  1602:127  warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  1607:20   error    Require statement not part of import statement                                                                       @typescript-eslint/no-var-requires
+  1675:11   error    Unexpected lexical declaration in case block                                                                         no-case-declarations
+  1698:11   error    Unexpected lexical declaration in case block                                                                         no-case-declarations
+  1707:11   error    Unexpected lexical declaration in case block                                                                         no-case-declarations
+  1767:11   error    Unexpected lexical declaration in case block                                                                         no-case-declarations
+  1785:11   error    Unexpected lexical declaration in case block                                                                         no-case-declarations
+  1791:11   error    Unexpected lexical declaration in case block                                                                         no-case-declarations
+  1861:11   error    Unexpected lexical declaration in case block                                                                         no-case-declarations
+  1867:11   error    Unexpected lexical declaration in case block                                                                         no-case-declarations
+  1886:19   warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  1973:1    error    Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free  @typescript-eslint/ban-ts-comment
+  1995:19   warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  2006:19   warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  2012:1    error    Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free  @typescript-eslint/ban-ts-comment
+  2020:19   warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  2026:1    error    Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free  @typescript-eslint/ban-ts-comment
+  2032:19   warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  2056:19   warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  2337:48   warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  2368:81   warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  2405:44   warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  2448:43   warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  2473:39   warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  2493:118  warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  2533:58   warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  2552:25   warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  2569:55   warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  2618:25   warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  2635:35   warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  2668:42   warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  2709:25   warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  2726:73   warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  2745:25   warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  2762:38   warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  2804:25   warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+
+C:\dev3\open-cowork\src\main\openai\responses-runner.ts
+   598:9   error    'input' is never reassigned. Use 'const' instead  prefer-const
+   603:26  warning  Unexpected any. Specify a different type          @typescript-eslint/no-explicit-any
+   669:12  error    Unexpected constant condition                     no-constant-condition
+   798:26  warning  Unexpected any. Specify a different type          @typescript-eslint/no-explicit-any
+   838:26  warning  Unexpected any. Specify a different type          @typescript-eslint/no-explicit-any
+  1330:72  warning  Unexpected any. Specify a different type          @typescript-eslint/no-explicit-any
+  1444:39  warning  Unexpected any. Specify a different type          @typescript-eslint/no-explicit-any
+  1471:39  warning  Unexpected any. Specify a different type          @typescript-eslint/no-explicit-any
+
+C:\dev3\open-cowork\src\main\remote\gateway.ts
+  350:9   error    Unexpected lexical declaration in case block  no-case-declarations
+  538:56  warning  Unexpected any. Specify a different type      @typescript-eslint/no-explicit-any
+  566:52  warning  Unexpected any. Specify a different type      @typescript-eslint/no-explicit-any
+  765:21  warning  Unexpected any. Specify a different type      @typescript-eslint/no-explicit-any
+
+C:\dev3\open-cowork\src\main\remote\remote-config-store.ts
+  31:10  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\dev3\open-cowork\src\main\remote\remote-manager.ts
+  379:5   error    Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free  @typescript-eslint/ban-ts-comment
+  380:27  warning  'qIdx' is defined but never used. Allowed unused args must match /^_/u                                               @typescript-eslint/no-unused-vars
+  868:43  warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  885:43  warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  982:32  warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  983:36  warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  984:10  warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  990:33  warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+
+C:\dev3\open-cowork\src\main\sandbox\lima-agent\index.ts
+  103:21  error  Unnecessary escape character: \/  no-useless-escape
+  120:45  error  Unnecessary escape character: \/  no-useless-escape
+  120:49  error  Unnecessary escape character: \.  no-useless-escape
+
+C:\dev3\open-cowork\src\main\sandbox\lima-bridge.ts
+  701:19  warning  '_id' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\dev3\open-cowork\src\main\sandbox\lima-sync.ts
+  448:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\dev3\open-cowork\src\main\sandbox\native-executor.ts
+  88:36  error  Unnecessary escape character: \/  no-useless-escape
+  94:21  error  Unnecessary escape character: \/  no-useless-escape
+
+C:\dev3\open-cowork\src\main\sandbox\path-guard.ts
+  158:22  error  Unnecessary escape character: \/  no-useless-escape
+  191:47  error  Unnecessary escape character: \/  no-useless-escape
+
+C:\dev3\open-cowork\src\main\sandbox\wsl-agent\index.ts
+  100:21  error  Unnecessary escape character: \/  no-useless-escape
+  117:45  error  Unnecessary escape character: \/  no-useless-escape
+  117:49  error  Unnecessary escape character: \.  no-useless-escape
+
+C:\dev3\open-cowork\src\main\sandbox\wsl-bridge.ts
+  736:19  warning  '_id' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\dev3\open-cowork\src\main\session\session-manager.ts
+  422:88  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  436:83  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\dev3\open-cowork\src\main\skills\plugin-registry-store.ts
+  23:10  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\dev3\open-cowork\src\main\skills\skills-manager.ts
+  39:50  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\dev3\open-cowork\src\main\tools\tool-executor.ts
+  270:93  error  Unnecessary escape character: \/  no-useless-escape
+  277:36  error  Unnecessary escape character: \/  no-useless-escape
+  284:20  error  Unnecessary escape character: \/  no-useless-escape
+  322:21  error  Unnecessary escape character: \/  no-useless-escape
+
+C:\dev3\open-cowork\src\main\utils\artifact-parser.ts
+  31:38  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  31:72  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  35:38  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  35:72  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  36:38  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  36:72  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\dev3\open-cowork\src\main\utils\logger.ts
+  122:46  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  163:30  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  168:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  173:35  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\dev3\open-cowork\src\main\vm\computer-use-adapter.ts
+  138:72  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  416:46  error    Unnecessary escape character: \.          no-useless-escape
+  438:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\dev3\open-cowork\src\main\vm\computer-use-session.ts
+   53:69  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   59:18  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   70:66  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  128:14  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  131:33  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  132:28  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  170:59  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  183:38  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\dev3\open-cowork\src\main\vm\vm-config-store.ts
+  15:30  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  20:6   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\dev3\open-cowork\src\main\vm\vm-manager.ts
+  476:38  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\dev3\open-cowork\src\openclaw\server\index.ts
+  77:9  error  Unexpected lexical declaration in case block  no-case-declarations
+
+C:\dev3\open-cowork\src\preload\index.ts
+  103:29  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  104:44  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  105:26  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  109:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  110:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  111:44  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  116:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  117:36  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  118:40  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  119:46  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  120:24  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  120:38  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  121:35  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  121:49  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  250:56  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  284:26  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  286:42  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  288:42  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  290:70  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  306:41  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  308:37  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  310:38  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  318:28  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  334:35  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  341:45  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  343:49  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  383:28  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  394:35  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  396:33  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  397:37  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  402:36  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  442:35  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  443:50  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  444:30  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  446:33  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  447:40  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  448:50  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  451:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  452:42  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  453:46  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  454:52  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  455:28  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  455:44  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  456:39  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  456:55  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  551:60  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  568:32  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  569:48  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  570:48  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  571:74  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  579:45  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  580:43  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  581:44  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  585:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  594:41  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  598:51  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  599:55  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  620:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  630:39  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  631:39  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  632:43  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  635:42  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\dev3\open-cowork\src\renderer\App.tsx
+  56:6  warning  React Hook useEffect has missing dependencies: 'isElectron' and 'listSessions'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\dev3\open-cowork\src\renderer\components\CareerBoxView.tsx
+   69:64  warning  The ref value 'statusInterval.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'statusInterval.current' to a variable inside the effect, and use that variable in the cleanup function  react-hooks/exhaustive-deps
+  102:45  warning  Unexpected any. Specify a different type                                                                                                                                                                                                                                     @typescript-eslint/no-explicit-any
+  111:21  warning  Unexpected any. Specify a different type                                                                                                                                                                                                                                     @typescript-eslint/no-explicit-any
+
+C:\dev3\open-cowork\src\renderer\components\ChatView.tsx
+   37:60  warning  Unexpected any. Specify a different type                                                                                                                                                  @typescript-eslint/no-explicit-any
+   55:9   warning  The 'messages' conditional could make the dependencies of useMemo Hook (at line 88) change on every render. To fix this, wrap the initialization of 'messages' in its own useMemo() Hook  react-hooks/exhaustive-deps
+  166:6   warning  React Hook useEffect has a missing dependency: 'scrollToBottom'. Either include it or remove the dependency array                                                                         react-hooks/exhaustive-deps
+  187:6   warning  React Hook useEffect has a missing dependency: 'scrollToBottom'. Either include it or remove the dependency array                                                                         react-hooks/exhaustive-deps
+  227:47  warning  Unexpected any. Specify a different type                                                                                                                                                  @typescript-eslint/no-explicit-any
+  287:42  warning  Unexpected any. Specify a different type                                                                                                                                                  @typescript-eslint/no-explicit-any
+
+C:\dev3\open-cowork\src\renderer\components\ContextPanel.tsx
+   86:46  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  272:36  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  275:36  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\dev3\open-cowork\src\renderer\components\CoworkDesktopView.tsx
+   63:36  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   69:36  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  169:30  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  184:30  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\dev3\open-cowork\src\renderer\components\CredentialsModal.tsx
+  295:17  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\dev3\open-cowork\src\renderer\components\MCPConnectorsModal.tsx
+   34:38  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   39:57  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   41:85  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  110:61  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  468:11  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\dev3\open-cowork\src\renderer\components\MessageCard.tsx
+  558:45  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  665:53  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\dev3\open-cowork\src\renderer\components\RemoteControlPanel.tsx
+   98:3  error  Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free  @typescript-eslint/ban-ts-comment
+  105:3  error  Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free  @typescript-eslint/ban-ts-comment
+
+C:\dev3\open-cowork\src\renderer\components\SandboxSetupDialog.tsx
+  65:6  warning  React Hook useEffect has a missing dependency: 'handleClose'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\dev3\open-cowork\src\renderer\components\SettingsPanel.tsx
+   294:55  warning  Unexpected any. Specify a different type                                                                            @typescript-eslint/no-explicit-any
+   548:44  warning  Unexpected any. Specify a different type                                                                            @typescript-eslint/no-explicit-any
+  1285:6   warning  React Hook useEffect has a missing dependency: 'loadCredentials'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  1443:15  warning  Unexpected any. Specify a different type                                                                            @typescript-eslint/no-explicit-any
+  1501:56  warning  Unexpected any. Specify a different type                                                                            @typescript-eslint/no-explicit-any
+  1611:38  warning  Unexpected any. Specify a different type                                                                            @typescript-eslint/no-explicit-any
+  1616:57  warning  Unexpected any. Specify a different type                                                                            @typescript-eslint/no-explicit-any
+  1618:85  warning  Unexpected any. Specify a different type                                                                            @typescript-eslint/no-explicit-any
+  1631:6   warning  React Hook useEffect has a missing dependency: 'loadAll'. Either include it or remove the dependency array          react-hooks/exhaustive-deps
+  1701:61  warning  Unexpected any. Specify a different type                                                                            @typescript-eslint/no-explicit-any
+  1976:10  warning  Unexpected any. Specify a different type                                                                            @typescript-eslint/no-explicit-any
+  2445:6   warning  React Hook useEffect has a missing dependency: 'loadSkills'. Either include it or remove the dependency array       react-hooks/exhaustive-deps
+  2992:6   warning  React Hook useEffect has a missing dependency: 'loadLogs'. Either include it or remove the dependency array         react-hooks/exhaustive-deps
+
+C:\dev3\open-cowork\src\renderer\components\Sidebar.tsx
+  89:6  warning  React Hook useCallback has missing dependencies: 'activeView' and 'setActiveView'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\dev3\open-cowork\src\renderer\components\VMCards.tsx
+   54:28  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   66:28  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  159:28  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  243:30  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\dev3\open-cowork\src\renderer\components\VMCreateWizard.tsx
+  75:6  warning  React Hook useEffect has a missing dependency: 'vmName'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\dev3\open-cowork\src\renderer\components\VMDesktopViewer.tsx
+  31:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\dev3\open-cowork\src\renderer\components\VMView.tsx
+  454:67  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\dev3\open-cowork\src\renderer\components\WelcomeView.tsx
+  62:40  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\dev3\open-cowork\src\renderer\hooks\useIPC.ts
+  244:9  error    Unnecessary try/catch wrapper                                                                                           no-useless-catch
+  377:9  error    Unnecessary try/catch wrapper                                                                                           no-useless-catch
+  420:5  warning  React Hook useCallback has a missing dependency: 'clearPendingTurns'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\dev3\open-cowork\src\renderer\lib\coeadapt-api.ts
+  174:10  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  320:18  error    Unexpected constant condition             no-constant-condition
+
+C:\dev3\open-cowork\src\renderer\store\index.ts
+  246:28  warning  '_' is assigned a value but never used           @typescript-eslint/no-unused-vars
+  247:28  warning  '__partials' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  248:28  warning  '__pending' is assigned a value but never used   @typescript-eslint/no-unused-vars
+  249:28  warning  '__active' is assigned a value but never used    @typescript-eslint/no-unused-vars
+  250:28  warning  '__traces' is assigned a value but never used    @typescript-eslint/no-unused-vars
+
+C:\dev3\open-cowork\src\renderer\utils\file-link.ts
+  15:31  error  Unnecessary escape character: \[  no-useless-escape
+  15:33  error  Unnecessary escape character: \(  no-useless-escape
+  15:35  error  Unnecessary escape character: \)  no-useless-escape
+  15:37  error  Unnecessary escape character: \{  no-useless-escape
+  15:39  error  Unnecessary escape character: \}  no-useless-escape
+  35:28  error  Unnecessary escape character: \[  no-useless-escape
+  35:30  error  Unnecessary escape character: \(  no-useless-escape
+  35:32  error  Unnecessary escape character: \)  no-useless-escape
+  35:34  error  Unnecessary escape character: \{  no-useless-escape
+  35:36  error  Unnecessary escape character: \}  no-useless-escape
+
+Γ£û 405 problems (86 errors, 319 warnings)
+  7 errors and 0 warnings potentially fixable with the `--fix` option.
+

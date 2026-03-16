@@ -15,6 +15,7 @@ class PluginRegistryStore {
     const storeCwd = this.resolveStoreCwd();
     const storeOptions: any = {
       name: 'plugin-registry',
+      projectName: 'coeadapt',
       cwd: storeCwd,
       defaults: {
         plugins: [],
@@ -35,7 +36,7 @@ class PluginRegistryStore {
         return app.getPath('userData');
       }
     } catch {
-      // 测试或非 Electron 场景走兜底目录。
+      //  Electron 
     }
     return path.join(os.tmpdir(), 'open-cowork');
   }

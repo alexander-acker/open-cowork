@@ -1098,6 +1098,17 @@ const CodeBlock = memo(function CodeBlock({
 }) {
   const [copied, setCopied] = useState(false);
 
+  const highlightedHtml = useMemo(() => {
+    try {
+      if (hljs.getLanguage(language)) {
+        return hljs.highlight(children, { language }).value;
+      }
+      return hljs.highlightAuto(children).value;
+    } catch {
+      return null;
+    }
+  }, [children, language]);
+
   const handleCopy = async () => {
     await navigator.clipboard.writeText(children);
     setCopied(true);
@@ -1120,7 +1131,11 @@ const CodeBlock = memo(function CodeBlock({
         </button>
       </div>
       <pre className="code-block">
-        <code>{children}</code>
+        {highlightedHtml ? (
+          <code className={`hljs language-${language}`} dangerouslySetInnerHTML={{ __html: highlightedHtml }} />
+        ) : (
+          <code>{children}</code>
+        )}
       </pre>
     </div>
   );

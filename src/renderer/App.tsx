@@ -4,10 +4,14 @@ import { useIPC } from './hooks/useIPC';
 import { useWindowSize } from './hooks/useWindowSize';
 import { Sidebar } from './components/Sidebar';
 import { WelcomeView } from './components/WelcomeView';
+import { CareerBoxView } from './components/CareerBoxView';
+import { VMView } from './components/VMView';
+import { CoworkDesktopView } from './components/CoworkDesktopView';
 import { PermissionDialog } from './components/PermissionDialog';
 import { SudoPasswordDialog } from './components/SudoPasswordDialog';
 import { Titlebar } from './components/Titlebar';
 import { SandboxSetupDialog } from './components/SandboxSetupDialog';
+import { OnboardingModal } from './components/OnboardingModal';
 import { SandboxSyncToast } from './components/SandboxSyncToast';
 import { GlobalNoticeToast } from './components/GlobalNoticeToast';
 import type { AppConfig } from './types';
@@ -182,6 +186,11 @@ function App() {
         />
       </Suspense>
       
+      {/* Onboarding Modal */}
+      {showOnboardingModal && (
+        <OnboardingModal onComplete={() => setShowOnboardingModal(false)} />
+      )}
+
       {/* Sandbox Setup Dialog */}
       {showSandboxSetup && (
         <SandboxSetupDialog 

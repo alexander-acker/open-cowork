@@ -78,7 +78,7 @@
   },
   "language": {
     "english": "English",
-    "chinese": "中文",
+    "chinese": "",
     "selectLanguage": "Select Language",
     "currentLanguage": "Current language"
   },
@@ -565,6 +565,7 @@
     "noTasksHint": "Start a new chat to begin building, researching, or editing files.",
     "search": "Search conversations...",
     "deleteAll": "Delete all conversations",
+    "deleteAllConfirm": "Are you sure you want to delete all {{count}} conversations? This cannot be undone.",
     "localTasks": "These tasks run locally and aren't synced across devices.",
     "apiConfigured": "API Configured",
     "apiNotConfigured": "API Not Configured",
@@ -596,7 +597,9 @@
     "disclaimer": "Open Cowork is AI-powered and may make mistakes. Please double-check responses.",
     "noModel": "No model",
     "connectorCount_one": "{{count}} connector",
-    "connectorCount_other": "{{count}} connectors"
+    "connectorCount_other": "{{count}} connectors",
+    "aiDisclaimer": "Open Cowork is AI-powered and may make mistakes. Please double-check responses.",
+    "send": "Send message"
   },
   "context": {
     "progress": "Progress",

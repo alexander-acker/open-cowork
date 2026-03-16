@@ -270,7 +270,7 @@ export function ConfigModal({
                     onClick={() => changeProtocol(mode.id)}
                     className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
                       customProtocol === mode.id
-                        ? 'bg-accent text-white'
+                        ? 'bg-accent text-white shadow-md'
                         : 'bg-surface-hover text-text-secondary hover:bg-surface-active'
                     }`}
                   >

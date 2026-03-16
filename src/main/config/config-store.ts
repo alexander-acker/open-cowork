@@ -112,6 +112,13 @@ export interface AppConfig {
 
   // First run flag
   isConfigured: boolean;
+
+  // Coeadapt connection
+  clerkPublishableKey: string;
+  coeadaptApiUrl: string;
+
+  // Work environment preference (null = not yet chosen, triggers onboarding)
+  workEnvironment: 'real-machine' | 'vm' | null;
 }
 
 const DEFAULT_CONFIG_SET_ID = 'default';
@@ -206,6 +213,9 @@ const defaultConfig: AppConfig = {
   sandboxEnabled: false,
   enableThinking: false,
   isConfigured: false,
+  clerkPublishableKey: '',
+  coeadaptApiUrl: 'https://api.coeadapt.com',
+  workEnvironment: null,
 };
 
 export const PROVIDER_PRESETS = API_PROVIDER_PRESETS;
@@ -355,6 +365,9 @@ export class ConfigStore {
       defaults: defaultConfig,
       // Encrypt the API key for basic security
       encryptionKey: 'open-cowork-config-v1',
+      // Always provide projectName - required by conf package and
+      // Electron detection can fail when bundled by Vite
+      projectName: 'coeadapt',
     };
 
     // Add projectName for non-Electron environments (e.g., MCP servers)
