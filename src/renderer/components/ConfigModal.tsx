@@ -35,6 +35,7 @@ const PROVIDER_LABELS: Record<
   gemini: 'Gemini',
   ollama: 'Ollama',
   custom: 'Custom',
+  navi: 'Navi',
 };
 
 export function ConfigModal({
